@@ -62,10 +62,8 @@ describe('McpToolsPanel', () => {
       new Error('MockServer returned 404: not found'),
     );
     renderPanel();
-    // humanizeServerError maps 404 to the "feature isn't available" guidance,
-    // so the raw "MockServer returned 404" string must NOT be shown verbatim.
     await waitFor(() =>
-      expect(screen.getByText(/isn.t available on the connected MockServer/i)).toBeInTheDocument(),
+      expect(screen.getByText('The requested resource was not found (HTTP 404).')).toBeInTheDocument(),
     );
     expect(screen.queryByText(/MockServer returned 404/)).not.toBeInTheDocument();
   });

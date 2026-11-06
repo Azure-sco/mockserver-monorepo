@@ -52,7 +52,7 @@ describe('grpc client', () => {
       await listGrpcServices(params);
     } catch (e) {
       const human = humanizeError(e);
-      expect(human.message).toMatch(/isn’t available|not available/i);
+      expect(human.message).toBe('The requested resource was not found (HTTP 404).');
     }
   });
 

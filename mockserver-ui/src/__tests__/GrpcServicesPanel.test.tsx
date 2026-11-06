@@ -76,7 +76,7 @@ describe('GrpcServicesPanel', () => {
     }));
     renderPanel();
     await waitFor(() => {
-      expect(screen.getByText(/isn’t available|not available/i)).toBeInTheDocument();
+      expect(screen.getByText('The requested resource was not found (HTTP 404).')).toBeInTheDocument();
     });
   });
 });

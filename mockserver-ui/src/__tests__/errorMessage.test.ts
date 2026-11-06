@@ -33,8 +33,12 @@ describe('humanizeServerError', () => {
     );
   });
 
-  it('404 → feature unavailable / older version', () => {
-    expect(humanizeServerError(404, '').message).toContain('isn’t available');
+  it('404 → reports a missing resource and keeps the raw body', () => {
+    const rawBody = '{"error":"No matching resource"}';
+    expect(humanizeServerError(404, rawBody)).toEqual({
+      message: 'The requested resource was not found (HTTP 404).',
+      details: rawBody,
+    });
   });
 
   it('409 → conflict', () => {
@@ -74,8 +78,10 @@ describe('humanizeServerError', () => {
 describe('humanizeError', () => {
   it('parses the "MockServer returned <status>: <body>" shape and delegates', () => {
     const err = new Error('MockServer returned 404: Not Found');
-    const r = humanizeError(err);
-    expect(r.message).toContain('isn’t available');
+    expect(humanizeError(err)).toEqual({
+      message: 'The requested resource was not found (HTTP 404).',
+      details: 'Not Found',
+    });
   });
 
   it('parses a 400 server-returned shape and extracts the JSON reason', () => {

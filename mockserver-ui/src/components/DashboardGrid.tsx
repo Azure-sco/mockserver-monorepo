@@ -101,7 +101,7 @@ export default function DashboardGrid() {
         <Box sx={{ minHeight: 0, overflow: 'hidden' }}>
           <ExpectationPanel />
         </Box>
-        <Box sx={{ minHeight: 0, overflow: 'hidden' }}>
+        <Box data-testid="received-requests-panel" sx={{ minHeight: 0, overflow: 'hidden' }}>
           <RequestPanel
             title="Received Requests"
             items={recordedRequests}
@@ -145,7 +145,7 @@ export default function DashboardGrid() {
       <Box sx={{ minHeight: 0, overflow: 'hidden' }}>
         <ExpectationPanel />
       </Box>
-      <Box sx={{ minHeight: 0, overflow: 'hidden' }}>
+      <Box data-testid="received-requests-panel" sx={{ minHeight: 0, overflow: 'hidden' }}>
         <RequestPanel
           title="Received Requests"
           items={recordedRequests}

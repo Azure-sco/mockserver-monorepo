@@ -61,6 +61,22 @@ VITE_MOCKSERVER_DASHBOARD_LOCALE=zh-CN ./mvnw -pl mockserver-netty -am package -
 在 PowerShell 中，先执行 `$env:VITE_MOCKSERVER_DASHBOARD_LOCALE = 'zh-CN'`，再执行 `npm run dev` 或使用 `./mvnw.cmd` 打包。
 启动打包后的 MockServer，打开 [管理页面](http://localhost:1080/mockserver/dashboard/)。
 
+### 在真实浏览器中验证中文 JAR
+
+在 `mockserver-ui` 目录中先运行 `npm ci`，并确认 `java` 使用 Java 17 或更高版本，也可用 `E2E_JAVA` 指定可执行文件。将 `E2E_MS_JAR` 设为刚构建的可执行 JAR 的绝对路径。
+在 `mockserver/mockserver-netty/target/` 中找到以 `-jar-with-dependencies.jar` 结尾的 JAR。此用例会重置测试实例的数据，请为测试预留空闲端口。
+默认端口是 `1084` 和 `1114`，可通过 `E2E_MS_PORT` 和 `E2E_UPSTREAM_PORT` 指定。以下示例使用已安装的 Microsoft Edge。
+
+```powershell
+$env:E2E_MS_JAR = 'D:\path\to\mockserver-netty-VERSION-jar-with-dependencies.jar'
+$env:E2E_DASHBOARD_LOCALE = 'zh-CN'
+$env:E2E_BROWSER_CHANNEL = 'msedge'
+npm run test:e2e -- dashboard.spec.ts --grep '@dashboard-locale'
+```
+
+此用例检查页面语言和中文标签，并验证创建的 Mock 能响应真实 HTTP 请求、通过 WebSocket 实时显示请求记录。
+`E2E_DASHBOARD_LOCALE` 指定测试预期的语言，默认是英文。
+
 ## Demo data (manual UI testing)
 
 To see every dashboard screen populated with a large, varied dataset, run:

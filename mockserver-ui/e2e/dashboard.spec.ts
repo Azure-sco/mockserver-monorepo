@@ -54,31 +54,56 @@ test.beforeEach(async ({ request }) => {
 // ---------------------------------------------------------------------------
 // #15 — live WebSocket log stream
 // ---------------------------------------------------------------------------
-test('creates an expectation in the composer, then streams the matching request into the log panel live over the WebSocket', async ({
+test('creates an expectation in the composer, then streams the matching request into the log panel live over the WebSocket', { tag: '@dashboard-locale' }, async ({
   page,
   request,
 }) => {
+  const locale = process.env.E2E_DASHBOARD_LOCALE || 'en';
+  const labels = locale === 'zh-CN'
+    ? {
+      connected: '已连接',
+      quickMode: '快速模式',
+      path: '路径',
+      statusCode: '状态码',
+      submit: '注册规则',
+      receivedRequests: '接收的请求',
+    }
+    : {
+      connected: 'connected',
+      quickMode: 'Quick mock',
+      path: 'Path',
+      statusCode: 'Status code',
+      submit: 'Register mock',
+      receivedRequests: 'Received Requests',
+    };
   const path = `/e2e/live-${Date.now()}`;
 
   // Land straight on the composer (the store reads the view from the URL hash).
   await page.goto('./#/composer');
+  await expect(page.locator('html')).toHaveAttribute('lang', locale);
 
-  // The WebSocket connects on mount — wait for the AppBar status chip to say so,
-  // proving the real ws://…/_mockserver_ui_websocket handshake succeeded.
-  await expect(page.getByText('connected', { exact: true })).toBeVisible();
+  const connection = page.getByTestId('connection-status');
+  await expect(connection).toHaveAttribute('data-status', 'connected');
+  await expect(connection).toBeVisible();
+  await expect(connection).toHaveText(labels.connected);
 
   // Author a minimal HTTP mock in the Quick form and register it through the UI.
+  const quickMode = page.getByRole('button', { name: labels.quickMode, exact: true, pressed: true });
+  await expect(quickMode).toBeVisible();
+  await expect(quickMode).toHaveText(labels.quickMode);
   const quick = page.getByTestId('quick-mock-form');
-  await expect(quick).toBeVisible();
-  await quick.getByLabel('Path', { exact: true }).fill(path);
-  await quick.getByLabel('Status code', { exact: true }).fill('201');
-  await page.getByRole('button', { name: 'Register mock' }).click();
+  const pathInput = quick.getByTestId('quick-mock-path');
+  const statusInput = quick.getByTestId('quick-mock-status-code');
+  const submit = quick.getByTestId('quick-mock-submit');
+  await expect(pathInput).toHaveAccessibleName(labels.path);
+  await expect(statusInput).toHaveAccessibleName(labels.statusCode);
+  await expect(submit).toHaveText(labels.submit);
+  await pathInput.fill(path);
+  await statusInput.fill('201');
+  await submit.click();
   await expect(page.getByTestId('register-success')).toBeVisible();
 
-  // Move to the live Dashboard (log panel) WITHOUT a page reload, so the same
-  // WebSocket connection stays open and we genuinely observe a live push. The
-  // DashboardGrid renders two responsive layouts (one hidden by CSS), so scope
-  // assertions to the VISIBLE copy.
+  // Switch views without reloading to keep the same WebSocket open.
   await page.evaluate(() => {
     window.location.hash = '#/dashboard';
   });
@@ -88,11 +113,8 @@ test('creates an expectation in the composer, then streams the matching request 
   const logRegion = page.getByRole('log').filter({ visible: true });
   await expect(logRegion.getByText('CREATED_EXPECTATION').first()).toBeVisible();
   await expect(logRegion.getByText('EXPECTATION_RESPONSE')).toHaveCount(0);
-  const receivedRequests = page
-    .locator('.MuiPaper-root')
-    .filter({ has: page.locator('h6, .MuiTypography-subtitle2').getByText('Received Requests', { exact: true }) })
-    .filter({ visible: true });
-  await expect(receivedRequests).toBeVisible();
+  const receivedRequests = page.getByTestId('received-requests-panel');
+  await expect(receivedRequests.getByText(labels.receivedRequests, { exact: true })).toBeVisible();
   await expect(receivedRequests).not.toContainText(path);
 
   // Fire a MATCHING request over the wire. MockServer serves the mock (201) and

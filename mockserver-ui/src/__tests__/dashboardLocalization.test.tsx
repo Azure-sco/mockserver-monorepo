@@ -30,14 +30,14 @@ describe('Simplified Chinese dashboard', () => {
     expect(useDashboardStore.getState().view).toBe('composer');
   });
 
-  it('translates the error summary and preserves the original error details', () => {
+  it('translates the 404 summary and preserves the original error details', () => {
     expect(humanizeError(new Error('MockServer returned 404: original server details'))).toEqual({
-      message: '当前连接的 MockServer 不支持此功能，可能需要更新服务器版本。',
+      message: '未找到请求的资源（HTTP 404）。',
       details: 'original server details',
     });
   });
 
-  it('shows a Chinese summary and the raw server details when mock registration fails', async () => {
+  it('shows a Chinese 404 summary and the raw server details when mock registration fails', async () => {
     const details = 'Registration endpoint unavailable on this server';
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(details, { status: 404 }));
     try {
@@ -61,7 +61,7 @@ describe('Simplified Chinese dashboard', () => {
         expect.objectContaining({ method: 'PUT' }),
       );
       const alert = within(await screen.findByTestId('register-error'));
-      expect(alert.getByText('当前连接的 MockServer 不支持此功能，可能需要更新服务器版本。')).toBeInTheDocument();
+      expect(alert.getByText('未找到请求的资源（HTTP 404）。')).toBeInTheDocument();
       expect(alert.queryByText(details)).not.toBeInTheDocument();
       await user.click(alert.getByRole('button', { name: '详情' }));
       expect(await alert.findByText(details)).toBeInTheDocument();

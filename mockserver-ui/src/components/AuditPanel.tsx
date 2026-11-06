@@ -21,7 +21,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
-import { humanizeError, unavailableFeatureMessage, type HumanError } from '../lib/errorMessage';
+import { humanizeError, type HumanError } from '../lib/errorMessage';
 import { monospaceFontFamily } from '../theme';
 import type { ConnectionParams } from '../hooks/useConnectionParams';
 import { fetchAuditEntries, type AuditEntry } from '../lib/audit';
@@ -32,18 +32,12 @@ interface AuditPanelProps {
   connectionParams: ConnectionParams;
 }
 
-/**
- * The audit endpoint returns no JSON error envelope on 404, so a missing
- * endpoint surfaces as the status-line message or the humanized "isn't
- * available" copy. Detect both so the panel shows the "not available on an
- * older server" branch rather than a generic error.
- */
+/** A missing audit endpoint can return just an HTTP 404 status line. */
 function isUnavailable(message: string): boolean {
   return (
     message.includes('404') ||
     message.includes('Not Found') ||
-    message.includes('isn’t available') ||
-    message === unavailableFeatureMessage
+    message.includes('isn’t available')
   );
 }
 

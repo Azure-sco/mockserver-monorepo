@@ -1852,10 +1852,12 @@ function StatusCodeField({
   value,
   onChange,
   width = 130,
+  testId,
 }: {
   value: number;
   onChange: (statusCode: number) => void;
   width?: number;
+  testId?: string;
 }) {
   const error = statusCodeHint(value);
   return (
@@ -1867,7 +1869,7 @@ function StatusCodeField({
       onChange={(e) => onChange(e.target.value.trim() === '' ? NaN : Number(e.target.value))}
       error={!!error}
       helperText={error}
-      slotProps={{ htmlInput: { min: 100, max: 999, step: 1 } }}
+      slotProps={{ htmlInput: { min: 100, max: 999, step: 1, 'data-testid': testId } }}
       sx={{ width: { xs: '100%', sm: width } }}
     />
   );
@@ -4440,6 +4442,7 @@ function QuickMockForm({
             value={matcher.path}
             onChange={(e) => setMatcher({ ...matcher, path: e.target.value })}
             placeholder="/foo/bar"
+            slotProps={{ htmlInput: { 'data-testid': 'quick-mock-path' } }}
           />
         </Box>
       </Box>
@@ -4450,6 +4453,7 @@ function QuickMockForm({
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
           <StatusCodeField
+            testId="quick-mock-status-code"
             width={140}
             value={staticState.statusCode}
             onChange={(statusCode) => setStaticState({ ...staticState, statusCode })}
@@ -4513,6 +4517,7 @@ function QuickMockForm({
               size="small"
               onClick={onRegister}
               disabled={registering || disabledReason !== null}
+              data-testid="quick-mock-submit"
             >
               {registering
                 ? uiText('Registering…', "正在注册…")

@@ -474,6 +474,8 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
         </Typography>
         <Tooltip title={uiText(`MockServer at ${serverUrl}`, `MockServer 地址 ${serverUrl}`)}>
           <Chip
+            data-testid="connection-status"
+            data-status={connectionStatus}
             label={STATUS_LABELS[connectionStatus]}
             size="small"
             color={statusColor(connectionStatus)}

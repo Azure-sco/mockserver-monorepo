@@ -264,8 +264,7 @@ describe('OptimiseView', () => {
     );
     renderView();
     expect(await screen.findByTestId('optimise-error')).toBeInTheDocument();
-    // 404 is humanised to the "feature not available" message
-    expect(screen.getByText(/isn.t available on the connected MockServer/i)).toBeInTheDocument();
+    expect(screen.getByText('The requested resource was not found (HTTP 404).')).toBeInTheDocument();
   });
 });
 

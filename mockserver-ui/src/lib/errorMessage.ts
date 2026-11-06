@@ -17,11 +17,6 @@ export interface HumanError {
   details?: string;
 }
 
-export const unavailableFeatureMessage = uiText(
-  'This feature isn’t available on the connected MockServer (it may be an older version).',
-  '当前连接的 MockServer 不支持此功能，可能需要更新服务器版本。',
-);
-
 /** Matches the `MockServer returned <status>: <body>` thrown shape (also `Replay failed (<status>): <body>`). */
 const SERVER_ERROR_SHAPE = /^MockServer returned (\d{3}):\s*([\s\S]*)$/;
 const REPLAY_ERROR_SHAPE = /^Replay failed \((\d{3})\):\s*([\s\S]*)$/;
@@ -93,7 +88,7 @@ export function humanizeServerError(status: number, rawBody: string): HumanError
   }
   if (status === 404) {
     return {
-      message: unavailableFeatureMessage,
+      message: uiText('The requested resource was not found (HTTP 404).', '未找到请求的资源（HTTP 404）。'),
       details,
     };
   }

@@ -256,7 +256,7 @@ describe('ComposerView humanised register error', () => {
     expect(within(errorAlert).getByText(/long Java stack/)).toBeInTheDocument();
   });
 
-  it('a 404 surfaces the older-version message', async () => {
+  it('a 404 reports that the requested resource was not found', async () => {
     const user = userEvent.setup({ delay: null });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response('not found', { status: 404 }),
@@ -265,6 +265,6 @@ describe('ComposerView humanised register error', () => {
     await user.type(screen.getByLabelText('Path'), '/missing');
     await user.click(screen.getByRole('button', { name: /Register mock/ }));
     const errorAlert = await screen.findByTestId('register-error');
-    expect(within(errorAlert).getByText(/isn’t available on the connected MockServer/i)).toBeInTheDocument();
+    expect(within(errorAlert).getByText('The requested resource was not found (HTTP 404).')).toBeInTheDocument();
   });
 });

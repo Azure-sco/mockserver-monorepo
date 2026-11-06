@@ -16,7 +16,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
-import { humanizeError, unavailableFeatureMessage } from '../lib/errorMessage';
+import { humanizeError } from '../lib/errorMessage';
 import type { ConnectionParams } from '../hooks/useConnectionParams';
 import { fetchClusterInfo, type ClusterInfo } from '../lib/cluster';
 
@@ -26,18 +26,12 @@ interface ClusterPanelProps {
 
 const POLL_INTERVAL_MS = 5000;
 
-/**
- * The cluster endpoint returns no JSON error envelope on 404, so a missing
- * endpoint surfaces as the status-line message or the humanized "isn't
- * available" copy. Detect both so the panel shows the "not available on an
- * older server" branch rather than a generic error.
- */
+/** A missing cluster endpoint can return just an HTTP 404 status line. */
 function isUnavailable(message: string): boolean {
   return (
     message.includes('404') ||
     message.includes('Not Found') ||
-    message.includes('isn’t available') ||
-    message === unavailableFeatureMessage
+    message.includes('isn’t available')
   );
 }
 
