@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { Fragment, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -73,6 +74,18 @@ const toolBubbleSx = {
 // Role label above a bubble
 // ---------------------------------------------------------------------------
 
+const ROLE_LABELS = new Map<string, string>([
+  ['user', '用户'],
+  ['assistant', '助手'],
+  ['model', '模型'],
+  ['system', '系统'],
+  ['developer', '开发者'],
+  ['tool', '工具'],
+  ['function', '函数'],
+  ['function_call', '函数调用'],
+  ['function_call_output', '函数调用结果'],
+]);
+
 function RoleLabel({ role, align }: { role: string; align: 'left' | 'right' }) {
   return (
     <Typography
@@ -86,7 +99,7 @@ function RoleLabel({ role, align }: { role: string; align: 'left' | 'right' }) {
         textTransform: 'capitalize',
       }}
     >
-      {role}
+      {uiText(role, ROLE_LABELS.get(role) ?? role)}
     </Typography>
   );
 }
@@ -120,7 +133,7 @@ function SystemBanner({ content }: { content: unknown }) {
           letterSpacing: 0.5,
         }}
       >
-        System
+        {uiText('System', '系统')}
       </Typography>
       {typeof content === 'string' ? (
         <Typography
@@ -200,7 +213,7 @@ function renderAnthropicContentBlock(
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
           <BuildIcon sx={{ fontSize: '0.85rem', color: 'secondary.main' }} />
           <Typography variant="caption" sx={{ fontFamily: monospaceFontFamily, fontWeight: 600, fontSize: LABEL_FONT_SIZE, color: 'secondary.main' }}>
-            {block.name ?? 'tool_use'}
+            {block.name ?? uiText('tool_use', '工具调用')}
           </Typography>
         </Box>
         {block.input != null && (
@@ -217,7 +230,7 @@ function renderAnthropicContentBlock(
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
           <BuildIcon sx={{ fontSize: '0.85rem', color: 'info.main' }} />
           <Typography variant="caption" sx={{ fontFamily: monospaceFontFamily, fontWeight: 600, fontSize: LABEL_FONT_SIZE, color: 'info.main' }}>
-            tool_result
+            {uiText('tool_result', '工具结果')}
           </Typography>
         </Box>
         {typeof b['content'] === 'string' ? (
@@ -234,7 +247,7 @@ function renderAnthropicContentBlock(
   if (block.type === 'image') {
     return (
       <Typography key={index} variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: MONO_FONT_SIZE, color: 'text.secondary' }}>
-        [image]
+        {uiText('[image]', '[图片]')}
       </Typography>
     );
   }
@@ -345,11 +358,11 @@ function MetadataStrip({ model, inputTokens, outputTokens, stopReason, streamed,
           <Chip label={model} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem', maxWidth: 200, '& .MuiChip-label': { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }} />
         </Tooltip>
       )}
-      {inputTokens != null && <Chip label={`In: ${inputTokens}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-      {outputTokens != null && <Chip label={`Out: ${outputTokens}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-      {stopReason && <Chip label={`Stop: ${stopReason}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-      {streamed && <Chip label="Streamed" size="small" color="info" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-      {streamTruncated && <Chip label="Truncated" size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+      {inputTokens != null && <Chip label={uiText(`In: ${inputTokens}`, `输入：${inputTokens}`)} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+      {outputTokens != null && <Chip label={uiText(`Out: ${outputTokens}`, `输出：${outputTokens}`)} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+      {stopReason && <Chip label={uiText(`Stop: ${stopReason}`, `停止原因：${stopReason}`)} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+      {streamed && <Chip label={uiText('Streamed', '流式传输')} size="small" color="info" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+      {streamTruncated && <Chip label={uiText('Truncated', '已截断')} size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
     </Box>
   );
 }
@@ -397,7 +410,7 @@ function TruncatedResponseNotice({ rawResponseBody }: { rawResponseBody?: string
           color="warning"
           variant="outlined"
           icon={<WarningAmberIcon sx={{ fontSize: '0.85rem' }} />}
-          label="Response could not be parsed — possibly truncated"
+          label={uiText('Response could not be parsed — possibly truncated', '无法解析响应，内容可能已截断')}
           sx={{ height: 20, fontSize: '0.65rem' }}
         />
         <Button
@@ -405,7 +418,7 @@ function TruncatedResponseNotice({ rawResponseBody }: { rawResponseBody?: string
           onClick={() => setShowRaw((v) => !v)}
           sx={{ fontSize: '0.65rem', textTransform: 'none', minWidth: 0, py: 0 }}
         >
-          {showRaw ? 'Hide raw body' : 'Show raw body'}
+          {showRaw ? uiText('Hide raw body', '隐藏原始响应体') : uiText('Show raw body', '显示原始响应体')}
         </Button>
       </Box>
       {showRaw && (
@@ -487,7 +500,7 @@ export function AnthropicConversationView({ parsed, rawResponseBody }: { parsed:
       {/* Empty state */}
       {parsed.messages.length === 0 && parsed.responseContent.length === 0 && !responseLooksUnparseable(rawResponseBody) && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-          No conversation content
+          {uiText('No conversation content', '没有对话内容')}
         </Typography>
       )}
     </Box>
@@ -575,7 +588,7 @@ export function OpenAiConversationView({ parsed, rawResponseBody }: { parsed: Op
                     if (p['type'] === 'image_url') {
                       return (
                         <Typography key={j} variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: MONO_FONT_SIZE, color: 'text.secondary' }}>
-                          [image]
+                          {uiText('[image]', '[图片]')}
                         </Typography>
                       );
                     }
@@ -633,7 +646,7 @@ export function OpenAiConversationView({ parsed, rawResponseBody }: { parsed: Op
       {/* Empty state */}
       {parsed.messages.length === 0 && parsed.choices.length === 0 && !responseLooksUnparseable(rawResponseBody) && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-          No conversation content
+          {uiText('No conversation content', '没有对话内容')}
         </Typography>
       )}
     </Box>
@@ -712,7 +725,7 @@ function renderGeminiParts(parts: unknown, side: 'left' | 'right') {
         if (part['inlineData'] && typeof part['inlineData'] === 'object') {
           return (
             <Typography key={i} variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: MONO_FONT_SIZE, color: 'text.secondary' }}>
-              [inlineData]
+              {uiText('[inlineData]', '[内嵌数据]')}
             </Typography>
           );
         }
@@ -791,7 +804,7 @@ export function GeminiConversationView({ parsed, rawResponseBody }: { parsed: Ge
       {/* Empty state */}
       {parsed.contents.length === 0 && parsed.candidates.length === 0 && !responseLooksUnparseable(rawResponseBody) && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-          No conversation content
+          {uiText('No conversation content', '没有对话内容')}
         </Typography>
       )}
     </Box>
@@ -897,7 +910,7 @@ export function OllamaConversationView({ parsed, rawResponseBody }: { parsed: Ol
       {/* Empty state */}
       {parsed.messages.length === 0 && parsed.responseMessage == null && !responseLooksUnparseable(rawResponseBody) && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-          No conversation content
+          {uiText('No conversation content', '没有对话内容')}
         </Typography>
       )}
     </Box>
@@ -966,13 +979,13 @@ function renderResponsesItem(item: unknown, index: number, side: 'left' | 'right
                 if (t === 'input_image') {
                   return (
                     <Typography key={j} variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: MONO_FONT_SIZE, color: 'text.secondary' }}>
-                      [input_image]
+                      {uiText('[input_image]', '[输入图片]')}
                     </Typography>
                   );
                 }
                 return (
                   <Typography key={j} variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: MONO_FONT_SIZE, color: 'text.secondary' }}>
-                    [{t || 'unknown'}]
+                    [{t || uiText('unknown', '未知')}]
                   </Typography>
                 );
               })}
@@ -1022,7 +1035,7 @@ function renderResponsesItem(item: unknown, index: number, side: 'left' | 'right
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
             <BuildIcon sx={{ fontSize: '0.85rem', color: 'info.main' }} />
             <Typography variant="caption" sx={{ fontFamily: monospaceFontFamily, fontWeight: 600, fontSize: LABEL_FONT_SIZE, color: 'info.main' }}>
-              output
+              {uiText('output', '输出')}
             </Typography>
           </Box>
           {typeof it['output'] === 'string' ? (
@@ -1080,7 +1093,7 @@ export function OpenAiResponsesConversationView({ parsed, rawResponseBody }: { p
       {/* Empty state */}
       {parsed.input.length === 0 && parsed.output.length === 0 && !responseLooksUnparseable(rawResponseBody) && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-          No conversation content
+          {uiText('No conversation content', '没有对话内容')}
         </Typography>
       )}
     </Box>
@@ -1255,7 +1268,7 @@ export function GroupedConversationView<T>({ group }: { group: ConversationGroup
         const synthesized = turnParsed(turn.parsed, turn.newMessages, isFirst, isLast);
         return (
           <Box key={i}>
-            <TurnDivider label={isLast ? `Turn ${i + 1} · response` : `Turn ${i + 1}`} />
+            <TurnDivider label={isLast ? uiText(`Turn ${i + 1} · response`, `第 ${i + 1} 轮 · 响应`) : uiText(`Turn ${i + 1}`, `第 ${i + 1} 轮`)} />
             {renderConversationByKind(synthesized)}
           </Box>
         );
@@ -1306,7 +1319,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
           mb: 0.5,
         }}
       >
-        Scripted Conversation Turns
+        {uiText('Scripted Conversation Turns', '脚本对话轮次')}
       </Typography>
 
       {turns.map((turn, i) => {
@@ -1343,7 +1356,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
             {/* Turn header with state transition */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
               <Chip
-                label={`Turn ${turn.turnIndex}`}
+                label={uiText(`Turn ${turn.turnIndex}`, `第 ${turn.turnIndex} 轮`)}
                 size="small"
                 color="primary"
                 variant="outlined"
@@ -1373,7 +1386,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
                   variant="caption"
                   sx={{ fontSize: '0.6rem', color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}
                 >
-                  When
+                  {uiText('When', '匹配条件')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.25 }}>
                   {predicateEntries.map(([key, value]) => (
@@ -1399,7 +1412,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
                 variant="caption"
                 sx={{ fontSize: '0.6rem', color: 'text.secondary', fontWeight: 600, textTransform: 'uppercase' }}
               >
-                Response
+                {uiText('Response', '响应')}
               </Typography>
               {turn.response.text && (
                 <Typography
@@ -1434,7 +1447,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
               )}
               {turn.response.stopReason && (
                 <Chip
-                  label={`Stop: ${turn.response.stopReason}`}
+                  label={uiText(`Stop: ${turn.response.stopReason}`, `停止原因：${turn.response.stopReason}`)}
                   size="small"
                   variant="outlined"
                   sx={{ height: 18, fontSize: '0.6rem', mt: 0.5 }}
@@ -1442,7 +1455,7 @@ export function ScriptedTurnsPanel({ turns }: { turns: ScriptedTurn[] }) {
               )}
               {turn.response.streaming && (
                 <Chip
-                  label="Streamed"
+                  label={uiText('Streamed', '流式传输')}
                   size="small"
                   color="info"
                   variant="outlined"

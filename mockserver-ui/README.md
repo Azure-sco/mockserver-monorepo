@@ -42,6 +42,25 @@ Vite redirects `/` to the base path and preserves the query string.
 > the Maven `build-ui` profile at build time, so UI changes only appear there after rebuilding
 > `mockserver-netty`.
 
+## 简体中文管理页面
+
+管理页面默认使用英文。需要简体中文时，将 `VITE_MOCKSERVER_DASHBOARD_LOCALE` 设为 `zh-CN`。
+
+在 `mockserver-ui` 目录中启动开发服务。
+
+```bash
+VITE_MOCKSERVER_DASHBOARD_LOCALE=zh-CN npm run dev
+```
+
+需要把中文管理页面打包进可执行 JAR 时，在 `mockserver` 目录中构建。
+
+```bash
+VITE_MOCKSERVER_DASHBOARD_LOCALE=zh-CN ./mvnw -pl mockserver-netty -am package -DskipTests -DskipITs
+```
+
+在 PowerShell 中，先执行 `$env:VITE_MOCKSERVER_DASHBOARD_LOCALE = 'zh-CN'`，再执行 `npm run dev` 或使用 `./mvnw.cmd` 打包。
+启动打包后的 MockServer，打开 [管理页面](http://localhost:1080/mockserver/dashboard/)。
+
 ## Demo data (manual UI testing)
 
 To see every dashboard screen populated with a large, varied dataset, run:

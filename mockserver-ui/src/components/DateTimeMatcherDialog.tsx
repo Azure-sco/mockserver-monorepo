@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -19,16 +20,16 @@ import {
 } from '../lib/matcherValue';
 
 const FIELDS: { value: MatcherValueField; label: string }[] = [
-  { value: 'headers', label: 'Header' },
-  { value: 'queryString', label: 'Query Parameter' },
+  { value: 'headers', label: uiText('Header', "请求头") },
+  { value: 'queryString', label: uiText('Query Parameter', "查询参数") },
   { value: 'cookies', label: 'Cookie' },
-  { value: 'pathParams', label: 'Path Parameter' },
+  { value: 'pathParams', label: uiText('Path Parameter', "路径参数") },
 ];
 
 const OPERATORS: { value: DateTimeOperator; label: string }[] = [
-  { value: 'before', label: 'Before' },
-  { value: 'after', label: 'After' },
-  { value: 'equalToDateTime', label: 'Equal To Date-Time' },
+  { value: 'before', label: uiText('Before', "早于") },
+  { value: 'after', label: uiText('After', "晚于") },
+  { value: 'equalToDateTime', label: uiText('Equal To Date-Time', "等于指定日期时间") },
 ];
 
 interface Draft {
@@ -74,7 +75,7 @@ export default function DateTimeMatcherDialog({
 
   const name = draft.name.trim();
   const nameError = name.includes(matcherFieldSeparator(draft.field))
-    ? `Name cannot contain "${matcherFieldSeparator(draft.field)}"`
+    ? uiText(`Name cannot contain "${matcherFieldSeparator(draft.field)}"`, `名称不能包含“${matcherFieldSeparator(draft.field)}”`)
     : undefined;
   const canAdd = (forBody || (name !== '' && !nameError)) && draft.expected.trim() !== '';
 
@@ -108,16 +109,15 @@ export default function DateTimeMatcherDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth aria-labelledby="date-time-matcher-title">
-      <DialogTitle id="date-time-matcher-title">{forBody ? 'Body Date-Time Comparison' : 'Add Date-Time Matcher'}</DialogTitle>
+      <DialogTitle id="date-time-matcher-title">{forBody ? uiText('Body Date-Time Comparison', "请求体日期时间比较") : uiText('Add Date-Time Matcher', "添加日期时间条件")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Match a value by comparing it as a date-time instead of as text. The expected value
-          is <code>now</code>, <code>now -1 hours</code>, or a date-time such as <code>2026-10-21T15:00:00Z</code>.
+          {uiText("Match a value by comparing it as a date-time instead of as text. The expected value is ", "将值作为日期时间进行比较。可填写 ")}<code>now</code>, <code>now -1 hours</code>{uiText(", or a date-time such as ", "、相对时间表达式或日期时间，例如 ")}<code>2026-10-21T15:00:00Z</code>.
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 0.5 }}>
           {!forBody && <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <TextField
-              label="Field"
+              label={uiText("Field", "字段")}
               size="small"
               select
               value={draft.field}
@@ -127,7 +127,7 @@ export default function DateTimeMatcherDialog({
               {FIELDS.map((f) => <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>)}
             </TextField>
             <TextField
-              label="Name"
+              label={uiText("Name", "名称")}
               size="small"
               value={draft.name}
               onChange={(e) => set('name', e.target.value)}
@@ -139,7 +139,7 @@ export default function DateTimeMatcherDialog({
           </Box>}
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <TextField
-              label="Comparison"
+              label={uiText("Comparison", "比较方式")}
               size="small"
               select
               value={draft.operator}
@@ -149,7 +149,7 @@ export default function DateTimeMatcherDialog({
               {OPERATORS.map((o) => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
             </TextField>
             <TextField
-              label="Expected Value"
+              label={uiText("Expected Value", "期望值")}
               size="small"
               value={draft.expected}
               onChange={(e) => set('expected', e.target.value)}
@@ -158,28 +158,28 @@ export default function DateTimeMatcherDialog({
             />
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {optional('actualFormat', 'Actual Format (optional)', 'rfc1123, epochSeconds, dd/MM/yyyy')}
-            {optional('zone', 'Zone (optional)', 'Europe/London')}
+            {optional('actualFormat', uiText('Actual Format (optional)', "实际值格式（可选）"), 'rfc1123, epochSeconds, dd/MM/yyyy')}
+            {optional('zone', uiText('Zone (optional)', "时区（可选）"), 'Europe/London')}
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {optional('truncateExpected', 'Truncate Expected (optional)', 'startOfDay')}
-            {optional('truncateActual', 'Truncate Actual (optional)', 'first day of month')}
+            {optional('truncateExpected', uiText('Truncate Expected (optional)', "截断期望值的时间精度（可选）"), 'startOfDay')}
+            {optional('truncateActual', uiText('Truncate Actual (optional)', "截断实际值的时间精度（可选）"), 'first day of month')}
           </Box>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <FormControlLabel
               control={<Checkbox size="small" checked={draft.applyTruncationLast} onChange={(e) => set('applyTruncationLast', e.target.checked)} />}
-              label="Apply Truncation Last"
+              label={uiText("Apply Truncation Last", "最后截断时间精度")}
             />
             <FormControlLabel
               control={<Checkbox size="small" checked={draft.not} onChange={(e) => set('not', e.target.checked)} />}
-              label="Not (Negate the Match)"
+              label={uiText("Not (Negate the Match)", "取反")}
             />
           </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" disabled={!canAdd} onClick={add}>{forBody ? 'Set' : 'Add'}</Button>
+        <Button onClick={onClose}>{uiText("Cancel", "取消")}</Button>
+        <Button variant="contained" disabled={!canAdd} onClick={add}>{forBody ? uiText('Set', "设置") : uiText('Add', "添加")}</Button>
       </DialogActions>
     </Dialog>
   );

@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Alert, AlertTitle, Box, Button, Stack, Typography } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { uiText } from '../lib/dashboardLocale';
 
 interface ErrorBoundaryProps {
   /** Short label for what failed, e.g. "detail pane" or "Metrics view". */
@@ -87,7 +88,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     const { error } = this.state;
     if (error) {
       const chunkError = isChunkLoadError(error);
-      const what = this.props.label ?? 'this view';
+      const what = this.props.label ?? uiText('this view', '当前页面');
       return (
         <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
           <Alert
@@ -96,11 +97,11 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             icon={<ErrorOutlineIcon fontSize="inherit" />}
             sx={{ maxWidth: 560, width: '100%' }}
           >
-            <AlertTitle>This view failed to load</AlertTitle>
+            <AlertTitle>{uiText('This view failed to load', '页面加载失败')}</AlertTitle>
             <Typography variant="body2" sx={{ mb: 1 }}>
               {chunkError
-                ? `Could not load ${what}. This usually means the app was updated — reload the page to fetch the latest version.`
-                : `Something went wrong while rendering ${what}.`}
+                ? uiText(`Could not load ${what}. This usually means the app was updated — reload the page to fetch the latest version.`, `无法加载${what}。应用可能已更新，请重新加载页面以获取最新版本。`)
+                : uiText(`Something went wrong while rendering ${what}.`, `显示${what}时发生错误。`)}
             </Typography>
             <Typography
               variant="caption"
@@ -113,7 +114,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
                 opacity: 0.85,
               }}
             >
-              {error.message || 'An unexpected error occurred.'}
+              {error.message || uiText('An unexpected error occurred.', '发生了意外错误。')}
             </Typography>
             <Stack direction="row" spacing={1}>
               {chunkError ? (
@@ -124,7 +125,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
                   startIcon={<RefreshIcon />}
                   onClick={() => window.location.reload()}
                 >
-                  Reload page
+                  {uiText('Reload page', '重新加载页面')}
                 </Button>
               ) : (
                 <Button
@@ -134,7 +135,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
                   startIcon={<RefreshIcon />}
                   onClick={this.reset}
                 >
-                  Try again
+                  {uiText('Try again', '重试')}
                 </Button>
               )}
             </Stack>

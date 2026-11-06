@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
@@ -41,7 +42,7 @@ export default function ConversationWizardStep1({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 1 }}>
       <TextField
-        label="Provider"
+        label={uiText("Provider", "服务提供方")}
         size="small"
         select
         fullWidth
@@ -56,7 +57,7 @@ export default function ConversationWizardStep1({
       </TextField>
 
       <TextField
-        label="Path"
+        label={uiText("Path", "路径")}
         size="small"
         fullWidth
         placeholder="/v1/messages"
@@ -65,10 +66,10 @@ export default function ConversationWizardStep1({
       />
 
       <TextField
-        label="Model (optional)"
+        label={uiText("Model (optional)", "模型（可选）")}
         size="small"
         fullWidth
-        placeholder="e.g. claude-sonnet-4-20250514"
+        placeholder={uiText("e.g. claude-sonnet-4-20250514", "例如 claude-sonnet-4-20250514")}
         value={model}
         onChange={(e) => onModelChange(e.target.value)}
       />
@@ -76,7 +77,7 @@ export default function ConversationWizardStep1({
       {/* Isolation toggle */}
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
-          Per-Session Isolation (optional)
+          {uiText("Per-Session Isolation (optional)", "按会话隔离（可选）")}
         </Typography>
         <ToggleButtonGroup
           value={isolationEnabled ? (isolateBy?.source ?? 'header') : null}
@@ -97,16 +98,16 @@ export default function ConversationWizardStep1({
             '& .MuiToggleButton-root': { py: 0.5, px: 1.5, fontSize: '0.75rem', textTransform: 'none' },
           }}
         >
-          <ToggleButton value="header">Header</ToggleButton>
-          <ToggleButton value="queryParameter">Query Param</ToggleButton>
+          <ToggleButton value="header">{uiText("Header", "请求头")}</ToggleButton>
+          <ToggleButton value="queryParameter">{uiText("Query Param", "查询参数")}</ToggleButton>
           <ToggleButton value="cookie">Cookie</ToggleButton>
         </ToggleButtonGroup>
         {isolationEnabled && (
           <TextField
-            label="Isolation key name"
+            label={uiText("Isolation key name", "隔离键名称")}
             size="small"
             fullWidth
-            placeholder="e.g. x-session-id"
+            placeholder={uiText("e.g. x-session-id", "例如 x-session-id")}
             value={isolateBy?.name ?? ''}
             onChange={(e) =>
               onIsolateByChange({

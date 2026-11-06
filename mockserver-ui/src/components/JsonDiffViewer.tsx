@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useId, useLayoutEffect, useRef } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import type { DiffOnMount } from '@monaco-editor/react';
@@ -116,7 +117,7 @@ export default function JsonDiffViewer({
             renderLineHighlight: 'none',
             scrollbar: { alwaysConsumeMouseWheel: false },
             tabFocusMode: true,
-            ...(name ? { originalAriaLabel: `${name} (before)`, modifiedAriaLabel: `${name} (after)` } : {}),
+            ...(name ? { originalAriaLabel: uiText(`${name} (before)`, `${name}（修改前）`), modifiedAriaLabel: uiText(`${name} (after)`, `${name}（修改后）`) } : {}),
           }}
         />
       </Box>

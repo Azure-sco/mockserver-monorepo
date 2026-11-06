@@ -8,6 +8,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import HelpOutlinedIcon from '@mui/icons-material/HelpOutlined';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { filterFields, parseSearchTerm, describeUnsupportedOperators } from '../lib/filterDSL';
+import { uiText } from '../lib/dashboardLocale';
 
 /** The fields advertised by this field, honouring an optional call-site subset. */
 function advertisedFields(fields?: readonly string[]) {
@@ -25,7 +26,7 @@ function advertisedFields(fields?: readonly string[]) {
  */
 function searchPlaceholder(fields?: readonly string[]): string {
   const examples = advertisedFields(fields).map((f) => f.example);
-  return `Search — try ${[...examples, '/regex/'].join(', ')}`;
+  return uiText(`Search — try ${[...examples, '/regex/'].join(', ')}`, `搜索，可试用 ${[...examples, '/regex/'].join('、')}`);
 }
 
 /**
@@ -36,17 +37,17 @@ function searchPlaceholder(fields?: readonly string[]): string {
 function searchHelp(fields?: readonly string[]) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, py: 0.25, maxWidth: 320 }}>
-      <Typography variant="caption" sx={{ fontWeight: 600 }}>Search operators</Typography>
+      <Typography variant="caption" sx={{ fontWeight: 600 }}>{uiText('Search operators', '搜索运算符')}</Typography>
       {advertisedFields(fields).map((f) => (
         <Typography key={f.name} variant="caption">
           {f.example} — {f.description}
         </Typography>
       ))}
       <Typography variant="caption">
-        /regex/ — free-text regular expression (optional flags, defaults to case-insensitive)
+        {uiText('/regex/ — free-text regular expression (optional flags, defaults to case-insensitive)', '/regex/ 用于自由文本的正则匹配，可指定标志，默认忽略大小写')}
       </Typography>
       <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-        Plain text matches anywhere; operators combine with AND.
+        {uiText('Plain text matches anywhere; operators combine with AND.', '纯文本可匹配任意位置。使用多个运算符时，所有条件必须同时满足。')}
       </Typography>
     </Box>
   );
@@ -89,7 +90,7 @@ export default function OperatorSearchField({
   maxWidth = 240,
   sx,
   fields,
-  ariaLabel = 'Search',
+  ariaLabel = uiText('Search', '搜索'),
 }: OperatorSearchFieldProps) {
   // Only a restricted surface can produce an unsupported operator, so the
   // unrestricted panels never pay for this beyond a cheap re-parse.
@@ -120,7 +121,7 @@ export default function OperatorSearchField({
                 <HelpOutlinedIcon
                   fontSize="small"
                   role="img"
-                  aria-label="Search operator help"
+                  aria-label={uiText('Search operator help', '搜索运算符帮助')}
                   tabIndex={0}
                   sx={{ color: 'text.secondary', cursor: 'help' }}
                 />

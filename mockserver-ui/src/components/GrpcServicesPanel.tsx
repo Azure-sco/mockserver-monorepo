@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -44,10 +45,10 @@ function servingChipColor(status: ServingStatus | undefined): 'success' | 'error
 }
 
 function streamingLabel(clientStreaming: boolean, serverStreaming: boolean): string {
-  if (clientStreaming && serverStreaming) return 'bidi stream';
-  if (serverStreaming) return 'server stream';
-  if (clientStreaming) return 'client stream';
-  return 'unary';
+  if (clientStreaming && serverStreaming) return uiText('bidi stream', "双向流");
+  if (serverStreaming) return uiText('server stream', "服务端流");
+  if (clientStreaming) return uiText('client stream', "客户端流");
+  return uiText('unary', "一元调用");
 }
 
 /**
@@ -101,40 +102,38 @@ export default function GrpcServicesPanel({ connectionParams }: GrpcServicesPane
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <HubIcon fontSize="small" color="primary" />
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          gRPC Services
+          {uiText("gRPC Services", "gRPC 服务")}
         </Typography>
         <Chip
           size="small"
-          label={`${services.length} service(s)`}
+          label={uiText(`${services.length} service(s)`, `${services.length} 个服务`)}
           color={services.length > 0 ? 'info' : 'default'}
           variant="outlined"
         />
         {methodCount > 0 && (
-          <Chip size="small" label={`${methodCount} method(s)`} variant="outlined" />
+          <Chip size="small" label={uiText(`${methodCount} method(s)`, `${methodCount} 个方法`)} variant="outlined" />
         )}
         {defaultHealth && (
-          <Tooltip title="Overall gRPC health-check serving status">
+          <Tooltip title={uiText("Overall gRPC health-check serving status", "gRPC 服务器的整体健康检查状态")}>
             <Chip
               size="small"
-              label={`server ${defaultHealth}`}
+              label={uiText(`server ${defaultHealth}`, `服务器：${defaultHealth}`)}
               color={servingChipColor(defaultHealth)}
               variant="outlined"
             />
           </Tooltip>
         )}
         <Box sx={{ flex: 1 }} />
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh gRPC services">
+        <Tooltip title={uiText("Refresh now", "立即刷新")}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText("Refresh gRPC services", "刷新 gRPC 服务")}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        Services and methods loaded from the gRPC protobuf descriptors, with each
-        service&apos;s health-check serving status. Load descriptors via the{' '}
-        <code>PUT /mockserver/grpc/descriptors</code> endpoint, or configure a
-        descriptor / proto directory at startup.
+        {uiText("Services and methods loaded from the gRPC protobuf descriptors, with each service's health-check serving status. Load descriptors via the", "查看从 gRPC Protobuf 描述符加载的服务和方法，以及各服务的健康状态。可通过")}{' '}
+        <code>PUT /mockserver/grpc/descriptors</code>{uiText(" endpoint, or configure a descriptor / proto directory at startup.", " 端点加载描述符，也可以在启动时配置描述符目录或 Proto 目录。")}
       </Typography>
 
       {loadError && (
@@ -147,8 +146,7 @@ export default function GrpcServicesPanel({ connectionParams }: GrpcServicesPane
       {services.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 1.25 }}>
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            No gRPC services loaded. Upload a compiled protobuf FileDescriptorSet
-            to <code>PUT /mockserver/grpc/descriptors</code> to mock gRPC methods.
+            {uiText("No gRPC services loaded. Upload a compiled protobuf FileDescriptorSet to ", "尚未加载 gRPC 服务。请将编译后的 Protobuf FileDescriptorSet 上传至 ")}<code>PUT /mockserver/grpc/descriptors</code>{uiText(" to mock gRPC methods.", " ，即可模拟 gRPC 方法。")}
           </Typography>
         </Paper>
       ) : (
@@ -162,23 +160,23 @@ export default function GrpcServicesPanel({ connectionParams }: GrpcServicesPane
                 </Typography>
                 <Chip
                   size="small"
-                  label={serviceHealth ?? 'no health'}
+                  label={serviceHealth ?? uiText('no health', "无健康状态")}
                   color={servingChipColor(serviceHealth)}
                   variant="outlined"
                 />
                 <Box sx={{ flex: 1 }} />
                 <Typography variant="caption" color="text.secondary">
-                  {service.methods?.length ?? 0} method(s)
+                  {service.methods?.length ?? 0}{uiText(" method(s)", " 个方法")}
                 </Typography>
               </Box>
               <TableContainer>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Method</TableCell>
-                      <TableCell>Input</TableCell>
-                      <TableCell>Output</TableCell>
-                      <TableCell align="right">Kind</TableCell>
+                      <TableCell>{uiText("Method", "方法")}</TableCell>
+                      <TableCell>{uiText("Input", "输入")}</TableCell>
+                      <TableCell>{uiText("Output", "输出")}</TableCell>
+                      <TableCell align="right">{uiText("Kind", "类型")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

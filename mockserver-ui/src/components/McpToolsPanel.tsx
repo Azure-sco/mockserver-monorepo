@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -88,7 +89,7 @@ export default function McpToolsPanel({ connectionParams, selectedExpectationId 
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <Typography variant="h6" sx={{ fontSize: '1rem', flex: 1 }}>
-          MCP Tools{' '}
+          {uiText('MCP Tools', 'MCP 工具')}{' '}
           <Chip label={tools.length} size="small" sx={{ ml: 0.5 }} />
         </Typography>
         <Button
@@ -97,12 +98,11 @@ export default function McpToolsPanel({ connectionParams, selectedExpectationId 
           onClick={refresh}
           disabled={loading}
         >
-          Refresh
+          {uiText('Refresh', '刷新')}
         </Button>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-        Model Context Protocol tool definitions generated from the active expectations — what an AI
-        agent sees when it connects to this MockServer's MCP endpoint.
+        {uiText('Model Context Protocol tool definitions generated from the active expectations — what an AI agent sees when it connects to this MockServer\'s MCP endpoint.', '根据生效的 Mock 规则生成的 MCP 工具定义。AI 助手连接此 MockServer 的 MCP 端点时会看到这些定义。')}
       </Typography>
       {error !== null && (
         <Alert severity="error" sx={{ mb: 1 }}>
@@ -110,16 +110,16 @@ export default function McpToolsPanel({ connectionParams, selectedExpectationId 
         </Alert>
       )}
       {!loading && error === null && tools.length === 0 && (
-        <Alert severity="info">No tools — add response expectations to generate MCP tools.</Alert>
+        <Alert severity="info">{uiText('No tools — add response expectations to generate MCP tools.', '暂无工具。添加返回响应的 Mock 规则后即可生成 MCP 工具。')}</Alert>
       )}
       {tools.length > 0 && (
         <Paper variant="outlined">
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Tool name</TableCell>
-                <TableCell>Endpoint</TableCell>
-                <TableCell>Description</TableCell>
+                <TableCell>{uiText('Tool name', '工具名称')}</TableCell>
+                <TableCell>{uiText('Endpoint', '端点')}</TableCell>
+                <TableCell>{uiText('Description', '说明')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

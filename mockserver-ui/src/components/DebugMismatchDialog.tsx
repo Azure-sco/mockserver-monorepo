@@ -26,25 +26,26 @@ import { mismatchDifferencesToDiffResult } from '../lib/diff';
 import { monospaceFontFamily } from '../theme';
 import CaptureAsMockDialog from './CaptureAsMockDialog';
 import DiffPanel from './DiffPanel';
+import { uiText } from '../lib/dashboardLocale';
 
 // Client-derived remediation hints, mirroring the server's MismatchRemediation
 // defaults. The debug-mismatch endpoint (unlike explainUnmatched) does not return
 // remediation hints, so we derive an equivalent short hint from the field name.
 const FIELD_HINTS: Record<string, string> = {
-  method: 'check the HTTP method',
-  path: 'check the request path',
-  pathParameters: 'check path parameter values',
-  queryParameters: 'check query string parameters',
-  cookies: 'check request cookies',
-  headers: 'check request headers',
-  body: 'check the request body content',
-  secure: 'check whether the request uses HTTPS vs HTTP',
-  protocol: 'check the protocol version',
-  'keep-alive': 'check the keep-alive setting',
-  operation: 'check the OpenAPI operation id',
-  openapi: 'check the OpenAPI operation id',
-  clientCertificate: 'check the client certificate',
-  jwt: 'check the JWT claims',
+  method: uiText('check the HTTP method', '检查 HTTP 请求方法'),
+  path: uiText('check the request path', '检查请求路径'),
+  pathParameters: uiText('check path parameter values', '检查路径参数的值'),
+  queryParameters: uiText('check query string parameters', '检查查询参数'),
+  cookies: uiText('check request cookies', '检查请求的 Cookie'),
+  headers: uiText('check request headers', '检查请求头'),
+  body: uiText('check the request body content', '检查请求正文'),
+  secure: uiText('check whether the request uses HTTPS vs HTTP', '检查请求使用的是 HTTPS 还是 HTTP'),
+  protocol: uiText('check the protocol version', '检查协议版本'),
+  'keep-alive': uiText('check the keep-alive setting', '检查连接保持设置'),
+  operation: uiText('check the OpenAPI operation id', '检查 OpenAPI 操作 ID'),
+  openapi: uiText('check the OpenAPI operation id', '检查 OpenAPI 操作 ID'),
+  clientCertificate: uiText('check the client certificate', '检查客户端证书'),
+  jwt: uiText('check the JWT claims', '检查 JWT 声明'),
 };
 
 function hintForField(field: string): string | undefined {
@@ -106,7 +107,7 @@ function ExpectationResultRow({ result, isClosest }: { result: DebugMismatchExpe
           <CancelIcon sx={{ fontSize: '1rem', color: 'error.main' }} />
         )}
         <Chip
-          label={result.matches ? 'matches' : `differs on ${differing} field${differing === 1 ? '' : 's'}`}
+          label={result.matches ? uiText('matches', '匹配') : uiText(`differs on ${differing} field${differing === 1 ? '' : 's'}`, `有 ${differing} 个字段不一致`)}
           size="small"
           color={chipColor(result)}
           variant="outlined"
@@ -115,14 +116,14 @@ function ExpectationResultRow({ result, isClosest }: { result: DebugMismatchExpe
         <Box component="span" sx={{ fontFamily: monospaceFontFamily, fontSize: '0.8rem', color: 'text.secondary' }}>
           {result.expectationMethod && result.expectationPath
             ? `${result.expectationMethod} ${result.expectationPath}`
-            : result.expectationId ?? 'unknown'}
+            : result.expectationId ?? uiText('unknown', '未知')}
         </Box>
         {isClosest && (
-          <Chip label="closest" size="small" color="warning" sx={{ fontSize: '0.7rem', height: 18 }} />
+          <Chip label={uiText('closest', '最接近')} size="small" color="warning" sx={{ fontSize: '0.7rem', height: 18 }} />
         )}
         {result.anyOf && (
           <Chip
-            label={`anyOf: closest is branch ${result.anyOf.closestBranch} of ${result.anyOf.branches.length}`}
+            label={uiText(`anyOf: closest is branch ${result.anyOf.closestBranch} of ${result.anyOf.branches.length}`, `anyOf 共 ${result.anyOf.branches.length} 个分支，第 ${result.anyOf.closestBranch} 个最接近`)}
             size="small"
             variant="outlined"
             data-testid="debug-mismatch-any-of-closest"
@@ -162,7 +163,7 @@ function ExpectationResultRow({ result, isClosest }: { result: DebugMismatchExpe
                   variant="caption"
                   sx={{ display: 'block', pl: 2, fontStyle: 'italic', color: 'text.secondary', lineHeight: 1.4 }}
                 >
-                  Hint: {hintForField(field)}
+                  {uiText('Hint: ', '提示 ')} {hintForField(field)}
                 </Typography>
               )}
             </Box>
@@ -281,24 +282,24 @@ export default function DebugMismatchDialog({ connectionParams }: DebugMismatchD
       <Dialog open={open} onClose={close} maxWidth="md" fullWidth fullScreen={fullScreen}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            Why Didn&apos;t This Match?
+            {uiText('Why Didn\'t This Match?', '为什么没有匹配？')}
             {result && (
               <Chip
-                label={`${result.totalExpectations} expectation${result.totalExpectations !== 1 ? 's' : ''}`}
+                label={uiText(`${result.totalExpectations} expectation${result.totalExpectations !== 1 ? 's' : ''}`, `${result.totalExpectations} 条 Mock 规则`)}
                 size="small"
                 variant="outlined"
                 sx={{ fontSize: '0.75rem' }}
               />
             )}
           </Box>
-          <IconButton size="small" onClick={close} aria-label="Close">
+          <IconButton size="small" onClick={close} aria-label={uiText('Close', '关闭')}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ p: 0 }}>
           {loading && (
             <Typography sx={{ p: 3, textAlign: 'center' }} color="text.secondary">
-              Analyzing match results...
+              {uiText('Analyzing match results...', '正在分析匹配结果…')}
             </Typography>
           )}
           {error && (
@@ -310,7 +311,7 @@ export default function DebugMismatchDialog({ connectionParams }: DebugMismatchD
             <>
               {result.truncated && (
                 <Typography variant="caption" sx={{ display: 'block', px: 2, py: 0.5, bgcolor: 'warning.dark', color: 'warning.contrastText' }}>
-                  Showing first {result.maxExpectationsEvaluated} of {result.totalExpectations} expectations
+                  {uiText(`Showing first ${result.maxExpectationsEvaluated} of ${result.totalExpectations} expectations`, `共 ${result.totalExpectations} 条规则，仅显示前 ${result.maxExpectationsEvaluated} 条`)}
                 </Typography>
               )}
               <Tabs
@@ -319,13 +320,13 @@ export default function DebugMismatchDialog({ connectionParams }: DebugMismatchD
                 variant="fullWidth"
                 sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 40 }}
               >
-                <Tab value="results" label="Match Results" sx={{ minHeight: 40, py: 0 }} />
-                <Tab value="diff" label="Visual Diff" sx={{ minHeight: 40, py: 0 }} />
+                <Tab value="results" label={uiText('Match Results', '匹配结果')} sx={{ minHeight: 40, py: 0 }} />
+                <Tab value="diff" label={uiText('Visual Diff', '差异对比')} sx={{ minHeight: 40, py: 0 }} />
               </Tabs>
               {tab === 'results' &&
                 (result.results.length === 0 ? (
                   <Typography sx={{ p: 3, textAlign: 'center' }} color="text.secondary">
-                    No active expectations
+                    {uiText('No active expectations', '暂无生效规则')}
                   </Typography>
                 ) : (
                   result.results.map((r, i) => (
@@ -341,25 +342,25 @@ export default function DebugMismatchDialog({ connectionParams }: DebugMismatchD
                   {diffSource ? (
                     <>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                        Comparing the request against the closest expectation
+                        {uiText('Comparing the request against the closest expectation', '正在比较请求与最接近的规则')}
                         {diffSource.expectationMethod && diffSource.expectationPath
                           ? ` (${diffSource.expectationMethod} ${diffSource.expectationPath})`
                           : diffSource.expectationId
                             ? ` (${diffSource.expectationId})`
                             : ''}
-                        . Expected = what the matcher required, Actual = what the request contained.
+                        {uiText('. Expected = what the matcher required, Actual = what the request contained.', '。“预期”指匹配条件要求的值，“实际”指请求中包含的值。')}
                       </Typography>
                       <DiffPanel
                         result={diffResult}
                         loading={false}
                         error={null}
-                        title="Request vs Closest Expectation"
-                        identicalMessage="No field-level differences were reported for the closest expectation."
+                        title={uiText('Request vs Closest Expectation', '请求与最接近的规则')}
+                        identicalMessage={uiText('No field-level differences were reported for the closest expectation.', '最接近的规则未报告字段差异。')}
                       />
                     </>
                   ) : (
                     <Typography sx={{ py: 2, textAlign: 'center' }} color="text.secondary">
-                      No closest expectation with field-level differences to diff. See the Match results tab for the full reasons.
+                      {uiText('No closest expectation with field-level differences to diff. See the Match results tab for the full reasons.', '没有可对比字段差异的规则。请在“匹配结果”标签页查看具体原因。')}
                     </Typography>
                   )}
                 </Box>
@@ -374,11 +375,11 @@ export default function DebugMismatchDialog({ connectionParams }: DebugMismatchD
               startIcon={<AddCircleOutlineIcon />}
               onClick={() => setCaptureOpen(true)}
             >
-              Create Expectation
+              {uiText('Create Expectation', '创建 Mock 规则')}
             </Button>
           )}
           <Button onClick={close} size="small">
-            Close
+            {uiText('Close', '关闭')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -305,27 +306,27 @@ const EMPTY_FORM: FormState = {
  * ≥1 non-PAUSE (load) stage, every duration > 0, and ramp stages supply both endpoints.
  */
 function buildProfile(stages: StageFormState[]): { stages: LoadStageDTO[] } | { error: string } {
-  if (stages.length === 0) return { error: 'At least one stage is required' };
+  if (stages.length === 0) return { error: uiText('At least one stage is required', '至少需要一个阶段') };
   const out: LoadStageDTO[] = [];
   let hasLoadStage = false;
   for (let i = 0; i < stages.length; i++) {
     const s = stages[i]!;
-    const label = `Stage ${i + 1}`;
+    const label = uiText(`Stage ${i + 1}`, `阶段 ${i + 1}`);
     const durationMillis = num(s.durationMillis);
-    if (durationMillis == null || durationMillis <= 0) return { error: `${label}: duration (ms) must be greater than 0` };
+    if (durationMillis == null || durationMillis <= 0) return { error: uiText(`${label}: duration (ms) must be greater than 0`, `${label}：持续时间必须大于 0 毫秒`) };
 
     const stage: LoadStageDTO = { type: s.type, durationMillis };
     if (s.type === 'VU') {
       hasLoadStage = true;
       if (s.mode === 'HOLD') {
         const vus = num(s.vus);
-        if (vus == null || vus < 1) return { error: `${label}: virtual users (VUs) must be at least 1` };
+        if (vus == null || vus < 1) return { error: uiText(`${label}: virtual users (VUs) must be at least 1`, `${label}：虚拟用户数必须至少为 1`) };
         stage.vus = vus;
       } else {
         const startVus = num(s.startVus);
         const endVus = num(s.endVus);
-        if (startVus == null || startVus < 0) return { error: `${label}: start VUs must be 0 or greater` };
-        if (endVus == null || endVus < 1) return { error: `${label}: end VUs must be at least 1` };
+        if (startVus == null || startVus < 0) return { error: uiText(`${label}: start VUs must be 0 or greater`, `${label}：起始虚拟用户数必须大于或等于 0`) };
+        if (endVus == null || endVus < 1) return { error: uiText(`${label}: end VUs must be at least 1`, `${label}：结束虚拟用户数必须至少为 1`) };
         stage.startVus = startVus;
         stage.endVus = endVus;
         stage.curve = s.curve;
@@ -334,27 +335,27 @@ function buildProfile(stages: StageFormState[]): { stages: LoadStageDTO[] } | { 
       hasLoadStage = true;
       if (s.mode === 'HOLD') {
         const rate = num(s.rate);
-        if (rate == null || rate <= 0) return { error: `${label}: rate (iterations/sec) must be greater than 0` };
+        if (rate == null || rate <= 0) return { error: uiText(`${label}: rate (iterations/sec) must be greater than 0`, `${label}：速率必须大于 0 次迭代/秒`) };
         stage.rate = rate;
       } else {
         const startRate = num(s.startRate);
         const endRate = num(s.endRate);
-        if (startRate == null || startRate < 0) return { error: `${label}: start rate must be 0 or greater` };
-        if (endRate == null || endRate <= 0) return { error: `${label}: end rate must be greater than 0` };
+        if (startRate == null || startRate < 0) return { error: uiText(`${label}: start rate must be 0 or greater`, `${label}：起始速率必须大于或等于 0`) };
+        if (endRate == null || endRate <= 0) return { error: uiText(`${label}: end rate must be greater than 0`, `${label}：结束速率必须大于 0`) };
         stage.startRate = startRate;
         stage.endRate = endRate;
         stage.curve = s.curve;
       }
       const maxVus = num(s.maxVus);
       if (maxVus != null) {
-        if (maxVus < 1) return { error: `${label}: max VUs must be at least 1 (or leave blank)` };
+        if (maxVus < 1) return { error: uiText(`${label}: max VUs must be at least 1 (or leave blank)`, `${label}：最大虚拟用户数必须至少为 1，也可留空`) };
         stage.maxVus = maxVus;
       }
     }
     // PAUSE: only durationMillis.
     out.push(stage);
   }
-  if (!hasLoadStage) return { error: 'At least one VU or RATE stage is required (a profile of only pauses drives no load)' };
+  if (!hasLoadStage) return { error: uiText('At least one VU or RATE stage is required (a profile of only pauses drives no load)', '至少需要一个按虚拟用户数或到达速率驱动的阶段。仅配置暂停阶段无法生成负载') };
   return { stages: out };
 }
 
@@ -379,7 +380,7 @@ function buildShape(form: ShapeFormState): { shape: LoadShapeDTO } | { error: st
   const shape: LoadShapeDTO = { type: form.type, metric: form.metric };
   const positive = (raw: string, label: string): number | { error: string } => {
     const v = num(raw);
-    if (v == null || v <= 0) return { error: `Shape: ${label} must be greater than 0` };
+    if (v == null || v <= 0) return { error: uiText(`Shape: ${label} must be greater than 0`, `负载曲线：${label}必须大于 0`) };
     return v;
   };
   if (form.type === 'SPIKE') {
@@ -396,12 +397,12 @@ function buildShape(form: ShapeFormState): { shape: LoadShapeDTO } | { error: st
     shape.baseline = baseline; shape.peak = peak; shape.rampUpMillis = rampUp; shape.holdMillis = hold; shape.rampDownMillis = rampDown;
     const recovery = num(form.recoveryHoldMillis);
     if (recovery != null) {
-      if (recovery < 0) return { error: 'Shape: recovery hold (ms) must be 0 or greater (or leave blank)' };
+      if (recovery < 0) return { error: uiText('Shape: recovery hold (ms) must be 0 or greater (or leave blank)', '负载曲线：恢复后的保持时长必须大于或等于 0 毫秒，也可留空') };
       shape.recoveryHoldMillis = recovery;
     }
   } else if (form.type === 'STAIRS') {
     const start = num(form.start);
-    if (start == null || start < 0) return { error: 'Shape: start must be 0 or greater' };
+    if (start == null || start < 0) return { error: uiText('Shape: start must be 0 or greater', '负载曲线：起始值必须大于或等于 0') };
     const step = positive(form.step, 'step rise');
     if (typeof step === 'object') return step;
     const steps = positive(form.steps, 'number of steps');
@@ -425,21 +426,21 @@ function buildShape(form: ShapeFormState): { shape: LoadShapeDTO } | { error: st
 
 /** Build a LoadScenarioDTO from the form, or return a validation message. */
 function buildScenario(form: FormState): { scenario: LoadScenarioDTO } | { error: string } {
-  if (form.name.trim() === '') return { error: 'Scenario name is required' };
+  if (form.name.trim() === '') return { error: uiText('Scenario name is required', '请输入场景名称') };
 
   const builtProfile = buildProfileFromForm(form);
   if ('error' in builtProfile) return { error: builtProfile.error };
   const profile = builtProfile.profile;
 
-  if (form.steps.length === 0) return { error: 'At least one step is required' };
+  if (form.steps.length === 0) return { error: uiText('At least one step is required', '至少需要一个步骤') };
   const weighted = form.stepSelection === 'WEIGHTED';
   const steps: LoadStepDTO[] = [];
   for (let i = 0; i < form.steps.length; i++) {
     const s = form.steps[i]!;
-    if (s.host.trim() === '') return { error: `Step ${i + 1}: target host is required` };
+    if (s.host.trim() === '') return { error: uiText(`Step ${i + 1}: target host is required`, `步骤 ${i + 1}：请输入目标主机`) };
     const port = num(s.port);
-    if (port == null || port < 1 || port > 65535) return { error: `Step ${i + 1}: target port must be 1–65535` };
-    if (s.path.trim() === '') return { error: `Step ${i + 1}: path is required` };
+    if (port == null || port < 1 || port > 65535) return { error: uiText(`Step ${i + 1}: target port must be 1–65535`, `步骤 ${i + 1}：目标端口必须在 1 至 65535 之间`) };
+    if (s.path.trim() === '') return { error: uiText(`Step ${i + 1}: path is required`, `步骤 ${i + 1}：请输入路径`) };
 
     const socketAddress: SocketAddressDTO = { host: s.host.trim(), port, scheme: s.scheme };
     const step: LoadStepDTO = {
@@ -451,16 +452,16 @@ function buildScenario(form: FormState): { scenario: LoadScenarioDTO } | { error
     if (s.name.trim() !== '') step.name = s.name.trim();
     const thinkTimeMs = num(s.thinkTimeMs);
     if (thinkTimeMs != null) {
-      if (thinkTimeMs < 0) return { error: `Step ${i + 1}: think time (ms) must be 0 or greater` };
+      if (thinkTimeMs < 0) return { error: uiText(`Step ${i + 1}: think time (ms) must be 0 or greater`, `步骤 ${i + 1}：步骤结束后的延迟必须大于或等于 0 毫秒`) };
       step.thinkTime = { timeUnit: 'MILLISECONDS', value: thinkTimeMs };
     }
     const captures = buildCaptures(s.captures);
-    if ('error' in captures) return { error: `Step ${i + 1}: ${captures.error}` };
+    if ('error' in captures) return { error: uiText(`Step ${i + 1}: ${captures.error}`, `步骤 ${i + 1}：${captures.error}`) };
     if (captures.captures.length > 0) step.captures = captures.captures;
     if (weighted) {
       const weight = num(s.weight);
       if (weight != null) {
-        if (weight <= 0) return { error: `Step ${i + 1}: weight must be greater than 0 under WEIGHTED selection` };
+        if (weight <= 0) return { error: uiText(`Step ${i + 1}: weight must be greater than 0 under WEIGHTED selection`, `步骤 ${i + 1}：按权重选择时，权重必须大于 0`) };
         step.weight = weight;
       }
     }
@@ -475,12 +476,12 @@ function buildScenario(form: FormState): { scenario: LoadScenarioDTO } | { error
   };
   const maxRequests = num(form.maxRequests);
   if (maxRequests != null) {
-    if (maxRequests < 1) return { error: 'Max requests must be at least 1 (or leave blank for unlimited)' };
+    if (maxRequests < 1) return { error: uiText('Max requests must be at least 1 (or leave blank for unlimited)', '最大请求数必须至少为 1，留空表示不限') };
     scenario.maxRequests = maxRequests;
   }
   const startDelayMillis = num(form.startDelayMillis);
   if (startDelayMillis != null) {
-    if (startDelayMillis < 0) return { error: 'Start delay (ms) must be 0 or greater (or leave blank for none)' };
+    if (startDelayMillis < 0) return { error: uiText('Start delay (ms) must be 0 or greater (or leave blank for none)', '启动延迟必须大于或等于 0 毫秒，留空表示无延迟') };
     scenario.startDelayMillis = startDelayMillis;
   }
   const labels = labelRowsToObject(form.labels);
@@ -495,14 +496,14 @@ function buildScenario(form: FormState): { scenario: LoadScenarioDTO } | { error
     if (form.abortOnFail) scenario.abortOnFail = true;
     const abortGraceMillis = num(form.abortGraceMillis);
     if (abortGraceMillis != null) {
-      if (abortGraceMillis < 0) return { error: 'Abort grace (ms) must be 0 or greater (or leave blank)' };
+      if (abortGraceMillis < 0) return { error: uiText('Abort grace (ms) must be 0 or greater (or leave blank)', '中止宽限期必须大于或等于 0 毫秒，也可留空') };
       scenario.abortGraceMillis = abortGraceMillis;
     }
   }
 
   if (form.pacingMode !== 'NONE') {
     const value = num(form.pacingValue);
-    if (value == null || value <= 0) return { error: 'Pacing value must be greater than 0 when a pacing mode is selected' };
+    if (value == null || value <= 0) return { error: uiText('Pacing value must be greater than 0 when a pacing mode is selected', '选择执行节奏后，其值必须大于 0') };
     scenario.pacing = { mode: form.pacingMode, value };
   }
 
@@ -519,7 +520,7 @@ function buildThresholds(rows: ThresholdFormState[]): { thresholds: LoadThreshol
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]!;
     const threshold = num(r.threshold);
-    if (threshold == null) return { error: `Threshold ${i + 1}: a numeric threshold value is required` };
+    if (threshold == null) return { error: uiText(`Threshold ${i + 1}: a numeric threshold value is required`, `阈值 ${i + 1}：请输入数值`) };
     out.push({ metric: r.metric, comparator: r.comparator, threshold });
   }
   return { thresholds: out };
@@ -533,8 +534,8 @@ function buildCaptures(rows: CaptureFormState[]): { captures: LoadCaptureDTO[] }
     const name = r.name.trim();
     const expression = r.expression.trim();
     if (name === '' && expression === '') continue; // an untouched row → skip
-    if (name === '') return { error: `capture ${i + 1} needs a variable name` };
-    if (expression === '') return { error: `capture ${i + 1} (${name}) needs an expression` };
+    if (name === '') return { error: uiText(`capture ${i + 1} needs a variable name`, `第 ${i + 1} 项变量提取需要变量名称`) };
+    if (expression === '') return { error: uiText(`capture ${i + 1} (${name}) needs an expression`, `第 ${i + 1} 项变量提取（${name}）需要表达式`) };
     const capture: LoadCaptureDTO = { name, source: r.source, expression };
     if (r.defaultValue.trim() !== '') capture.defaultValue = r.defaultValue;
     out.push(capture);
@@ -546,7 +547,7 @@ function buildCaptures(rows: CaptureFormState[]): { captures: LoadCaptureDTO[] }
 function buildFeeder(form: FeederFormState): { feeder: LoadFeederDTO | null } | { error: string } {
   if (!form.enabled) return { feeder: null };
   if (form.mode === 'RAW') {
-    if (form.rawData.trim() === '') return { error: 'Feeder: raw data is required (or disable the feeder)' };
+    if (form.rawData.trim() === '') return { error: uiText('Feeder: raw data is required (or disable the feeder)', '请填写原始数据，或关闭测试数据源') };
     return { feeder: { data: form.rawData, format: form.rawFormat, strategy: form.strategy } };
   }
   const rows: Record<string, string>[] = [];
@@ -558,7 +559,7 @@ function buildFeeder(form: FeederFormState): { feeder: LoadFeederDTO | null } | 
     }
     if (Object.keys(obj).length > 0) rows.push(obj);
   }
-  if (rows.length === 0) return { error: 'Feeder: at least one non-empty row is required (or disable the feeder)' };
+  if (rows.length === 0) return { error: uiText('Feeder: at least one non-empty row is required (or disable the feeder)', '请至少填写一行有效数据，或关闭测试数据源') };
   return { feeder: { rows, strategy: form.strategy } };
 }
 
@@ -919,12 +920,12 @@ function ratePerSecond(samples: Sample[]): number[] {
 
 const SERIES_DEFS: SeriesDef[] = [
   { key: 'rps', label: 'RPS', format: (v) => `${v.toFixed(1)}/s`, derive: ratePerSecond, combine: 'sum' },
-  { key: 'vus', label: 'Active VUs', format: (v) => Math.round(v).toLocaleString(), derive: (s) => s.map((x) => x.currentVus), combine: 'sum' },
-  { key: 'inFlight', label: 'In-flight', format: (v) => Math.round(v).toLocaleString(), derive: (s) => s.map((x) => x.inFlight), combine: 'sum' },
+  { key: 'vus', label: uiText('Active VUs', '活跃虚拟用户'), format: (v) => Math.round(v).toLocaleString(), derive: (s) => s.map((x) => x.currentVus), combine: 'sum' },
+  { key: 'inFlight', label: uiText('In-flight', '在途请求'), format: (v) => Math.round(v).toLocaleString(), derive: (s) => s.map((x) => x.inFlight), combine: 'sum' },
   { key: 'p50', label: 'p50 ms', format: (v) => `${v.toFixed(0)} ms`, derive: (s) => s.map((x) => x.p50), combine: 'max' },
   { key: 'p95', label: 'p95 ms', format: (v) => `${v.toFixed(0)} ms`, derive: (s) => s.map((x) => x.p95), combine: 'max' },
   { key: 'p99', label: 'p99 ms', format: (v) => `${v.toFixed(0)} ms`, derive: (s) => s.map((x) => x.p99), combine: 'max' },
-  { key: 'errorRate', label: 'Error rate %', format: (v) => `${v.toFixed(1)}%`, derive: (s) => s.map((x) => (x.requestsSent > 0 ? (x.failed / x.requestsSent) * 100 : 0)), combine: 'ratio' },
+  { key: 'errorRate', label: uiText('Error rate %', '错误率（%）'), format: (v) => `${v.toFixed(1)}%`, derive: (s) => s.map((x) => (x.requestsSent > 0 ? (x.failed / x.requestsSent) * 100 : 0)), combine: 'ratio' },
 ];
 
 // Default-visible subset — RPS + p95 + active VUs (per the brief).
@@ -1250,9 +1251,9 @@ export default function LoadScenarioPanel({ connectionParams }: LoadScenarioPane
   const deleteOne = useCallback((entry: RegisteredScenario) => {
     const active = entry.state === 'RUNNING' || entry.state === 'PENDING';
     setConfirm({
-      title: `Delete ${entry.name}?`,
-      message: `This removes ${entry.name} from the registry${active ? ' and stops its run' : ''}. This cannot be undone.`,
-      confirmLabel: 'Delete',
+      title: uiText(`Delete ${entry.name}?`, `删除 ${entry.name}？`),
+      message: uiText(`This removes ${entry.name} from the registry${active ? ' and stops its run' : ''}. This cannot be undone.`, `此操作会移除场景 ${entry.name}${active ? ' 并停止运行' : ''}，且无法撤销。`),
+      confirmLabel: uiText('Delete', '删除'),
       onConfirm: () => void runAction(async () => {
         await deleteLoadScenario(connectionParams, entry.name);
       }),
@@ -1262,10 +1263,13 @@ export default function LoadScenarioPanel({ connectionParams }: LoadScenarioPane
   const clearAll = useCallback(() => {
     const activeCount = registry.filter((s) => s.state === 'RUNNING' || s.state === 'PENDING').length;
     setConfirm({
-      title: 'Clear all load scenarios?',
-      message: `This removes all ${registry.length} registered scenario${registry.length === 1 ? '' : 's'}`
-        + `${activeCount > 0 ? ` and stops ${activeCount} active run${activeCount === 1 ? '' : 's'}` : ''}. This cannot be undone.`,
-      confirmLabel: 'Clear all',
+      title: uiText('Clear all load scenarios?', '清空所有负载场景？'),
+      message: uiText(
+        `This removes all ${registry.length} registered scenario${registry.length === 1 ? '' : 's'}`
+          + `${activeCount > 0 ? ` and stops ${activeCount} active run${activeCount === 1 ? '' : 's'}` : ''}. This cannot be undone.`,
+        `此操作会移除全部 ${registry.length} 个负载场景${activeCount > 0 ? `，并停止 ${activeCount} 项正在运行的任务` : ''}，且无法撤销。`,
+      ),
+      confirmLabel: uiText('Clear all', '清空全部'),
       onConfirm: () => void runAction(async () => {
         await clearLoadScenarios(connectionParams);
       }),
@@ -1485,11 +1489,11 @@ export default function LoadScenarioPanel({ connectionParams }: LoadScenarioPane
   return (
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }} data-testid="load-scenario-panel">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Performance — Load Scenarios</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{uiText('Performance — Load Scenarios', '性能测试 · 负载场景')}</Typography>
         <Chip size="small" label={headerState} color={statusColor} variant="outlined" data-testid="load-header-state" />
         <Box sx={{ flex: 1 }} />
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh load scenario status">
+        <Tooltip title={uiText('Refresh now', '立即刷新')}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText('Refresh load scenario status', '刷新负载场景状态')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -1497,28 +1501,27 @@ export default function LoadScenarioPanel({ connectionParams }: LoadScenarioPane
 
       {disabled && (
         <Alert severity="info" sx={{ mb: 1.5 }} data-testid="load-disabled-alert">
-          <AlertTitle>Load generation is disabled</AlertTitle>
-          Load scenarios are off by default. Start MockServer with load generation enabled to drive
-          traffic from here:
+          <AlertTitle>{uiText('Load generation is disabled', '负载生成已禁用')}</AlertTitle>
+          {uiText('Load scenarios are off by default. Start MockServer with load generation enabled to drive traffic from here:', '默认关闭负载场景。启动 MockServer 时启用负载生成，即可在此发起压测：')}
           <Box component="pre" sx={{ mt: 1, mb: 1, p: 1, bgcolor: 'action.hover', borderRadius: 1, typography: 'subtitle2', fontWeight: 400, overflow: 'auto' }}>
 {`-Dmockserver.loadGenerationEnabled=true
 # or environment variable:
 MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
           </Box>
-          For deeper analysis, the{' '}
-          <Link component="button" type="button" onClick={() => setView('metrics')}>Metrics tab</Link>{' '}
-          surfaces the <code>mock_server_load_*</code> Prometheus/OTEL series. See the{' '}
+          {uiText('For deeper analysis, the', '如需进一步分析，请查看')}{' '}
+          <Link component="button" type="button" onClick={() => setView('metrics')}>{uiText('Metrics tab', '指标页')}</Link>{' '}
+          {uiText('surfaces the', '，其中包含')} <code>mock_server_load_*</code> {uiText('Prometheus/OTEL series. See the', '的 Prometheus / OpenTelemetry 指标。参见')}{' '}
           <Link href="https://www.mock-server.com/mock_server/load_injection.html" target="_blank" rel="noopener noreferrer">
-            load injection docs
-          </Link>.
+            {uiText('load injection docs', '负载注入文档')}
+          </Link>{uiText('.', '。')}
         </Alert>
       )}
 
       {loadError && !disabled && (
         <Alert severity="error" sx={{ mb: 1.5 }} action={
-          <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry"><RefreshIcon fontSize="small" /></IconButton>
+          <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText('Retry', '重试')}><RefreshIcon fontSize="small" /></IconButton>
         }>
-          <AlertTitle>Could not load scenario status</AlertTitle>
+          <AlertTitle>{uiText('Could not load scenario status', '无法加载场景状态')}</AlertTitle>
           {loadError}
         </Alert>
       )}
@@ -1530,7 +1533,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
       {/* Registered scenarios (Wave C) — shared across both sub-tabs */}
       <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-registry">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Registered Scenarios</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{uiText('Registered Scenarios', '已注册的场景')}</Typography>
           <Chip size="small" label={registry.length} variant="outlined" />
           <Box sx={{ flex: 1 }} />
           <Button
@@ -1538,20 +1541,19 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
             disabled={busy || disabled || selected.size === 0} onClick={startSelected}
             data-testid="load-start-selected"
           >
-            Start selected{selected.size > 0 ? ` (${selected.size})` : ''}
+            {uiText('Start selected', '启动选中的场景')}{selected.size > 0 ? ` (${selected.size})` : ''}
           </Button>
           <Button
             size="small" color="error" variant="outlined" startIcon={<DeleteSweepIcon />}
             disabled={busy || registry.length === 0} onClick={clearAll}
             data-testid="load-clear-all"
           >
-            Clear all
+            {uiText('Clear all', '清空全部')}
           </Button>
         </Box>
         {registry.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            No scenarios registered yet. Use <strong>Load</strong> below to register one without running it,
-            or <strong>Load &amp; Run</strong> to register and start it.
+            {uiText('No scenarios registered yet. Use', '尚未注册负载场景。点击下方的')} <strong>{uiText('Load', '注册')}</strong> {uiText('below to register one without running it, or', '仅注册，点击')} <strong>{uiText('Load & Run', '注册并运行')}</strong> {uiText('to register and start it.', '可注册后立即启动。')}
           </Typography>
         ) : (
           registry.map((entry) => (
@@ -1575,8 +1577,8 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
               />
               {entry.status && (entry.state === 'RUNNING' || entry.state === 'COMPLETED' || entry.state === 'STOPPED') && (
                 <Typography variant="caption" color="text.secondary">
-                  {(entry.status.requestsSent ?? 0).toLocaleString()} sent · {(errorRate(entry.status) * 100).toFixed(1)}% err
-                  {entry.status.currentVus != null ? ` · ${entry.status.currentVus} VUs` : ''}
+                  {(entry.status.requestsSent ?? 0).toLocaleString()} {uiText('sent ·', '已发送 ·')} {(errorRate(entry.status) * 100).toFixed(1)}{uiText('% err', '% 错误率')}
+                  {entry.status.currentVus != null ? uiText(` · ${entry.status.currentVus} VUs`, ` · ${entry.status.currentVus} 个虚拟用户`) : ''}
                 </Typography>
               )}
               {entry.status?.verdict && (
@@ -1589,34 +1591,34 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
               )}
               <Box sx={{ flex: 1 }} />
               {entry.definition && (
-                <Tooltip title="Load into author form">
+                <Tooltip title={uiText('Load into author form', '载入编辑表单')}>
                   <span>
-                    <IconButton size="small" onClick={() => editRegistered(entry)} aria-label={`Edit ${entry.name}`}>
+                    <IconButton size="small" onClick={() => editRegistered(entry)} aria-label={uiText(`Edit ${entry.name}`, `编辑 ${entry.name}`)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
               )}
               {(entry.state === 'RUNNING' || entry.state === 'PENDING') ? (
-                <Tooltip title="Stop">
+                <Tooltip title={uiText('Stop', '停止')}>
                   <span>
-                    <IconButton size="small" color="error" disabled={busy} onClick={() => stopOne(entry.name)} aria-label={`Stop ${entry.name}`}>
+                    <IconButton size="small" color="error" disabled={busy} onClick={() => stopOne(entry.name)} aria-label={uiText(`Stop ${entry.name}`, `停止 ${entry.name}`)}>
                       <StopIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
               ) : (
-                <Tooltip title={disabled ? 'Load generation disabled' : 'Start'}>
+                <Tooltip title={disabled ? uiText('Load generation disabled', '负载生成已禁用') : uiText('Start', '启动')}>
                   <span>
-                    <IconButton size="small" color="primary" disabled={busy || disabled} onClick={() => startSelectedOne(entry.name)} aria-label={`Start ${entry.name}`}>
+                    <IconButton size="small" color="primary" disabled={busy || disabled} onClick={() => startSelectedOne(entry.name)} aria-label={uiText(`Start ${entry.name}`, `启动 ${entry.name}`)}>
                       <PlayArrowIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </Tooltip>
               )}
-              <Tooltip title="Remove from registry">
+              <Tooltip title={uiText('Remove from registry', '移除场景')}>
                 <span>
-                  <IconButton size="small" disabled={busy} onClick={() => deleteOne(entry)} aria-label={`Delete ${entry.name}`}>
+                  <IconButton size="small" disabled={busy} onClick={() => deleteOne(entry)} aria-label={uiText(`Delete ${entry.name}`, `删除 ${entry.name}`)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </span>
@@ -1632,8 +1634,8 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
         onChange={(_, v: number) => setPanelView(v === 1 ? 'author' : 'run')}
         sx={{ mb: 1.5, minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
       >
-        <Tab label="Run & Monitor" />
-        <Tab label="Create / Edit" />
+        <Tab label={uiText('Run & Monitor', '运行与监控')} />
+        <Tab label={uiText('Create / Edit', '创建或编辑')} />
       </Tabs>
 
       {view === 'run' ? (
@@ -1643,7 +1645,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
       {runningEntries.length > 0 && (
         <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-running-scenarios">
           <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-            Running Now ({runningEntries.length})
+            {uiText('Running Now (', '运行中 (')}{runningEntries.length})
           </Typography>
           {runningEntries.map((entry) => {
             const st = entry.status;
@@ -1652,7 +1654,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>{entry.name}</Typography>
                   {st?.elapsedMillis != null && (
-                    <Chip size="small" variant="outlined" label={`${formatElapsed(st.elapsedMillis)} elapsed`} />
+                    <Chip size="small" variant="outlined" label={uiText(`${formatElapsed(st.elapsedMillis)} elapsed`, `已运行 ${formatElapsed(st.elapsedMillis)}`)} />
                   )}
                   {st && stageReadout(st) && (
                     <Chip size="small" color="primary" variant="outlined" label={stageReadout(st)} />
@@ -1660,23 +1662,23 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
                   {st && <VerdictBadge status={st} />}
                   <Box sx={{ flex: 1 }} />
                   <Button size="small" variant="outlined" startIcon={<EditIcon />} disabled={busy} onClick={() => handleEditRunning(entry)}>
-                    Edit running
+                    {uiText('Edit running', '编辑运行中的场景')}
                   </Button>
                   <Button size="small" color="error" variant="outlined" startIcon={<StopIcon />} disabled={busy} onClick={() => stopOne(entry.name)}>
-                    Stop
+                    {uiText('Stop', '停止')}
                   </Button>
                 </Box>
                 <RunProgressBar status={st} definition={entry.definition} />
                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 1 }}>
-                  <Stat label="Active VUs" value={(st?.currentVus ?? 0).toLocaleString()} />
-                  <Stat label="Requests sent" value={(st?.requestsSent ?? 0).toLocaleString()} />
-                  <Stat label="Succeeded" value={(st?.succeeded ?? 0).toLocaleString()} />
-                  <Stat label="Failed" value={(st?.failed ?? 0).toLocaleString()} />
-                  <Stat label="Error rate" value={st ? `${(errorRate(st) * 100).toFixed(1)}%` : '—'} />
+                  <Stat label={uiText('Active VUs', '活跃虚拟用户')} value={(st?.currentVus ?? 0).toLocaleString()} />
+                  <Stat label={uiText('Requests sent', '已发送请求')} value={(st?.requestsSent ?? 0).toLocaleString()} />
+                  <Stat label={uiText('Succeeded', '成功')} value={(st?.succeeded ?? 0).toLocaleString()} />
+                  <Stat label={uiText('Failed', '失败')} value={(st?.failed ?? 0).toLocaleString()} />
+                  <Stat label={uiText('Error rate', '错误率')} value={st ? `${(errorRate(st) * 100).toFixed(1)}%` : '—'} />
                   <Stat label="p95" value={`${(st?.p95Millis ?? 0).toFixed(0)} ms`} />
                   {st?.p999Millis != null && <Stat label="p99.9" value={`${st.p999Millis.toFixed(0)} ms`} />}
                   {st?.droppedIterations != null && st.droppedIterations > 0 && (
-                    <Stat label="Dropped" value={st.droppedIterations.toLocaleString()} />
+                    <Stat label={uiText('Dropped', '已丢弃')} value={st.droppedIterations.toLocaleString()} />
                   )}
                 </Box>
                 {st && <ThresholdResultsTable results={st.thresholdResults} />}
@@ -1692,11 +1694,11 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
         <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-chart">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
             <Typography variant="caption" color="text.secondary">
-              Live throughput &amp; latency{enabledScenarios.length > 1 ? ' — total + per scenario' : ''}
+              {uiText('Live throughput & latency', '实时吞吐量和延迟')}{enabledScenarios.length > 1 ? uiText(' — total + per scenario', '（整体及各场景）') : ''}
             </Typography>
           </Box>
           {/* Metric-type toggles (which series to plot) */}
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: scenarioNames.length > 1 ? 0.25 : 0.5 }} role="group" aria-label="Chart metric toggles">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: scenarioNames.length > 1 ? 0.25 : 0.5 }} role="group" aria-label={uiText('Chart metric toggles', '切换图表指标')}>
             {SERIES_DEFS.map((d) => (
               <FormControlLabel
                 key={d.key}
@@ -1714,8 +1716,8 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
           </Box>
           {/* Per-scenario toggles — only when more than one scenario has data to compare */}
           {scenarioNames.length > 1 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5, alignItems: 'center' }} role="group" aria-label="Chart scenario toggles">
-              <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>Scenarios:</Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5, alignItems: 'center' }} role="group" aria-label={uiText('Chart scenario toggles', '切换图表场景')}>
+              <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>{uiText('Scenarios:', '场景')}</Typography>
               {scenarioNames.map((name) => (
                 <FormControlLabel
                   key={name}
@@ -1734,7 +1736,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
           )}
           {chartSeries.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-              {visible.size === 0 ? 'Select at least one metric to plot.' : 'Select at least one scenario to plot.'}
+              {visible.size === 0 ? uiText('Select at least one metric to plot.', '至少选择一个要绘制的指标。') : uiText('Select at least one scenario to plot.', '至少选择一个要绘制的场景。')}
             </Typography>
           ) : (
             <MetricsLineChart series={chartSeries} timestamps={chartTimestamps} height={240} />
@@ -1747,30 +1749,30 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
         <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-summary">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="caption" color="text.secondary">
-              {summary.state === 'completed' ? 'Run complete' : 'Run stopped'} — key metrics
+              {summary.state === 'completed' ? uiText('Run complete', '运行完成') : uiText('Run stopped', '运行已停止')} {uiText('— key metrics', '· 关键指标')}
               {summary.name ? ` · ${summary.name}` : ''}
             </Typography>
             <VerdictBadge status={summary} />
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 1, mt: 1 }}>
-            <Stat label="Requests sent" value={(summary.requestsSent ?? 0).toLocaleString()} />
-            <Stat label="Succeeded" value={(summary.succeeded ?? 0).toLocaleString()} />
-            <Stat label="Failed" value={(summary.failed ?? 0).toLocaleString()} />
-            <Stat label="Error rate" value={`${(errorRate(summary) * 100).toFixed(1)}%`} />
-            <Stat label="Peak VUs" value={peakVus(frames, summary).toLocaleString()} />
-            <Stat label="Throughput" value={`${throughput(summary).toFixed(1)}/s`} />
+            <Stat label={uiText('Requests sent', '已发送请求')} value={(summary.requestsSent ?? 0).toLocaleString()} />
+            <Stat label={uiText('Succeeded', '成功')} value={(summary.succeeded ?? 0).toLocaleString()} />
+            <Stat label={uiText('Failed', '失败')} value={(summary.failed ?? 0).toLocaleString()} />
+            <Stat label={uiText('Error rate', '错误率')} value={`${(errorRate(summary) * 100).toFixed(1)}%`} />
+            <Stat label={uiText('Peak VUs', '虚拟用户峰值')} value={peakVus(frames, summary).toLocaleString()} />
+            <Stat label={uiText('Throughput', '吞吐量')} value={`${throughput(summary).toFixed(1)}/s`} />
             <Stat label="p50" value={`${(summary.p50Millis ?? 0).toFixed(0)} ms`} />
             <Stat label="p95" value={`${(summary.p95Millis ?? 0).toFixed(0)} ms`} />
             <Stat label="p99" value={`${(summary.p99Millis ?? 0).toFixed(0)} ms`} />
             {summary.p999Millis != null && <Stat label="p99.9" value={`${summary.p999Millis.toFixed(0)} ms`} />}
-            {summary.droppedIterations != null && <Stat label="Dropped" value={summary.droppedIterations.toLocaleString()} />}
+            {summary.droppedIterations != null && <Stat label={uiText('Dropped', '已丢弃')} value={summary.droppedIterations.toLocaleString()} />}
           </Box>
           <ThresholdResultsTable results={summary.thresholdResults} />
           {summary.name && <ReportButtons name={summary.name} onDownload={downloadReport} />}
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-            Deeper analysis lives in the{' '}
-            <Link component="button" type="button" onClick={() => setView('metrics')}>Metrics tab</Link>{' '}
-            (the <code>mock_server_load_*</code> series).
+            {uiText('Deeper analysis lives in the', '如需深入分析，请查看')}{' '}
+            <Link component="button" type="button" onClick={() => setView('metrics')}>{uiText('Metrics tab', '指标页')}</Link>{' '}
+            {uiText('(the', '（')} <code>mock_server_load_*</code> {uiText('series).', '指标）。')}
           </Typography>
         </Paper>
       )}
@@ -1779,9 +1781,9 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
       {!running && frames.length === 0 && !summary && (
         <Paper variant="outlined" sx={{ p: 2, mb: 1.5, textAlign: 'center' }} data-testid="load-run-empty">
           <Typography variant="body2" color="text.secondary">
-            Nothing running yet. Start a scenario from the registry above, or switch to the{' '}
-            <Link component="button" type="button" onClick={() => setPanelView('author')}>Create / Edit</Link>{' '}
-            tab to create one. Live throughput, latency and per-scenario charts appear here while runs are active.
+            {uiText('Nothing running yet. Start a scenario from the registry above, or switch to the', '暂无正在运行的场景。可在上方启动已注册的场景，也可以前往')}{' '}
+            <Link component="button" type="button" onClick={() => setPanelView('author')}>{uiText('Create / Edit', '创建或编辑')}</Link>{' '}
+            {uiText('tab to create one. Live throughput, latency and per-scenario charts appear here while runs are active.', '创建场景。场景运行时，这里会显示实时吞吐量、延迟和各场景的图表。')}
           </Typography>
         </Paper>
       )}
@@ -1794,14 +1796,14 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
       <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-author-form">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-            {running ? 'Edit / Restart Scenario' : 'Create a Load Scenario'}
+            {running ? uiText('Edit / Restart Scenario', '编辑或重启场景') : uiText('Create a Load Scenario', '创建负载场景')}
           </Typography>
           <Box sx={{ flex: 1 }} />
           <Button size="small" variant="outlined" onClick={() => setGenerateSource('openapi')} data-testid="load-generate-openapi-open">
-            Generate from OpenAPI
+            {uiText('Generate from OpenAPI', '从 OpenAPI 生成')}
           </Button>
           <Button size="small" variant="outlined" onClick={() => setGenerateSource('recording')} data-testid="load-generate-recording-open">
-            Generate from recording
+            {uiText('Generate from recording', '从录制记录生成')}
           </Button>
         </Box>
 
@@ -1810,102 +1812,102 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
             the same FIELD_GRID so column widths line up across both groups. */}
         <Box sx={FIELD_GRID}>
           <TextField
-            label="Scenario name" size="small" required value={form.name}
+            label={uiText('Scenario name', '场景名称')} size="small" required value={form.name}
             onChange={setField('name')} fullWidth
           />
           <TextField
-            select label="Template type" size="small" value={form.templateType}
+            select label={uiText('Template type', '模板类型')} size="small" value={form.templateType}
             onChange={(e) => setForm((p) => ({ ...p, templateType: e.target.value as FormState['templateType'] }))}
-            helperText="Engine for rendering templated step path/body (whole scenario)"
+            helperText={uiText('Engine for rendering templated step path/body (whole scenario)', '用于渲染场景中各步骤的路径和请求体模板')}
             fullWidth
           >
             <MenuItem value="VELOCITY">Velocity</MenuItem>
             <MenuItem value="MUSTACHE">Mustache</MenuItem>
           </TextField>
           <TextField
-            label="Max requests (optional)" size="small" value={form.maxRequests}
-            onChange={setField('maxRequests')} fullWidth placeholder="unlimited"
+            label={uiText('Max requests (optional)', '最大请求数（可选）')} size="small" value={form.maxRequests}
+            onChange={setField('maxRequests')} fullWidth placeholder={uiText('unlimited', '不限')}
           />
           <TextField
-            label="Start delay (ms)" size="small" value={form.startDelayMillis}
-            onChange={setField('startDelayMillis')} fullWidth placeholder="none"
-            helperText="Wait this long after Start before driving load"
+            label={uiText('Start delay (ms)', '启动延迟（毫秒）')} size="small" value={form.startDelayMillis}
+            onChange={setField('startDelayMillis')} fullWidth placeholder={uiText('none', '无')}
+            helperText={uiText('Wait this long after Start before driving load', '启动后等待指定时间，再开始发起请求')}
           />
         </Box>
 
         {/* Profile — EITHER an explicit ordered list of stages OR a single declarative shape. */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, mb: 0.5, flexWrap: 'wrap' }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Profile</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Profile', '负载配置')}</Typography>
           <Tabs
             value={form.profileMode === 'SHAPE' ? 1 : 0}
             onChange={(_, v: number) => setForm((p) => ({ ...p, profileMode: v === 1 ? 'SHAPE' : 'STAGES' }))}
             sx={{ minHeight: 30, '& .MuiTab-root': { minHeight: 30, py: 0.25, fontSize: '0.75rem', minWidth: 0, px: 1.5 } }}
           >
-            <Tab label="Explicit Stages" data-testid="load-profile-mode-stages" />
-            <Tab label="Named Shape" data-testid="load-profile-mode-shape" />
+            <Tab label={uiText('Explicit Stages', '手动配置阶段')} data-testid="load-profile-mode-stages" />
+            <Tab label={uiText('Named Shape', '预设负载曲线')} data-testid="load-profile-mode-shape" />
           </Tabs>
           {form.profileMode === 'STAGES' && (
-            <Button size="small" startIcon={<AddIcon />} onClick={addStage}>Add stage</Button>
+            <Button size="small" startIcon={<AddIcon />} onClick={addStage}>{uiText('Add stage', '添加阶段')}</Button>
           )}
         </Box>
 
         {form.profileMode === 'SHAPE' && (
           <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, mb: 1 }} data-testid="load-shape">
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              A declarative load shape; the server expands it into stages.
+              {uiText('A declarative load shape; the server expands it into stages.', '选择负载曲线后，服务器会自动生成各阶段。')}
             </Typography>
             <Box sx={FIELD_GRID}>
               <TextField
-                select label="Shape type" size="small" value={form.shape.type}
+                select label={uiText('Shape type', '曲线类型')} size="small" value={form.shape.type}
                 onChange={(e) => setShapeValue('type', e.target.value as LoadShapeType)}
                 fullWidth data-testid="load-shape-type"
               >
-                <MenuItem value="SPIKE">Spike</MenuItem>
-                <MenuItem value="STAIRS">Stairs</MenuItem>
-                <MenuItem value="RAMP_HOLD">Ramp &amp; hold</MenuItem>
+                <MenuItem value="SPIKE">{uiText('Spike', '突增')}</MenuItem>
+                <MenuItem value="STAIRS">{uiText('Stairs', '阶梯增长')}</MenuItem>
+                <MenuItem value="RAMP_HOLD">{uiText('Ramp & hold', '逐步升高并保持')}</MenuItem>
               </TextField>
               <TextField
-                select label="Drives" size="small" value={form.shape.metric}
+                select label={uiText('Drives', '负载驱动方式')} size="small" value={form.shape.metric}
                 onChange={(e) => setShapeValue('metric', e.target.value as LoadShapeMetric)}
-                helperText="VU (closed) or arrival rate (open)" fullWidth
+                helperText={uiText('VU (closed) or arrival rate (open)', '按虚拟用户数（闭环）或到达速率（开环）驱动')} fullWidth
               >
-                <MenuItem value="VU">VUs</MenuItem>
-                <MenuItem value="RATE">Rate (iterations/sec)</MenuItem>
+                <MenuItem value="VU">{uiText('VUs', '虚拟用户')}</MenuItem>
+                <MenuItem value="RATE">{uiText('Rate (iterations/sec)', '速率（迭代次数/秒）')}</MenuItem>
               </TextField>
               {form.shape.type !== 'STAIRS' && (
                 <TextField
-                  select label="Curve" size="small" value={form.shape.curve}
+                  select label={uiText('Curve', '曲线')} size="small" value={form.shape.curve}
                   onChange={(e) => setShapeValue('curve', e.target.value as RampCurve)}
                   fullWidth
                 >
-                  <MenuItem value="LINEAR">Linear</MenuItem>
-                  <MenuItem value="EXPONENTIAL">Exponential</MenuItem>
-                  <MenuItem value="QUADRATIC">Quadratic</MenuItem>
+                  <MenuItem value="LINEAR">{uiText('Linear', '线性')}</MenuItem>
+                  <MenuItem value="EXPONENTIAL">{uiText('Exponential', '指数')}</MenuItem>
+                  <MenuItem value="QUADRATIC">{uiText('Quadratic', '二次曲线')}</MenuItem>
                 </TextField>
               )}
               {form.shape.type === 'SPIKE' && (
                 <>
-                  <TextField label="Baseline" size="small" value={form.shape.baseline} onChange={setShapeField('baseline')} fullWidth />
-                  <TextField label="Peak" size="small" value={form.shape.peak} onChange={setShapeField('peak')} fullWidth />
-                  <TextField label="Ramp-up (ms)" size="small" value={form.shape.rampUpMillis} onChange={setShapeField('rampUpMillis')} fullWidth />
-                  <TextField label="Hold at peak (ms)" size="small" value={form.shape.holdMillis} onChange={setShapeField('holdMillis')} fullWidth />
-                  <TextField label="Ramp-down (ms)" size="small" value={form.shape.rampDownMillis} onChange={setShapeField('rampDownMillis')} fullWidth />
-                  <TextField label="Recovery hold (ms, optional)" size="small" value={form.shape.recoveryHoldMillis} onChange={setShapeField('recoveryHoldMillis')} fullWidth placeholder="none" />
+                  <TextField label={uiText('Baseline', '基准值')} size="small" value={form.shape.baseline} onChange={setShapeField('baseline')} fullWidth />
+                  <TextField label={uiText('Peak', '峰值')} size="small" value={form.shape.peak} onChange={setShapeField('peak')} fullWidth />
+                  <TextField label={uiText('Ramp-up (ms)', '升高时长（毫秒）')} size="small" value={form.shape.rampUpMillis} onChange={setShapeField('rampUpMillis')} fullWidth />
+                  <TextField label={uiText('Hold at peak (ms)', '峰值保持时长（毫秒）')} size="small" value={form.shape.holdMillis} onChange={setShapeField('holdMillis')} fullWidth />
+                  <TextField label={uiText('Ramp-down (ms)', '降低时长（毫秒）')} size="small" value={form.shape.rampDownMillis} onChange={setShapeField('rampDownMillis')} fullWidth />
+                  <TextField label={uiText('Recovery hold (ms, optional)', '恢复后的保持时长（毫秒，可选）')} size="small" value={form.shape.recoveryHoldMillis} onChange={setShapeField('recoveryHoldMillis')} fullWidth placeholder={uiText('none', '无')} />
                 </>
               )}
               {form.shape.type === 'STAIRS' && (
                 <>
-                  <TextField label="Start level" size="small" value={form.shape.start} onChange={setShapeField('start')} fullWidth />
-                  <TextField label="Step rise" size="small" value={form.shape.step} onChange={setShapeField('step')} fullWidth />
-                  <TextField label="Number of steps" size="small" value={form.shape.steps} onChange={setShapeField('steps')} fullWidth />
-                  <TextField label="Step duration (ms)" size="small" value={form.shape.stepDurationMillis} onChange={setShapeField('stepDurationMillis')} fullWidth />
+                  <TextField label={uiText('Start level', '起始值')} size="small" value={form.shape.start} onChange={setShapeField('start')} fullWidth />
+                  <TextField label={uiText('Step rise', '每阶增量')} size="small" value={form.shape.step} onChange={setShapeField('step')} fullWidth />
+                  <TextField label={uiText('Number of steps', '阶数')} size="small" value={form.shape.steps} onChange={setShapeField('steps')} fullWidth />
+                  <TextField label={uiText('Step duration (ms)', '每阶时长（毫秒）')} size="small" value={form.shape.stepDurationMillis} onChange={setShapeField('stepDurationMillis')} fullWidth />
                 </>
               )}
               {form.shape.type === 'RAMP_HOLD' && (
                 <>
-                  <TextField label="Target" size="small" value={form.shape.target} onChange={setShapeField('target')} fullWidth />
-                  <TextField label="Ramp (ms)" size="small" value={form.shape.rampMillis} onChange={setShapeField('rampMillis')} fullWidth />
-                  <TextField label="Hold (ms)" size="small" value={form.shape.holdMillis} onChange={setShapeField('holdMillis')} fullWidth />
+                  <TextField label={uiText('Target', '目标值')} size="small" value={form.shape.target} onChange={setShapeField('target')} fullWidth />
+                  <TextField label={uiText('Ramp (ms)', '逐步变化时长（毫秒）')} size="small" value={form.shape.rampMillis} onChange={setShapeField('rampMillis')} fullWidth />
+                  <TextField label={uiText('Hold (ms)', '保持时长（毫秒）')} size="small" value={form.shape.holdMillis} onChange={setShapeField('holdMillis')} fullWidth />
                 </>
               )}
             </Box>
@@ -1915,109 +1917,109 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
         {form.profileMode === 'STAGES' && form.stages.map((stage, i) => (
           <Box key={stage.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, mb: 1 }} data-testid={`load-stage-${i}`}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">Stage {i + 1}</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Stage', '阶段')} {i + 1}</Typography>
               <Box sx={{ flex: 1 }} />
-              <IconButton size="small" onClick={() => moveStage(i, -1)} aria-label={`Move stage ${i + 1} up`} disabled={i === 0}>
+              <IconButton size="small" onClick={() => moveStage(i, -1)} aria-label={uiText(`Move stage ${i + 1} up`, `上移第 ${i + 1} 阶段`)} disabled={i === 0}>
                 <ArrowUpwardIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" onClick={() => moveStage(i, 1)} aria-label={`Move stage ${i + 1} down`} disabled={i === form.stages.length - 1}>
+              <IconButton size="small" onClick={() => moveStage(i, 1)} aria-label={uiText(`Move stage ${i + 1} down`, `下移第 ${i + 1} 阶段`)} disabled={i === form.stages.length - 1}>
                 <ArrowDownwardIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" onClick={() => removeStage(i)} aria-label={`Remove stage ${i + 1}`} disabled={form.stages.length <= 1}>
+              <IconButton size="small" onClick={() => removeStage(i)} aria-label={uiText(`Remove stage ${i + 1}`, `移除第 ${i + 1} 阶段`)} disabled={form.stages.length <= 1}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
             <Box sx={FIELD_GRID}>
               <TextField
-                select label="Stage type" size="small" value={stage.type}
+                select label={uiText('Stage type', '阶段类型')} size="small" value={stage.type}
                 onChange={(e) => setStageValue(i, 'type', e.target.value as LoadStageType)}
                 fullWidth
               >
-                <MenuItem value="VU">VU (virtual users)</MenuItem>
-                <MenuItem value="RATE">Rate (iterations/sec)</MenuItem>
-                <MenuItem value="PAUSE">Pause (no load)</MenuItem>
+                <MenuItem value="VU">{uiText('VU (virtual users)', '虚拟用户数（VU）')}</MenuItem>
+                <MenuItem value="RATE">{uiText('Rate (iterations/sec)', '速率（迭代次数/秒）')}</MenuItem>
+                <MenuItem value="PAUSE">{uiText('Pause (no load)', '暂停（无负载）')}</MenuItem>
               </TextField>
               {stage.type !== 'PAUSE' && (
                 <TextField
-                  select label="Mode" size="small" value={stage.mode}
+                  select label={uiText('Mode', '模式')} size="small" value={stage.mode}
                   onChange={(e) => setStageValue(i, 'mode', e.target.value as StageFormState['mode'])}
                   fullWidth
                 >
-                  <MenuItem value="HOLD">Hold</MenuItem>
-                  <MenuItem value="RAMP">Ramp</MenuItem>
+                  <MenuItem value="HOLD">{uiText('Hold', '保持')}</MenuItem>
+                  <MenuItem value="RAMP">{uiText('Ramp', '逐步变化')}</MenuItem>
                 </TextField>
               )}
               {stage.type === 'VU' && stage.mode === 'HOLD' && (
-                <TextField label="Virtual users (VUs)" size="small" value={stage.vus} onChange={setStageField(i, 'vus')} fullWidth />
+                <TextField label={uiText('Virtual users (VUs)', '虚拟用户数（VU）')} size="small" value={stage.vus} onChange={setStageField(i, 'vus')} fullWidth />
               )}
               {stage.type === 'VU' && stage.mode === 'RAMP' && (
                 <>
-                  <TextField label="Start VUs" size="small" value={stage.startVus} onChange={setStageField(i, 'startVus')} fullWidth />
-                  <TextField label="End VUs" size="small" value={stage.endVus} onChange={setStageField(i, 'endVus')} fullWidth />
+                  <TextField label={uiText('Start VUs', '起始虚拟用户数')} size="small" value={stage.startVus} onChange={setStageField(i, 'startVus')} fullWidth />
+                  <TextField label={uiText('End VUs', '结束虚拟用户数')} size="small" value={stage.endVus} onChange={setStageField(i, 'endVus')} fullWidth />
                 </>
               )}
               {stage.type === 'RATE' && stage.mode === 'HOLD' && (
-                <TextField label="Rate (iterations/sec)" size="small" value={stage.rate} onChange={setStageField(i, 'rate')} fullWidth />
+                <TextField label={uiText('Rate (iterations/sec)', '速率（迭代次数/秒）')} size="small" value={stage.rate} onChange={setStageField(i, 'rate')} fullWidth />
               )}
               {stage.type === 'RATE' && stage.mode === 'RAMP' && (
                 <>
-                  <TextField label="Start rate (iterations/sec)" size="small" value={stage.startRate} onChange={setStageField(i, 'startRate')} fullWidth />
-                  <TextField label="End rate (iterations/sec)" size="small" value={stage.endRate} onChange={setStageField(i, 'endRate')} fullWidth />
+                  <TextField label={uiText('Start rate (iterations/sec)', '起始速率（迭代次数/秒）')} size="small" value={stage.startRate} onChange={setStageField(i, 'startRate')} fullWidth />
+                  <TextField label={uiText('End rate (iterations/sec)', '结束速率（迭代次数/秒）')} size="small" value={stage.endRate} onChange={setStageField(i, 'endRate')} fullWidth />
                 </>
               )}
               {stage.type === 'RATE' && (
-                <TextField label="Max VUs (optional)" size="small" value={stage.maxVus} onChange={setStageField(i, 'maxVus')} fullWidth placeholder="global cap" />
+                <TextField label={uiText('Max VUs (optional)', '最大虚拟用户数（可选）')} size="small" value={stage.maxVus} onChange={setStageField(i, 'maxVus')} fullWidth placeholder={uiText('global cap', '全局上限')} />
               )}
               {stage.type !== 'PAUSE' && stage.mode === 'RAMP' && (
                 <TextField
-                  select label="Curve" size="small" value={stage.curve}
+                  select label={uiText('Curve', '曲线')} size="small" value={stage.curve}
                   onChange={(e) => setStageValue(i, 'curve', e.target.value as RampCurve)}
                   fullWidth
                 >
-                  <MenuItem value="LINEAR">Linear</MenuItem>
-                  <MenuItem value="EXPONENTIAL">Exponential</MenuItem>
-                  <MenuItem value="QUADRATIC">Quadratic</MenuItem>
+                  <MenuItem value="LINEAR">{uiText('Linear', '线性')}</MenuItem>
+                  <MenuItem value="EXPONENTIAL">{uiText('Exponential', '指数')}</MenuItem>
+                  <MenuItem value="QUADRATIC">{uiText('Quadratic', '二次曲线')}</MenuItem>
                 </TextField>
               )}
-              <TextField label="Duration (ms)" size="small" value={stage.durationMillis} onChange={setStageField(i, 'durationMillis')} fullWidth />
+              <TextField label={uiText('Duration (ms)', '持续时间（毫秒）')} size="small" value={stage.durationMillis} onChange={setStageField(i, 'durationMillis')} fullWidth />
             </Box>
           </Box>
         ))}
 
         {/* Labels */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, mb: 0.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Labels (optional)</Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={addLabel}>Add label</Button>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Labels (optional)', '标签（可选）')}</Typography>
+          <Button size="small" startIcon={<AddIcon />} onClick={addLabel}>{uiText('Add label', '添加标签')}</Button>
         </Box>
         {form.labels.map((label, i) => (
           <Box key={label.id} sx={{ display: 'flex', gap: 1, mt: 0.5, mb: 1.25, alignItems: 'center', flexWrap: 'wrap' }}>
-            <TextField label="Key" size="small" value={label.key} onChange={setLabelField(i, 'key')} sx={responsiveWidth(160)} />
-            <TextField label="Value" size="small" value={label.value} onChange={setLabelField(i, 'value')} sx={responsiveWidth(160)} />
-            <IconButton size="small" onClick={() => removeLabel(i)} aria-label={`Remove label ${i + 1}`}><DeleteIcon fontSize="small" /></IconButton>
+            <TextField label={uiText('Key', '键')} size="small" value={label.key} onChange={setLabelField(i, 'key')} sx={responsiveWidth(160)} />
+            <TextField label={uiText('Value', '值')} size="small" value={label.value} onChange={setLabelField(i, 'value')} sx={responsiveWidth(160)} />
+            <IconButton size="small" onClick={() => removeLabel(i)} aria-label={uiText(`Remove label ${i + 1}`, `移除第 ${i + 1} 个标签`)}><DeleteIcon fontSize="small" /></IconButton>
           </Box>
         ))}
 
         {/* Thresholds — in-run pass/fail criteria; run carries a PASS verdict iff all hold. */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, mb: 0.5 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Thresholds (optional)</Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={addThreshold} data-testid="load-add-threshold">Add threshold</Button>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Thresholds (optional)', '阈值（可选）')}</Typography>
+          <Button size="small" startIcon={<AddIcon />} onClick={addThreshold} data-testid="load-add-threshold">{uiText('Add threshold', '添加阈值')}</Button>
         </Box>
         {form.thresholds.map((t, i) => (
           <Box key={t.id} sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`load-threshold-${i}`}>
             <TextField
-              select label="Metric" size="small" value={t.metric}
+              select label={uiText('Metric', '指标')} size="small" value={t.metric}
               onChange={(e) => setThresholdValue(i, 'metric', e.target.value as LoadThresholdMetric)}
               sx={responsiveWidth(180)}
             >
-              <MenuItem value="LATENCY_P50">Latency p50 (ms)</MenuItem>
-              <MenuItem value="LATENCY_P95">Latency p95 (ms)</MenuItem>
-              <MenuItem value="LATENCY_P99">Latency p99 (ms)</MenuItem>
-              <MenuItem value="LATENCY_P999">Latency p99.9 (ms)</MenuItem>
-              <MenuItem value="ERROR_RATE">Error rate (0–1)</MenuItem>
-              <MenuItem value="THROUGHPUT_RPS">Throughput (req/s)</MenuItem>
+              <MenuItem value="LATENCY_P50">{uiText('Latency p50 (ms)', 'p50 延迟（毫秒）')}</MenuItem>
+              <MenuItem value="LATENCY_P95">{uiText('Latency p95 (ms)', 'p95 延迟（毫秒）')}</MenuItem>
+              <MenuItem value="LATENCY_P99">{uiText('Latency p99 (ms)', 'p99 延迟（毫秒）')}</MenuItem>
+              <MenuItem value="LATENCY_P999">{uiText('Latency p99.9 (ms)', 'p99.9 延迟（毫秒）')}</MenuItem>
+              <MenuItem value="ERROR_RATE">{uiText('Error rate (0–1)', '错误率（0–1）')}</MenuItem>
+              <MenuItem value="THROUGHPUT_RPS">{uiText('Throughput (req/s)', '吞吐量（请求数/秒）')}</MenuItem>
             </TextField>
             <TextField
-              select label="Comparator" size="small" value={t.comparator}
+              select label={uiText('Comparator', '比较方式')} size="small" value={t.comparator}
               onChange={(e) => setThresholdValue(i, 'comparator', e.target.value as LoadComparator)}
               sx={responsiveWidth(150)}
             >
@@ -2027,11 +2029,11 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
               <MenuItem value="GREATER_THAN_OR_EQUAL">≥</MenuItem>
             </TextField>
             <TextField
-              label="Threshold" size="small" value={t.threshold}
+              label={uiText('Threshold', '阈值')} size="small" value={t.threshold}
               onChange={(e) => setThresholdValue(i, 'threshold', e.target.value)}
               sx={responsiveWidth(120)}
             />
-            <IconButton size="small" onClick={() => removeThreshold(i)} aria-label={`Remove threshold ${i + 1}`}><DeleteIcon fontSize="small" /></IconButton>
+            <IconButton size="small" onClick={() => removeThreshold(i)} aria-label={uiText(`Remove threshold ${i + 1}`, `移除第 ${i + 1} 个阈值`)}><DeleteIcon fontSize="small" /></IconButton>
           </Box>
         ))}
         {form.thresholds.length > 0 && (
@@ -2044,33 +2046,33 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
                   data-testid="load-abort-on-fail"
                 />
               }
-              label={<Typography variant="caption">Abort run on a FAIL verdict</Typography>}
+              label={<Typography variant="caption">{uiText('Abort run on a FAIL verdict', '阈值验证失败时中止运行')}</Typography>}
             />
             {form.abortOnFail && (
               <TextField
-                label="Abort grace (ms)" size="small" value={form.abortGraceMillis}
+                label={uiText('Abort grace (ms)', '中止宽限期（毫秒）')} size="small" value={form.abortGraceMillis}
                 onChange={setField('abortGraceMillis')} sx={responsiveWidth(160)} placeholder="0"
-                helperText="Ignore breaches for the first N ms"
+                helperText={uiText('Ignore breaches for the first N ms', '运行开始后的指定时间内，忽略阈值超限')}
               />
             )}
           </Box>
         )}
 
         {/* Pacing — adaptive per-VU iteration cycle (closed-model VU loop only). */}
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mt: 1.5, mb: 0.5 }}>Pacing (optional)</Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mt: 1.5, mb: 0.5 }}>{uiText('Pacing (optional)', '执行节奏（可选）')}</Typography>
         <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
-            select label="Pacing mode" size="small" value={form.pacingMode}
+            select label={uiText('Pacing mode', '节奏模式')} size="small" value={form.pacingMode}
             onChange={(e) => setForm((p) => ({ ...p, pacingMode: e.target.value as LoadPacingMode }))}
             sx={responsiveWidth(220)} data-testid="load-pacing-mode"
           >
-            <MenuItem value="NONE">None (immediate reschedule)</MenuItem>
-            <MenuItem value="CONSTANT_PACING">Constant pacing (cycle ms)</MenuItem>
-            <MenuItem value="CONSTANT_THROUGHPUT">Constant throughput (iters/s per VU)</MenuItem>
+            <MenuItem value="NONE">{uiText('None (immediate reschedule)', '无（立即开始下一次迭代）')}</MenuItem>
+            <MenuItem value="CONSTANT_PACING">{uiText('Constant pacing (cycle ms)', '固定间隔（周期毫秒数）')}</MenuItem>
+            <MenuItem value="CONSTANT_THROUGHPUT">{uiText('Constant throughput (iters/s per VU)', '固定吞吐量（每个虚拟用户的迭代次数/秒）')}</MenuItem>
           </TextField>
           {form.pacingMode !== 'NONE' && (
             <TextField
-              label={form.pacingMode === 'CONSTANT_PACING' ? 'Cycle (ms)' : 'Iterations/sec per VU'}
+              label={form.pacingMode === 'CONSTANT_PACING' ? uiText('Cycle (ms)', '周期（毫秒）') : uiText('Iterations/sec per VU', '每个虚拟用户的迭代次数/秒')}
               size="small" value={form.pacingValue} onChange={setField('pacingValue')} sx={responsiveWidth(180)}
             />
           )}
@@ -2086,32 +2088,32 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
                 data-testid="load-feeder-enabled"
               />
             }
-            label={<Typography variant="caption" sx={{ fontWeight: 600 }}>Data feeder (optional)</Typography>}
+            label={<Typography variant="caption" sx={{ fontWeight: 600 }}>{uiText('Data feeder (optional)', '测试数据源（可选）')}</Typography>}
           />
         </Box>
         {form.feeder.enabled && (
           <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, mb: 1 }} data-testid="load-feeder">
             <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
               <TextField
-                select label="Source" size="small" value={form.feeder.mode}
+                select label={uiText('Source', '来源')} size="small" value={form.feeder.mode}
                 onChange={(e) => setFeederValue('mode', e.target.value as FeederFormState['mode'])}
                 sx={responsiveWidth(160)}
               >
-                <MenuItem value="ROWS">Inline rows</MenuItem>
-                <MenuItem value="RAW">Raw CSV/JSON</MenuItem>
+                <MenuItem value="ROWS">{uiText('Inline rows', '手动填写数据行')}</MenuItem>
+                <MenuItem value="RAW">{uiText('Raw CSV/JSON', '原始 CSV / JSON')}</MenuItem>
               </TextField>
               <TextField
-                select label="Strategy" size="small" value={form.feeder.strategy}
+                select label={uiText('Strategy', '取数策略')} size="small" value={form.feeder.strategy}
                 onChange={(e) => setFeederValue('strategy', e.target.value as LoadFeederStrategy)}
                 sx={responsiveWidth(160)}
               >
-                <MenuItem value="CIRCULAR">Circular</MenuItem>
-                <MenuItem value="RANDOM">Random</MenuItem>
-                <MenuItem value="SEQUENTIAL">Sequential (replay once)</MenuItem>
+                <MenuItem value="CIRCULAR">{uiText('Circular', '循环')}</MenuItem>
+                <MenuItem value="RANDOM">{uiText('Random', '随机')}</MenuItem>
+                <MenuItem value="SEQUENTIAL">{uiText('Sequential (replay once)', '顺序（只读取一遍）')}</MenuItem>
               </TextField>
               {form.feeder.mode === 'RAW' && (
                 <TextField
-                  select label="Format" size="small" value={form.feeder.rawFormat}
+                  select label={uiText('Format', '格式')} size="small" value={form.feeder.rawFormat}
                   onChange={(e) => setFeederValue('rawFormat', e.target.value as 'CSV' | 'JSON')}
                   sx={responsiveWidth(120)}
                 >
@@ -2122,7 +2124,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
             </Box>
             {form.feeder.mode === 'RAW' ? (
               <TextField
-                label={form.feeder.rawFormat === 'CSV' ? 'CSV data (first line = header row)' : 'JSON data (array of flat objects)'}
+                label={form.feeder.rawFormat === 'CSV' ? uiText('CSV data (first line = header row)', 'CSV 数据（首行为表头）') : uiText('JSON data (array of flat objects)', 'JSON 数据（由平铺对象组成的数组）')}
                 size="small" value={form.feeder.rawData} onChange={(e) => setFeederValue('rawData', e.target.value)}
                 fullWidth multiline minRows={3}
                 slotProps={{ htmlInput: { style: { resize: 'vertical', overflow: 'auto' } } }}
@@ -2130,30 +2132,30 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
             ) : (
               <>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                  One row selected per iteration, exposed as <code>{'$iteration.data.<column>'}</code>.
+                  {uiText('One row selected per iteration, exposed as', '每次迭代选择一行数据，可通过以下变量引用')} <code>{'$iteration.data.<column>'}</code>.
                 </Typography>
                 {form.feeder.rows.map((row, ri) => (
                   <Box key={row.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 0.75, mb: 0.75 }} data-testid={`load-feeder-row-${ri}`}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Typography variant="caption" color="text.secondary">Row {ri + 1}</Typography>
-                      <Button size="small" startIcon={<AddIcon />} onClick={() => addFeederCell(ri)}>Add column</Button>
+                      <Typography variant="caption" color="text.secondary">{uiText('Row', '行')} {ri + 1}</Typography>
+                      <Button size="small" startIcon={<AddIcon />} onClick={() => addFeederCell(ri)}>{uiText('Add column', '添加列')}</Button>
                       <Box sx={{ flex: 1 }} />
-                      <IconButton size="small" onClick={() => removeFeederRow(ri)} aria-label={`Remove feeder row ${ri + 1}`} disabled={form.feeder.rows.length <= 1}>
+                      <IconButton size="small" onClick={() => removeFeederRow(ri)} aria-label={uiText(`Remove feeder row ${ri + 1}`, `移除数据源的第 ${ri + 1} 行`)} disabled={form.feeder.rows.length <= 1}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
                     {row.cells.map((cell, ci) => (
                       <Box key={cell.id} sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <TextField label="Column" size="small" value={cell.key} onChange={setFeederCellField(ri, ci, 'key')} sx={responsiveWidth(160)} />
-                        <TextField label="Value" size="small" value={cell.value} onChange={setFeederCellField(ri, ci, 'value')} sx={responsiveWidth(180)} />
-                        <IconButton size="small" onClick={() => removeFeederCell(ri, ci)} aria-label={`Remove column ${ci + 1} of feeder row ${ri + 1}`}>
+                        <TextField label={uiText('Column', '列')} size="small" value={cell.key} onChange={setFeederCellField(ri, ci, 'key')} sx={responsiveWidth(160)} />
+                        <TextField label={uiText('Value', '值')} size="small" value={cell.value} onChange={setFeederCellField(ri, ci, 'value')} sx={responsiveWidth(180)} />
+                        <IconButton size="small" onClick={() => removeFeederCell(ri, ci)} aria-label={uiText(`Remove column ${ci + 1} of feeder row ${ri + 1}`, `移除数据源第 ${ri + 1} 行的第 ${ci + 1} 列`)}>
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Box>
                     ))}
                   </Box>
                 ))}
-                <Button size="small" startIcon={<AddIcon />} onClick={addFeederRow}>Add row</Button>
+                <Button size="small" startIcon={<AddIcon />} onClick={addFeederRow}>{uiText('Add row', '添加行')}</Button>
               </>
             )}
           </Box>
@@ -2161,23 +2163,23 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
 
         {/* Steps */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, mb: 0.5, flexWrap: 'wrap' }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Steps</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Steps', '步骤')}</Typography>
           <TextField
-            select label="Step selection" size="small" value={form.stepSelection}
+            select label={uiText('Step selection', '步骤选择')} size="small" value={form.stepSelection}
             onChange={(e) => setForm((p) => ({ ...p, stepSelection: e.target.value as LoadStepSelection }))}
             sx={responsiveWidth(220)} data-testid="load-step-selection"
           >
-            <MenuItem value="SEQUENTIAL">Sequential (all steps in order)</MenuItem>
-            <MenuItem value="WEIGHTED">Weighted (one step per iteration)</MenuItem>
+            <MenuItem value="SEQUENTIAL">{uiText('Sequential (all steps in order)', '顺序执行（按顺序运行所有步骤）')}</MenuItem>
+            <MenuItem value="WEIGHTED">{uiText('Weighted (one step per iteration)', '按权重选择（每次迭代选一个步骤）')}</MenuItem>
           </TextField>
-          <Button size="small" startIcon={<AddIcon />} onClick={addStep}>Add step</Button>
+          <Button size="small" startIcon={<AddIcon />} onClick={addStep}>{uiText('Add step', '添加步骤')}</Button>
         </Box>
         {form.steps.map((step, i) => (
           <Box key={step.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, mb: 1 }} data-testid={`load-step-${i}`}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">Step {i + 1}</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Step', '步骤')} {i + 1}</Typography>
               <Box sx={{ flex: 1 }} />
-              <IconButton size="small" onClick={() => removeStep(i)} aria-label={`Remove step ${i + 1}`} disabled={form.steps.length <= 1}>
+              <IconButton size="small" onClick={() => removeStep(i)} aria-label={uiText(`Remove step ${i + 1}`, `移除第 ${i + 1} 个步骤`)} disabled={form.steps.length <= 1}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
@@ -2185,67 +2187,67 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
                 Path (widest column). Row 2: the remaining four fields in the uniform
                 auto-fit FIELD_GRID. */}
             <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) minmax(110px, 0.6fr) minmax(260px, 2.5fr)', gap: 1, alignItems: 'start', mb: 1 }}>
-              <TextField label="Step name (optional)" size="small" value={step.name} onChange={setStepField(i, 'name')} fullWidth />
-              <TextField select label="Method" size="small" value={step.method}
+              <TextField label={uiText('Step name (optional)', '步骤名称（可选）')} size="small" value={step.name} onChange={setStepField(i, 'name')} fullWidth />
+              <TextField select label={uiText('Method', '请求方法')} size="small" value={step.method}
                 onChange={(e) => setForm((p) => ({ ...p, steps: p.steps.map((s, j) => (j === i ? { ...s, method: e.target.value } : s)) }))}
                 fullWidth>
                 {['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'].map((m) => <MenuItem key={m} value={m}>{m}</MenuItem>)}
               </TextField>
-              <TextField label="Path" size="small" value={step.path} onChange={setStepField(i, 'path')} fullWidth />
+              <TextField label={uiText('Path', '路径')} size="small" value={step.path} onChange={setStepField(i, 'path')} fullWidth />
             </Box>
             <Box sx={FIELD_GRID}>
-              <TextField label="Target host" size="small" value={step.host} onChange={setStepField(i, 'host')} fullWidth />
-              <TextField label="Target port" size="small" value={step.port} onChange={setStepField(i, 'port')} fullWidth />
-              <TextField select label="Scheme" size="small" value={step.scheme}
+              <TextField label={uiText('Target host', '目标主机')} size="small" value={step.host} onChange={setStepField(i, 'host')} fullWidth />
+              <TextField label={uiText('Target port', '目标端口')} size="small" value={step.port} onChange={setStepField(i, 'port')} fullWidth />
+              <TextField select label={uiText('Scheme', '协议')} size="small" value={step.scheme}
                 onChange={(e) => setForm((p) => ({ ...p, steps: p.steps.map((s, j) => (j === i ? { ...s, scheme: e.target.value as 'HTTP' | 'HTTPS' } : s)) }))}
                 fullWidth>
                 <MenuItem value="HTTP">HTTP</MenuItem>
                 <MenuItem value="HTTPS">HTTPS</MenuItem>
               </TextField>
-              <TextField label="Delay after step (ms)" size="small" value={step.thinkTimeMs} onChange={setStepField(i, 'thinkTimeMs')} helperText="Wait this long after this step's request before the next step (a.k.a. think-time)" fullWidth placeholder="none" />
+              <TextField label={uiText('Delay after step (ms)', '步骤结束后的延迟（毫秒）')} size="small" value={step.thinkTimeMs} onChange={setStepField(i, 'thinkTimeMs')} helperText={uiText('Wait this long after this step\'s request before the next step (a.k.a. think-time)', '本步骤发送请求后，等待指定时间再进入下一步')} fullWidth placeholder={uiText('none', '无')} />
               {form.stepSelection === 'WEIGHTED' && (
-                <TextField label="Weight" size="small" value={step.weight} onChange={setStepField(i, 'weight')} fullWidth placeholder="1.0" helperText="Relative selection weight (> 0)" data-testid={`load-step-weight-${i}`} />
+                <TextField label={uiText('Weight', '权重')} size="small" value={step.weight} onChange={setStepField(i, 'weight')} fullWidth placeholder="1.0" helperText={uiText('Relative selection weight (> 0)', '相对选择权重（大于 0）')} data-testid={`load-step-weight-${i}`} />
               )}
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Request headers (optional)</Typography>
-              <Button size="small" startIcon={<AddIcon />} onClick={() => addStepHeader(i)}>Add header</Button>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Request headers (optional)', '请求头（可选）')}</Typography>
+              <Button size="small" startIcon={<AddIcon />} onClick={() => addStepHeader(i)}>{uiText('Add header', '添加请求头')}</Button>
             </Box>
             {step.headers.map((header, h) => (
               <Box key={header.id} sx={{ display: 'flex', gap: 1, mt: 0.5, mb: 1.25, alignItems: 'center', flexWrap: 'wrap' }}>
-                <TextField label="Header name" size="small" value={header.key} onChange={setStepHeaderField(i, h, 'key')} sx={responsiveWidth(180)} />
-                <TextField label="Header value" size="small" value={header.value} onChange={setStepHeaderField(i, h, 'value')} sx={responsiveWidth(200)} />
-                <IconButton size="small" onClick={() => removeStepHeader(i, h)} aria-label={`Remove header ${h + 1} of step ${i + 1}`}>
+                <TextField label={uiText('Header name', '请求头名称')} size="small" value={header.key} onChange={setStepHeaderField(i, h, 'key')} sx={responsiveWidth(180)} />
+                <TextField label={uiText('Header value', '请求头值')} size="small" value={header.value} onChange={setStepHeaderField(i, h, 'value')} sx={responsiveWidth(200)} />
+                <IconButton size="small" onClick={() => removeStepHeader(i, h)} aria-label={uiText(`Remove header ${h + 1} of step ${i + 1}`, `移除步骤 ${i + 1} 的第 ${h + 1} 个请求头`)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>
             ))}
             <TextField
-              label="Body (optional, templated)" size="small" value={step.body}
+              label={uiText('Body (optional, templated)', '请求体（可选，支持模板）')} size="small" value={step.body}
               onChange={setStepField(i, 'body')}
               fullWidth multiline minRows={bodyMinRows(step.body)} sx={{ mt: 1 }}
               slotProps={{ htmlInput: { style: { resize: 'vertical', overflow: 'auto' } } }}
             />
             {/* Captures — extract from this step's response into variables later steps can use. */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Captures (optional)</Typography>
-              <Button size="small" startIcon={<AddIcon />} onClick={() => addStepCapture(i)} data-testid={`load-add-capture-${i}`}>Add capture</Button>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Captures (optional)', '提取变量（可选）')}</Typography>
+              <Button size="small" startIcon={<AddIcon />} onClick={() => addStepCapture(i)} data-testid={`load-add-capture-${i}`}>{uiText('Add capture', '添加变量提取')}</Button>
             </Box>
             {step.captures.map((capture, c) => (
               <Box key={capture.id} sx={{ display: 'flex', gap: 1, mt: 0.5, mb: 0.75, alignItems: 'center', flexWrap: 'wrap' }} data-testid={`load-capture-${i}-${c}`}>
-                <TextField label="Variable name" size="small" value={capture.name} onChange={(e) => setStepCaptureValue(i, c, 'name', e.target.value)} sx={responsiveWidth(150)} />
+                <TextField label={uiText('Variable name', '变量名称')} size="small" value={capture.name} onChange={(e) => setStepCaptureValue(i, c, 'name', e.target.value)} sx={responsiveWidth(150)} />
                 <TextField
-                  select label="Source" size="small" value={capture.source}
+                  select label={uiText('Source', '来源')} size="small" value={capture.source}
                   onChange={(e) => setStepCaptureValue(i, c, 'source', e.target.value as LoadCaptureSource)}
                   sx={responsiveWidth(160)}
                 >
-                  <MenuItem value="BODY_JSONPATH">Body JSONPath</MenuItem>
-                  <MenuItem value="HEADER">Header</MenuItem>
-                  <MenuItem value="BODY_REGEX">Body regex</MenuItem>
+                  <MenuItem value="BODY_JSONPATH">{uiText('Body JSONPath', '响应体 JSONPath')}</MenuItem>
+                  <MenuItem value="HEADER">{uiText('Header', '响应头')}</MenuItem>
+                  <MenuItem value="BODY_REGEX">{uiText('Body regex', '响应体正则表达式')}</MenuItem>
                 </TextField>
-                <TextField label="Expression" size="small" value={capture.expression} onChange={(e) => setStepCaptureValue(i, c, 'expression', e.target.value)} sx={responsiveWidth(180)} />
-                <TextField label="Default (optional)" size="small" value={capture.defaultValue} onChange={(e) => setStepCaptureValue(i, c, 'defaultValue', e.target.value)} sx={responsiveWidth(140)} placeholder="unset" />
-                <IconButton size="small" onClick={() => removeStepCapture(i, c)} aria-label={`Remove capture ${c + 1} of step ${i + 1}`}><DeleteIcon fontSize="small" /></IconButton>
+                <TextField label={uiText('Expression', '表达式')} size="small" value={capture.expression} onChange={(e) => setStepCaptureValue(i, c, 'expression', e.target.value)} sx={responsiveWidth(180)} />
+                <TextField label={uiText('Default (optional)', '默认值（可选）')} size="small" value={capture.defaultValue} onChange={(e) => setStepCaptureValue(i, c, 'defaultValue', e.target.value)} sx={responsiveWidth(140)} placeholder={uiText('unset', '未设置')} />
+                <IconButton size="small" onClick={() => removeStepCapture(i, c)} aria-label={uiText(`Remove capture ${c + 1} of step ${i + 1}`, `移除步骤 ${i + 1} 的第 ${c + 1} 个变量提取`)}><DeleteIcon fontSize="small" /></IconButton>
               </Box>
             ))}
           </Box>
@@ -2257,18 +2259,18 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
             disabled={busy} onClick={handleLoad}
             data-testid="load-register"
           >
-            Load
+            {uiText('Load', '注册')}
           </Button>
           <Button
             variant="contained" color="primary" startIcon={<PlayArrowIcon />}
             disabled={busy || disabled} onClick={handleLoadAndRun}
             data-testid="load-register-run"
           >
-            Load &amp; Run
+            {uiText('Load & Run', '注册并运行')}
           </Button>
           <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
-            <strong>Load</strong> registers without running (allowed even when load generation is off).{' '}
-            <strong>Load &amp; Run</strong> registers then starts it.
+            <strong>{uiText('Load', '注册')}</strong> {uiText('registers without running (allowed even when load generation is off).', '只保存场景，关闭负载生成时也可以使用。')}{' '}
+            <strong>{uiText('Load & Run', '注册并运行')}</strong> {uiText('registers then starts it.', '保存并立即启动场景。')}
           </Typography>
         </Box>
       </Paper>
@@ -2278,8 +2280,8 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
       <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }} data-testid="load-codegen">
         {codeError && (
           <Alert severity="info" data-testid="load-code-incomplete" sx={{ mb: 1 }}>
-            <AlertTitle>Preview updates as you type</AlertTitle>
-            Still needed before you can run it: {codeError}
+            <AlertTitle>{uiText('Preview updates as you type', '预览随输入实时更新')}</AlertTitle>
+            {uiText('Still needed before you can run it:', '运行前还需完成以下设置：')} {codeError}
           </Alert>
         )}
         <LoadScenarioReview scenario={codeScenario} baseUrl={baseUrl} />
@@ -2292,7 +2294,7 @@ MOCKSERVER_LOAD_GENERATION_ENABLED=true`}
         open={confirm !== null}
         title={confirm?.title ?? ''}
         message={confirm?.message ?? ''}
-        confirmLabel={confirm?.confirmLabel ?? 'Confirm'}
+        confirmLabel={confirm?.confirmLabel ?? uiText('Confirm', '确认')}
         onConfirm={() => confirm?.onConfirm()}
         onClose={() => setConfirm(null)}
       />
@@ -2372,7 +2374,9 @@ function GenerateDialog({
     })();
   };
 
-  const title = source === 'openapi' ? 'Generate from OpenAPI' : 'Generate from Recording';
+  const title = source === 'openapi'
+    ? uiText('Generate from OpenAPI', '从 OpenAPI 生成')
+    : uiText('Generate from Recording', '从录制记录生成');
   const canSubmit = name.trim() !== '' && (source === 'recording' || spec.trim() !== '');
 
   return (
@@ -2382,13 +2386,13 @@ function GenerateDialog({
         {error && <HumanErrorAlert error={error} onClose={() => setError(null)} sx={{ mb: 1.5 }} />}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 0.5 }}>
           <TextField
-            label="Scenario name" size="small" required value={name}
+            label={uiText('Scenario name', '场景名称')} size="small" required value={name}
             onChange={(e) => setName(e.target.value)} fullWidth autoFocus
             data-testid="load-generate-name"
           />
           {source === 'openapi' ? (
             <TextField
-              label="OpenAPI spec (inline JSON/YAML, URL, or file/classpath)" size="small" required
+              label={uiText('OpenAPI spec (inline JSON/YAML, URL, or file/classpath)', 'OpenAPI 规范（JSON / YAML 内容、URL 或文件 / 类路径）')} size="small" required
               value={spec} onChange={(e) => setSpec(e.target.value)} fullWidth multiline minRows={4}
               data-testid="load-generate-spec"
               slotProps={{ htmlInput: { style: { resize: 'vertical', overflow: 'auto' } } }}
@@ -2396,30 +2400,30 @@ function GenerateDialog({
           ) : (
             <>
               <TextField
-                select label="Mode" size="small" value={mode}
+                select label={uiText('Mode', '模式')} size="small" value={mode}
                 onChange={(e) => setMode(e.target.value as GenerateRecordingMode)} fullWidth
-                helperText="VERBATIM: one step per recorded request. TEMPLATIZED: one per unique route."
+                helperText={uiText('VERBATIM: one step per recorded request. TEMPLATIZED: one per unique route.', '原样：每条已录制请求生成一个步骤。模板化：每条不同的路由生成一个步骤。')}
                 data-testid="load-generate-mode"
               >
-                <MenuItem value="VERBATIM">Verbatim</MenuItem>
-                <MenuItem value="TEMPLATIZED">Templatized</MenuItem>
+                <MenuItem value="VERBATIM">{uiText('Verbatim', '原样')}</MenuItem>
+                <MenuItem value="TEMPLATIZED">{uiText('Templatized', '模板化')}</MenuItem>
               </TextField>
               {mode === 'VERBATIM' && (
                 <TextField
-                  label="Max steps (optional)" size="small" value={maxSteps}
-                  onChange={(e) => setMaxSteps(e.target.value)} fullWidth placeholder="all recorded requests"
+                  label={uiText('Max steps (optional)', '最大步骤数（可选）')} size="small" value={maxSteps}
+                  onChange={(e) => setMaxSteps(e.target.value)} fullWidth placeholder={uiText('all recorded requests', '全部已录制请求')}
                 />
               )}
             </>
           )}
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Target (optional — overrides the spec/recording routing)
+            {uiText('Target (optional — overrides the spec/recording routing)', '目标（可选，覆盖规范或录制中的路由）')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <TextField label="Host" size="small" value={targetHost} onChange={(e) => setTargetHost(e.target.value)} sx={responsiveWidth(180)} />
-            <TextField label="Port" size="small" value={targetPort} onChange={(e) => setTargetPort(e.target.value)} sx={responsiveWidth(120)} />
+            <TextField label={uiText('Host', '主机')} size="small" value={targetHost} onChange={(e) => setTargetHost(e.target.value)} sx={responsiveWidth(180)} />
+            <TextField label={uiText('Port', '端口')} size="small" value={targetPort} onChange={(e) => setTargetPort(e.target.value)} sx={responsiveWidth(120)} />
             <TextField
-              select label="Scheme" size="small" value={targetScheme}
+              select label={uiText('Scheme', '协议')} size="small" value={targetScheme}
               onChange={(e) => setTargetScheme(e.target.value as 'http' | 'https')} sx={responsiveWidth(120)}
             >
               <MenuItem value="http">http</MenuItem>
@@ -2429,9 +2433,9 @@ function GenerateDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={busy}>Cancel</Button>
+        <Button onClick={onClose} disabled={busy}>{uiText('Cancel', '取消')}</Button>
         <Button variant="contained" onClick={submit} disabled={busy || !canSubmit} data-testid="load-generate-submit">
-          Generate
+          {uiText('Generate', '生成')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -2497,11 +2501,11 @@ function VerdictBadge({ status }: { status: LoadScenarioStatus }) {
       <Chip
         size="small"
         color={status.verdict === 'PASS' ? 'success' : 'error'}
-        label={status.verdict === 'PASS' ? 'Thresholds PASS' : 'Thresholds FAIL'}
+        label={status.verdict === 'PASS' ? uiText('Thresholds PASS', '阈值验证通过') : uiText('Thresholds FAIL', '阈值验证失败')}
         data-testid="load-verdict"
       />
       {status.abortedByThreshold && (
-        <Chip size="small" color="error" variant="outlined" label="aborted early" />
+        <Chip size="small" color="error" variant="outlined" label={uiText('aborted early', '已提前中止')} />
       )}
     </>
   );
@@ -2512,7 +2516,7 @@ function ThresholdResultsTable({ results }: { results?: ThresholdResult[] }) {
   if (!results || results.length === 0) return null;
   return (
     <Box sx={{ mt: 1 }} data-testid="load-threshold-results">
-      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Threshold results</Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Threshold results', '阈值验证结果')}</Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'auto auto 1fr auto', gap: 0.5, mt: 0.5, alignItems: 'center' }}>
         {results.map((r, i) => (
           <Box key={i} sx={{ display: 'contents' }}>
@@ -2520,14 +2524,14 @@ function ThresholdResultsTable({ results }: { results?: ThresholdResult[] }) {
               size="small"
               color={r.satisfied ? 'success' : 'error'}
               variant="outlined"
-              label={r.satisfied ? 'PASS' : 'FAIL'}
+              label={r.satisfied ? uiText('PASS', '通过') : uiText('FAIL', '失败')}
             />
             <Typography variant="caption">{THRESHOLD_METRIC_LABEL[r.metric]}</Typography>
             <Typography variant="caption" color="text.secondary">
               {COMPARATOR_SYMBOL[r.comparator]} {formatMetricValue(r.metric, r.threshold)}
             </Typography>
             <Typography variant="caption" sx={{ fontWeight: 600 }}>
-              observed {formatMetricValue(r.metric, r.observed)}
+              {uiText('observed', '观测值')} {formatMetricValue(r.metric, r.observed)}
             </Typography>
           </Box>
         ))}
@@ -2541,10 +2545,10 @@ function ReportButtons({ name, onDownload }: { name: string; onDownload: (name: 
   return (
     <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
       <Button size="small" variant="outlined" onClick={() => onDownload(name)} data-testid={`load-report-json-${name}`}>
-        Download report (JSON)
+        {uiText('Download report (JSON)', '下载报告（JSON）')}
       </Button>
       <Button size="small" variant="outlined" onClick={() => onDownload(name, 'junit')} data-testid={`load-report-junit-${name}`}>
-        Download report (JUnit XML)
+        {uiText('Download report (JUnit XML)', '下载报告（JUnit XML）')}
       </Button>
     </Box>
   );
@@ -2572,7 +2576,7 @@ function RunProgressBar({ status, definition }: { status?: LoadScenarioStatus; d
       variant="determinate"
       value={value}
       color={paused ? 'warning' : 'success'}
-      aria-label={paused ? 'Run paused' : 'Run progress'}
+      aria-label={paused ? uiText('Run paused', '运行已暂停') : uiText('Run progress', '运行进度')}
       sx={{ mb: 1, height: 6, borderRadius: 1 }}
     />
   );

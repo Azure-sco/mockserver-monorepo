@@ -1,3 +1,4 @@
+import { uiText } from './dashboardLocale';
 /**
  * The MockServer instance the dashboard talks to: derived from the page URL, or
  * overridden per workspace. Kept free of store and React imports so the store,
@@ -163,17 +164,17 @@ export type ConnectionValidation =
   | { ok: true; value: WorkspaceConnection }
   | { ok: false; field: 'host' | 'port' | 'basePath'; message: string };
 
-const HOST_MESSAGE_URL = 'Enter only the host name, without http:// or a path; set the base path below.';
-const HOST_MESSAGE_INVALID = 'Not a valid host name; an IPv6 address goes in brackets, e.g. [::1].';
-const PORT_MESSAGE = 'A port is a whole number from 1 to 65535.';
-const BASE_PATH_MESSAGE = 'A base path starts with / and has no spaces, ?, #, %, \\, // or . and .. segments, e.g. /mock.';
+const HOST_MESSAGE_URL = uiText('Enter only the host name, without http:// or a path; set the base path below.', '请输入主机名，无需加 http:// 或路径。基础路径可在下方填写。');
+const HOST_MESSAGE_INVALID = uiText('Not a valid host name; an IPv6 address goes in brackets, e.g. [::1].', '主机名无效。IPv6 地址需用方括号括起来，例如 [::1]。');
+const PORT_MESSAGE = uiText('A port is a whole number from 1 to 65535.', '端口必须是 1 至 65535 之间的整数。');
+const BASE_PATH_MESSAGE = uiText('A base path starts with / and has no spaces, ?, #, %, \\, // or . and .. segments, e.g. /mock.', '基础路径须以 / 开头，例如 /mock。不能包含空格、?、#、%、\\、//，也不能包含 . 或 .. 路径段。');
 
 // RFC 3986 path characters except `%`: no `?` or `#` (either would cut off the endpoint path the
 // dashboard appends), no encoded character, no `\` (a browser reads it as `/`), no empty segment.
 const BASE_PATH_PATTERN = /^(\/[A-Za-z0-9._~!$&'()*+,;=:@-]+)+$/;
 
 function hostProblem(host: string): string | null {
-  if (host === '') return 'Enter the host MockServer is listening on.';
+  if (host === '') return uiText('Enter the host MockServer is listening on.', '请输入 MockServer 监听的主机。');
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(host) || host.includes('/')) return HOST_MESSAGE_URL;
   if (host.length > 253 || !HOST_PATTERN.test(host)) return HOST_MESSAGE_INVALID;
   return !host.startsWith('[') || isUrlHost(host) ? null : HOST_MESSAGE_INVALID;
@@ -254,7 +255,7 @@ export async function probeTarget(params: ConnectionParams, fetchImpl: typeof fe
   if (isMixedContent(params)) {
     return {
       ok: false,
-      message: `This dashboard is served over https, so the browser blocks calls to an http target. Tick "Use https" if ${where} serves TLS.`,
+      message: uiText(`This dashboard is served over https, so the browser blocks calls to an http target. Tick "Use https" if ${where} serves TLS.`, `运行面板通过 HTTPS 加载，浏览器会阻止访问 HTTP 目标。如果 ${where} 支持 TLS，请勾选“使用 HTTPS”。`),
     };
   }
   const url = `${params.secure ? 'https' : 'http'}://${params.host}:${params.port}${params.basePath ?? ''}/mockserver/status`;
@@ -265,27 +266,30 @@ export async function probeTarget(params: ConnectionParams, fetchImpl: typeof fe
     if (response.status === 401 || response.status === 403) {
       return {
         ok: false,
-        message: `${where} requires control-plane authentication (HTTP ${response.status}), which the dashboard cannot supply from another origin.`,
+        message: uiText(`${where} requires control-plane authentication (HTTP ${response.status}), which the dashboard cannot supply from another origin.`, `${where} 的管理 API 需要认证（HTTP ${response.status}）。运行面板跨域访问时无法提供所需认证。`),
       };
     }
     if (!response.ok) {
       return {
         ok: false,
-        message: `${where} answered HTTP ${response.status} to PUT /mockserver/status, so it is not a MockServer at that base path.`,
+        message: uiText(`${where} answered HTTP ${response.status} to PUT /mockserver/status, so it is not a MockServer at that base path.`, `${where} 对 PUT /mockserver/status 返回了 HTTP ${response.status}。请检查该基础路径是否对应 MockServer。`),
       };
     }
     return { ok: true };
   } catch (e) {
     if (e instanceof Error && e.name === 'AbortError') {
-      return { ok: false, message: `${where} did not answer within ${PROBE_TIMEOUT_MS / 1000}s.` };
+      return { ok: false, message: uiText(`${where} did not answer within ${PROBE_TIMEOUT_MS / 1000}s.`, `${where} 在 ${PROBE_TIMEOUT_MS / 1000} 秒内未响应。`) };
     }
     // fetch reports a CORS refusal and an unreachable server identically.
     const cors = isCrossOrigin(params)
-      ? ` Calls to it are cross-origin, so the browser also refuses them when it does not answer CORS for this dashboard's origin` +
-        ` (by default MockServer does for a dashboard on localhost; otherwise list this dashboard's origin in its controlPlaneCorsAllowOrigin, and check no proxy in front of it drops the CORS headers).`
+      ? uiText(
+        ` Calls to it are cross-origin, so the browser also refuses them when it does not answer CORS for this dashboard's origin` +
+        ` (by default MockServer does for a dashboard on localhost; otherwise list this dashboard's origin in its controlPlaneCorsAllowOrigin, and check no proxy in front of it drops the CORS headers).`,
+        '浏览器会阻止没有通过 CORS 检查的跨域请求。MockServer 默认允许运行在 localhost 的面板跨域访问。其他来源需添加到 controlPlaneCorsAllowOrigin 中，并检查前置代理是否移除了 CORS 响应头。',
+      )
       : '';
-    const tls = params.secure ? ' With https, the browser must also trust its certificate: open the target in a tab once to check.' : '';
-    return { ok: false, message: `Could not reach MockServer at ${where}.${cors}${tls}` };
+    const tls = params.secure ? uiText(' With https, the browser must also trust its certificate: open the target in a tab once to check.', '使用 HTTPS 时，浏览器还必须信任服务器证书。可在新标签页中打开目标地址进行检查。') : '';
+    return { ok: false, message: uiText(`Could not reach MockServer at ${where}.${cors}${tls}`, `无法连接 ${where} 上的 MockServer。${cors}${tls}`) };
   } finally {
     clearTimeout(timer);
   }

@@ -31,11 +31,12 @@ import FrameLimitBanner from './components/FrameLimitBanner';
 import UrlTargetNotice from './components/UrlTargetNotice';
 import { getConfiguration } from './lib/configuration';
 import { initAnalytics, trackView } from './lib/analytics';
-import { CLEAR_LOGS_CONFIRM_MESSAGE, CLEAR_LOGS_CONFIRM_TITLE } from './lib/clearServerText';
+import { CLEAR_LOGS_CONFIRM_LABEL, CLEAR_LOGS_CONFIRM_MESSAGE, CLEAR_LOGS_CONFIRM_TITLE } from './lib/clearServerText';
 import { requestLogSearchFocus } from './lib/logSearchFocus';
 import { connectionKey, effectiveConnection, resolveUrlConnection, urlConnectionParams } from './lib/connectionTarget';
 import { releaseBreakpointCallbackClientsExcept } from './lib/breakpointCallbackClient';
 import type { RequestFilter } from './types';
+import { uiText } from './lib/dashboardLocale';
 
 // Lazy-loaded so the @mui/x-charts bundle only loads when the Metrics tab is
 // opened, keeping it off the initial dashboard load.
@@ -331,9 +332,8 @@ export default function App() {
               sx={{ mx: 1, mt: 1, flexShrink: 0 }}
               data-testid="connection-loss-banner"
             >
-              <AlertTitle>Connection lost</AlertTitle>
-              The dashboard has lost its live connection to MockServer and is trying to
-              reconnect. Displayed data may be stale until the connection is restored.
+              <AlertTitle>{uiText('Connection lost', '连接已断开')}</AlertTitle>
+              {uiText('The dashboard has lost its live connection to MockServer and is trying to reconnect. Displayed data may be stale until the connection is restored.', '运行面板与 MockServer 的实时连接已断开，正在尝试重新连接。连接恢复前，页面显示的数据可能不是最新的。')}
             </Alert>
           )}
           {/* Log-pressure warning: only the traffic/log views (Dashboard grid +
@@ -365,107 +365,107 @@ export default function App() {
             entire app, and clears automatically when the user switches tabs. The
             AppBar above stays OUTSIDE the boundary so navigation always works.
           */}
-          <ErrorBoundary key={`view-${targetKey}`} label="this view" resetKeys={[view]}>
+          <ErrorBoundary key={`view-${targetKey}`} label={uiText('this view', '当前页面')} resetKeys={[view]}>
             {view === 'get-started' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading…', '正在加载…')}</Box>}>
                 <OnboardingPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'dashboard' && <DashboardGrid />}
             {view === 'traffic' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading traffic…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading traffic…', '正在加载请求记录…')}</Box>}>
                 <TrafficInspector />
               </Suspense>
             )}
             {view === 'sessions' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading trace…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading trace…', '正在加载调用链…')}</Box>}>
                 <SessionInspector connectionParams={params} />
               </Suspense>
             )}
             {view === 'composer' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading composer…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading composer…', '正在加载 Mock 规则编辑器…')}</Box>}>
                 <ComposerView connectionParams={params} />
               </Suspense>
             )}
             {view === 'library' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading library…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading library…', '正在加载资源库…')}</Box>}>
                 <LibraryView connectionParams={params} />
               </Suspense>
             )}
             {view === 'metrics' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading metrics…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading metrics…', '正在加载指标…')}</Box>}>
                 <MetricsView connectionParams={params} />
               </Suspense>
             )}
             {view === 'optimise' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading LLM Optimise…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading LLM Optimise…', '正在加载 LLM 优化…')}</Box>}>
                 <OptimiseView connectionParams={params} />
               </Suspense>
             )}
             {view === 'mcp-health' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading MCP Health…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading MCP Health…', '正在加载 MCP 健康状态…')}</Box>}>
                 <McpServerHealthPanel />
               </Suspense>
             )}
             {view === 'chaos' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading chaos…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading chaos…', '正在加载故障注入…')}</Box>}>
                 <ServiceChaosPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'performance' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading performance…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading performance…', '正在加载性能测试…')}</Box>}>
                 <LoadScenarioPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'drift' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading drift…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading drift…', '正在加载差异检测…')}</Box>}>
                 <DriftPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'verification' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading verify…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading verify…', '正在加载请求与响应验证…')}</Box>}>
                 <VerificationView connectionParams={params} />
               </Suspense>
             )}
             {view === 'slo' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading SLO…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading SLO…', '正在加载 SLO…')}</Box>}>
                 <SloPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'async' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading async…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading async…', '正在加载异步消息…')}</Box>}>
                 <AsyncApiPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'grpc' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading gRPC…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading gRPC…', '正在加载 gRPC…')}</Box>}>
                 <GrpcServicesPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'breakpoints' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading breakpoints…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading breakpoints…', '正在加载断点…')}</Box>}>
                 <BreakpointsPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'contract' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading contract…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading contract…', '正在加载契约测试…')}</Box>}>
                 <ContractTestPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'cluster' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading cluster…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading cluster…', '正在加载集群…')}</Box>}>
                 <ClusterPanel connectionParams={params} />
               </Suspense>
             )}
             {view === 'scenarios' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading scenarios…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading scenarios…', '正在加载场景…')}</Box>}>
                 <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
                   <ScenarioPanel connectionParams={params} />
                 </Box>
               </Suspense>
             )}
             {view === 'audit' && (
-              <Suspense fallback={<Box sx={{ p: 2 }}>Loading audit…</Box>}>
+              <Suspense fallback={<Box sx={{ p: 2 }}>{uiText('Loading audit…', '正在加载审计日志…')}</Box>}>
                 <AuditPanel connectionParams={params} />
               </Suspense>
             )}
@@ -502,7 +502,7 @@ export default function App() {
           open={clearLogsConfirm}
           title={CLEAR_LOGS_CONFIRM_TITLE}
           message={CLEAR_LOGS_CONFIRM_MESSAGE}
-          confirmLabel="Clear logs"
+          confirmLabel={CLEAR_LOGS_CONFIRM_LABEL}
           onConfirm={() => { void clearServer('log'); }}
           onClose={() => setClearLogsConfirm(false)}
         />

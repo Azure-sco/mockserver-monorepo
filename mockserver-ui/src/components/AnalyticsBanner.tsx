@@ -10,6 +10,7 @@ import {
   setAnalyticsOptOut,
   onAnalyticsActivated,
 } from '../lib/analytics';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Quiet, single-line disclosure note shown once on first dashboard load, after
@@ -94,8 +95,7 @@ export default function AnalyticsBanner() {
         variant="caption"
         sx={{ flexGrow: 1, minWidth: 0, color: 'text.secondary' }}
       >
-        MockServer collects anonymous, cookieless dashboard usage stats to improve the UI for
-        everyone — no request or mock data is sent.{' '}
+        {uiText('MockServer collects anonymous, cookieless dashboard usage stats to improve the UI for everyone — no request or mock data is sent.', 'MockServer 会收集匿名的控制台使用统计来改进界面，无需使用 Cookie，也不会发送请求或 Mock 数据。')}{' '}
         <Link
           href="/mock_server/dashboard_privacy.html"
           target="_blank"
@@ -104,7 +104,7 @@ export default function AnalyticsBanner() {
           underline="always"
           data-testid="analytics-banner-learn-more"
         >
-          Learn more
+          {uiText('Learn more', '了解更多')}
         </Link>
         .
       </Typography>
@@ -116,7 +116,7 @@ export default function AnalyticsBanner() {
         data-testid="analytics-banner-opt-out"
         sx={{ minWidth: 0, fontSize: '0.7rem', textTransform: 'none' }}
       >
-        Opt out
+        {uiText('Opt out', '退出统计')}
       </Button>
       <Button
         color="inherit"
@@ -126,7 +126,7 @@ export default function AnalyticsBanner() {
         data-testid="analytics-banner-got-it"
         sx={{ minWidth: 0, fontSize: '0.7rem', textTransform: 'none' }}
       >
-        Got it
+        {uiText('Got it', '知道了')}
       </Button>
     </Box>
   );

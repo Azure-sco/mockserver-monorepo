@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTransientFlag } from '../hooks/useTransientFlag';
 import Box from '@mui/material/Box';
@@ -115,7 +116,7 @@ function useSessionOptions(): SessionOption[] {
   return useMemo(() => {
     const all = combineTraffic(proxiedRequests, recordedRequests);
     const sessions = groupBySession(all, activeExpectations);
-    const options: SessionOption[] = [{ value: ALL_SESSIONS, label: 'All captured LLM traffic' }];
+    const options: SessionOption[] = [{ value: ALL_SESSIONS, label: uiText('All captured LLM traffic', '所有已捕获的 LLM 流量') }];
     const seen = new Set<string>();
     for (const session of sessions) {
       // v1 optimisation groups proxied LLM traffic by upstream host. Isolation-
@@ -192,7 +193,7 @@ function VerdictBanner({ verdict }: { verdict: OptimisationVerdict }) {
           {verdict.grade}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Grade {verdict.grade} — no optimisation opportunities detected
+          {uiText('Grade', '评级')} {verdict.grade} {uiText('— no optimisation opportunities detected', '· 未发现可优化项')}
         </Typography>
       </Paper>
     );
@@ -209,7 +210,7 @@ function VerdictBanner({ verdict }: { verdict: OptimisationVerdict }) {
       </Typography>
       <Box sx={{ minWidth: 0 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-          Est. {money}{estSuffix} recoverable ({pct} of spend)
+          {uiText('Est.', '预计')} {money}{estSuffix} {uiText('recoverable (', '可节省（')}{pct} {uiText('of spend)', '的支出）')}
         </Typography>
         {verdict.rationale && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -235,11 +236,11 @@ function SnippetBlock({ label, snippet }: { label: string; snippet: string }) {
   }, [snippet, flashCopied]);
   return (
     <Box sx={{ position: 'relative', mt: 0.5 }}>
-      <Tooltip title={copied ? 'Copied!' : `Copy ${label}`}>
+      <Tooltip title={copied ? uiText('Copied!', '已复制') : uiText(`Copy ${label}`, `复制${label}`)}>
         <IconButton
           size="small"
           onClick={onCopy}
-          aria-label={`Copy ${label}`}
+          aria-label={uiText(`Copy ${label}`, `复制${label}`)}
           sx={{ position: 'absolute', top: 2, right: 2 }}
         >
           <ContentCopyIcon sx={{ fontSize: '0.8rem' }} />
@@ -285,7 +286,7 @@ function SignalCard({ signal }: { signal: OptimisationSignal }) {
             size="small"
             color="success"
             variant="outlined"
-            label={`save ~${formatCost(signal.estimatedSavingUsd)}`}
+            label={uiText(`save ~${formatCost(signal.estimatedSavingUsd)}`, `预计节省 ${formatCost(signal.estimatedSavingUsd)}`)}
             sx={{ height: 20, fontSize: '0.65rem', fontFamily: monospaceFontFamily }}
           />
         )}
@@ -294,12 +295,12 @@ function SignalCard({ signal }: { signal: OptimisationSignal }) {
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 0.5 }}>
         {signal.affectedCalls.length > 0 && (
           <Typography variant="caption" color="text.secondary">
-            Affected calls: {signal.affectedCalls.join(', ')}
+            {uiText('Affected calls:', '受影响的调用')} {signal.affectedCalls.join(', ')}
           </Typography>
         )}
         {signal.estimatedWastedInputTokens != null && (
           <Typography variant="caption" color="text.secondary">
-            ~{signal.estimatedWastedInputTokens.toLocaleString()} wasted input tokens
+            ~{signal.estimatedWastedInputTokens.toLocaleString()} {uiText('wasted input tokens', '浪费的输入 token')}
           </Typography>
         )}
       </Box>
@@ -309,14 +310,14 @@ function SignalCard({ signal }: { signal: OptimisationSignal }) {
           {fix.action && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>{fix.action}</Typography>
           )}
-          {fix.configSnippet && <SnippetBlock label="config snippet" snippet={fix.configSnippet} />}
-          {fix.exampleExpectation && <SnippetBlock label="example expectation" snippet={fix.exampleExpectation} />}
+          {fix.configSnippet && <SnippetBlock label={uiText('config snippet', '配置片段')} snippet={fix.configSnippet} />}
+          {fix.exampleExpectation && <SnippetBlock label={uiText('example expectation', '示例 Mock 规则')} snippet={fix.exampleExpectation} />}
           {(() => {
             const docsHref = safeHttpUrl(fix.docsUrl);
             return docsHref ? (
               <Typography variant="body2" sx={{ mt: 0.5 }}>
                 <Box component="a" href={docsHref} target="_blank" rel="noopener noreferrer" sx={{ color: 'primary.main' }}>
-                  Learn more
+                  {uiText('Learn more', '了解更多')}
                 </Box>
               </Typography>
             ) : null;
@@ -324,7 +325,7 @@ function SignalCard({ signal }: { signal: OptimisationSignal }) {
         </Box>
       ) : (
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Recommendation: <Box component="span" sx={{ fontWeight: 400 }}>{signal.recommendation}</Box>
+          {uiText('Recommendation:', '建议')} <Box component="span" sx={{ fontWeight: 400 }}>{signal.recommendation}</Box>
         </Typography>
       )}
     </Paper>
@@ -485,15 +486,15 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       {/* Header + session picker */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>LLM Optimise</Typography>
-        <Tooltip title="Captured LLM traffic, analysed for deterministic cost-saving opportunities. Export a brief to paste into any LLM.">
-          <Chip size="small" label="LLM cost" variant="outlined" />
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{uiText('LLM Optimise', 'LLM 优化')}</Typography>
+        <Tooltip title={uiText('Captured LLM traffic, analysed for deterministic cost-saving opportunities. Export a brief to paste into any LLM.', '根据已捕获的 LLM 流量分析可量化的成本优化机会。可导出摘要并交给 LLM 处理。')}>
+          <Chip size="small" label={uiText('LLM cost', 'LLM 成本')} variant="outlined" />
         </Tooltip>
         <Box sx={{ flex: 1 }} />
         <TextField
           select
           size="small"
-          label="Session"
+          label={uiText('Session', '会话')}
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
           sx={{ minWidth: 240, '& .MuiInputBase-root': { fontSize: '0.8rem' } }}
@@ -505,8 +506,8 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
             </MenuItem>
           ))}
         </TextField>
-        <Tooltip title="Refresh report">
-          <IconButton size="small" onClick={() => { trackFeature('optimise_run'); load(); }} aria-label="Refresh report">
+        <Tooltip title={uiText('Refresh report', '刷新报告')}>
+          <IconButton size="small" onClick={() => { trackFeature('optimise_run'); load(); }} aria-label={uiText('Refresh report', '刷新报告')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -531,11 +532,11 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
               size="small"
               onClick={() => { trackFeature('optimise_run'); load(); }}
             >
-              Refresh
+              {uiText('Refresh', '刷新')}
             </Button>
           }
         >
-          New traffic captured since this report — refresh to update.
+          {uiText('New traffic captured since this report — refresh to update.', '报告生成后已捕获新流量。刷新可查看最新结果。')}
         </Alert>
       )}
 
@@ -554,9 +555,9 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
 
       {isEmpty && (
         <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">No LLM traffic captured</Typography>
+          <Typography variant="body2" color="text.secondary">{uiText('No LLM traffic captured', '尚未捕获 LLM 流量')}</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-            Proxy LLM calls through MockServer, then return here to analyse them for cost-saving opportunities.
+            {uiText('Proxy LLM calls through MockServer, then return here to analyse them for cost-saving opportunities.', '通过 MockServer 代理 LLM 调用，再回到这里分析可节省的成本。')}
           </Typography>
         </Paper>
       )}
@@ -572,15 +573,15 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
             data-testid="optimise-hero"
           >
             <HeroCard
-              label={totals.costIsEstimated ? 'Total cost (est.)' : 'Total cost'}
+              label={totals.costIsEstimated ? uiText('Total cost (est.)', '总成本（估算）') : uiText('Total cost', '总成本')}
               value={formatCost(totals.estimatedCostUsd)}
             />
-            <HeroCard label="Input tokens" value={totals.inputTokens.toLocaleString()} />
-            <HeroCard label="Output tokens" value={totals.outputTokens.toLocaleString()} />
-            <HeroCard label="Calls" value={totals.callCount.toLocaleString()} />
-            <HeroCard label="Avg latency" value={formatMs(avgLatencyMs)} />
-            <HeroCard label="Cache hit" value={formatPercent(totals.cacheHitRatio)} />
-            <HeroCard label="One-shot" value={formatPercent(totals.oneShotRate)} />
+            <HeroCard label={uiText('Input tokens', '输入 token 数')} value={totals.inputTokens.toLocaleString()} />
+            <HeroCard label={uiText('Output tokens', '输出 token 数')} value={totals.outputTokens.toLocaleString()} />
+            <HeroCard label={uiText('Calls', '调用次数')} value={totals.callCount.toLocaleString()} />
+            <HeroCard label={uiText('Avg latency', '平均延迟')} value={formatMs(avgLatencyMs)} />
+            <HeroCard label={uiText('Cache hit', '缓存命中')} value={formatPercent(totals.cacheHitRatio)} />
+            <HeroCard label={uiText('One-shot', '单次调用')} value={formatPercent(totals.oneShotRate)} />
           </Box>
 
           {/* Provider / model summary + actions */}
@@ -599,7 +600,7 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
               onClick={() => void handleCopyVerdict()}
               disabled={busyAction !== null}
             >
-              {verdictCopied ? 'Copied!' : busyAction === 'copyVerdict' ? 'Copying…' : 'Copy verdict'}
+              {verdictCopied ? uiText('Copied!', '已复制') : busyAction === 'copyVerdict' ? uiText('Copying…', '正在复制…') : uiText('Copy verdict', '复制分析结果')}
             </Button>
             <Button
               variant="outlined"
@@ -608,7 +609,7 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
               onClick={() => void handleCopy()}
               disabled={busyAction !== null}
             >
-              {copied ? 'Copied!' : busyAction === 'copy' ? 'Copying…' : 'Copy optimisation brief'}
+              {copied ? uiText('Copied!', '已复制') : busyAction === 'copy' ? uiText('Copying…', '正在复制…') : uiText('Copy optimisation brief', '复制优化摘要')}
             </Button>
             <Button
               variant="contained"
@@ -617,18 +618,18 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
               onClick={() => void handleDownload()}
               disabled={busyAction !== null}
             >
-              {busyAction === 'download' ? 'Downloading…' : 'Download bundle'}
+              {busyAction === 'download' ? uiText('Downloading…', '正在下载…') : uiText('Download bundle', '下载分析资料')}
             </Button>
           </Box>
 
           {/* Detected opportunities */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-              Detected Opportunities {sortedSignals.length > 0 && `(${sortedSignals.length})`}
+              {uiText('Detected Opportunities', '发现的优化机会')} {sortedSignals.length > 0 && `(${sortedSignals.length})`}
             </Typography>
             {sortedSignals.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                No optimisation opportunities detected for this session.
+                {uiText('No optimisation opportunities detected for this session.', '此会话未发现可优化项。')}
               </Typography>
             ) : (
               <Box data-testid="optimise-signals">
@@ -641,19 +642,19 @@ export default function OptimiseView({ connectionParams }: OptimiseViewProps) {
 
           {/* Per-call table */}
           <Paper variant="outlined" sx={{ p: 1.25 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Calls</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>{uiText('Calls', '调用次数')}</Typography>
             <Box sx={{ overflowX: 'auto' }}>
-              <Table size="small" aria-label="Per-call breakdown" data-testid="optimise-call-table">
+              <Table size="small" aria-label={uiText('Per-call breakdown', '单次调用明细')} data-testid="optimise-call-table">
                 <TableHead>
                   <TableRow>
                     <TableCell>#</TableCell>
-                    <TableCell>Model</TableCell>
-                    <TableCell align="right">In tok</TableCell>
-                    <TableCell align="right">Out tok</TableCell>
-                    <TableCell align="right">Cost</TableCell>
-                    <TableCell align="right">Latency</TableCell>
-                    <TableCell align="right">Tools</TableCell>
-                    <TableCell>Finish</TableCell>
+                    <TableCell>{uiText('Model', '模型')}</TableCell>
+                    <TableCell align="right">{uiText('In tok', '输入 token')}</TableCell>
+                    <TableCell align="right">{uiText('Out tok', '输出 token')}</TableCell>
+                    <TableCell align="right">{uiText('Cost', '成本')}</TableCell>
+                    <TableCell align="right">{uiText('Latency', '延迟')}</TableCell>
+                    <TableCell align="right">{uiText('Tools', '工具')}</TableCell>
+                    <TableCell>{uiText('Finish', '结束原因')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

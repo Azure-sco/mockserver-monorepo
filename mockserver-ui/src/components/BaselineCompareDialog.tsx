@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -48,7 +49,7 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
       const parsed = JSON.parse(baselineText) as unknown;
       baseline = Array.isArray(parsed) ? (parsed as Record<string, unknown>[]) : [parsed as Record<string, unknown>];
     } catch {
-      setError({ message: 'The baseline must be valid JSON — paste an array of expectations.' });
+      setError({ message: uiText('The baseline must be valid JSON — paste an array of expectations.', '基线必须是有效的 JSON，请粘贴一个 Mock 规则数组。') });
       return;
     }
 
@@ -58,7 +59,7 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
         const parsed = JSON.parse(currentText) as unknown;
         current = Array.isArray(parsed) ? (parsed as Record<string, unknown>[]) : [parsed as Record<string, unknown>];
       } catch {
-        setError({ message: 'The current expectations must be valid JSON — paste an array, or leave it blank to diff against the live server.' });
+        setError({ message: uiText('The current expectations must be valid JSON — paste an array, or leave it blank to diff against the live server.', '当前规则必须是有效的 JSON。请粘贴规则数组，或留空以与运行中的服务比较。') });
         return;
       }
     }
@@ -81,17 +82,14 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
 
   return (
     <Dialog open={open} onClose={handleClose} fullScreen={fullScreen} maxWidth="md" fullWidth>
-      <DialogTitle>Compare Against Baseline</DialogTitle>
+      <DialogTitle>{uiText('Compare Against Baseline', '与基线对比')}</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Paste a known-good <strong>baseline</strong> array of expectations to
-          detect drift. Leave <strong>current</strong> blank to compare the
-          baseline against the live server&apos;s recorded expectations, or paste
-          a second array to compare two snapshots directly.
+          {uiText('Paste a known-good ', '粘贴一组已确认正确的')}<strong>{uiText('baseline', '基线规则')}</strong>{uiText(' array of expectations to detect drift. Leave ', '以检查契约漂移。将')}<strong>{uiText('current', '当前规则')}</strong>{uiText(' blank to compare the baseline against the live server\'s recorded expectations, or paste a second array to compare two snapshots directly.', '留空可与运行中的服务所录制的规则比较，也可以粘贴另一组规则来比较两个快照。')}
         </Typography>
 
         <TextField
-          label="Baseline expectations (JSON array)"
+          label={uiText('Baseline expectations (JSON array)', '基线规则（JSON 数组）')}
           placeholder='[ { "httpRequest": { "path": "/hello" }, "httpResponse": { "body": "hi" } } ]'
           multiline
           minRows={4}
@@ -103,7 +101,7 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
         />
 
         <TextField
-          label="Current expectations (optional — blank diffs against the live server)"
+          label={uiText('Current expectations (optional — blank diffs against the live server)', '当前规则（选填，留空则与运行中的服务比较）')}
           placeholder="[ … ]"
           multiline
           minRows={3}
@@ -121,16 +119,16 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
               <Chip
                 size="small"
-                label={report.hasDrift ? 'drift detected' : 'no drift'}
+                label={report.hasDrift ? uiText('drift detected', '检测到漂移') : uiText('no drift', '未检测到漂移')}
                 color={report.hasDrift ? 'warning' : 'success'}
                 variant="outlined"
               />
-              <Chip size="small" label={`${report.added.length} added`} variant="outlined" />
-              <Chip size="small" label={`${report.removed.length} removed`} variant="outlined" />
-              <Chip size="small" label={`${report.changed.length} changed`} variant="outlined" />
+              <Chip size="small" label={uiText(`${report.added.length} added`, `新增 ${report.added.length} 条`)} variant="outlined" />
+              <Chip size="small" label={uiText(`${report.removed.length} removed`, `移除 ${report.removed.length} 条`)} variant="outlined" />
+              <Chip size="small" label={uiText(`${report.changed.length} changed`, `变更 ${report.changed.length} 条`)} variant="outlined" />
             </Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-              Diff Report
+              {uiText('Diff Report', '差异报告')}
             </Typography>
             <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1, maxHeight: 360, overflow: 'auto' }}>
               <JsonViewer data={report as unknown as Record<string, unknown>} collapsed={2} />
@@ -139,14 +137,14 @@ export default function BaselineCompareDialog({ open, onClose, connectionParams 
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={busy}>Close</Button>
+        <Button onClick={handleClose} disabled={busy}>{uiText('Close', '关闭')}</Button>
         <Button
           variant="contained"
           onClick={() => { void run(); }}
           disabled={busy || !baselineText.trim()}
           startIcon={busy ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
-          {busy ? 'Comparing…' : 'Compare'}
+          {busy ? uiText('Comparing…', '正在对比…') : uiText('Compare', '对比')}
         </Button>
       </DialogActions>
     </Dialog>

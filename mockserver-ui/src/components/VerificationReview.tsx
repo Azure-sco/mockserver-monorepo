@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
@@ -65,7 +66,7 @@ export default function VerificationReview(props: VerificationReviewProps) {
   return (
     <Box sx={{ py: 1 }}>
       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
-        Generated Code
+        {uiText('Generated Code', '生成的代码')}
       </Typography>
       <Tabs
         value={safeTab}

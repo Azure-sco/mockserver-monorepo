@@ -1,3 +1,5 @@
+import { uiText } from './dashboardLocale';
+
 /**
  * Named network-condition presets for the TCP-layer chaos form — the MockServer
  * analogue of Charles Proxy's Throttle Presets.
@@ -84,44 +86,44 @@ export function bandwidthThresholdBytes(bytesPerSec: number): number {
 export const NETWORK_PRESETS: readonly NetworkPreset[] = [
   {
     id: 'dial-up-throughput',
-    label: 'Dial-up (throughput)',
-    description: '56k modem — the slowest realistic upload, for timeout handling',
+    label: uiText('Dial-up (throughput)', "拨号网络（吞吐量）"),
+    description: uiText('56k modem — the slowest realistic upload, for timeout handling', "模拟 56k 调制解调器的慢速上传，用于测试超时处理"),
     fault: { kind: 'bandwidth', bandwidthBytesPerSec: 7_000 },
   },
   {
     id: 'slow-3g-throughput',
-    label: 'Slow 3G (throughput)',
-    description: "Chrome DevTools' Slow 3G download rate, applied to inbound request bytes",
+    label: uiText('Slow 3G (throughput)', "低速 3G（吞吐量）"),
+    description: uiText("Chrome DevTools' Slow 3G download rate, applied to inbound request bytes", "将 Chrome 开发者工具的低速 3G 下载速率应用于入站请求字节"),
     fault: { kind: 'bandwidth', bandwidthBytesPerSec: 50_000 },
   },
   {
     id: 'fast-3g-throughput',
-    label: 'Fast 3G (throughput)',
-    description: "Chrome DevTools' Fast 3G download rate, applied to inbound request bytes",
+    label: uiText('Fast 3G (throughput)', "高速 3G（吞吐量）"),
+    description: uiText("Chrome DevTools' Fast 3G download rate, applied to inbound request bytes", "将 Chrome 开发者工具的高速 3G 下载速率应用于入站请求字节"),
     fault: { kind: 'bandwidth', bandwidthBytesPerSec: 180_000 },
   },
   {
     id: 'slow-3g-latency',
-    label: 'Slow 3G (latency)',
-    description: "Chrome DevTools' Slow 3G latency, charged per inbound read rather than per round trip",
+    label: uiText('Slow 3G (latency)', "低速 3G（延迟）"),
+    description: uiText("Chrome DevTools' Slow 3G latency, charged per inbound read rather than per round trip", "应用 Chrome 开发者工具的低速 3G 延迟，按每次入站读取计算"),
     fault: { kind: 'latency', latencyMs: 2_000 },
   },
   {
     id: 'fast-3g-latency',
-    label: 'Fast 3G (latency)',
-    description: "Chrome DevTools' Fast 3G latency (562.5 ms, rounded), charged per inbound read",
+    label: uiText('Fast 3G (latency)', "高速 3G（延迟）"),
+    description: uiText("Chrome DevTools' Fast 3G latency (562.5 ms, rounded), charged per inbound read", "应用 Chrome 开发者工具的高速 3G 延迟（562.5 毫秒，已取整），按每次入站读取计算"),
     fault: { kind: 'latency', latencyMs: 563 },
   },
   {
     id: 'satellite-latency',
-    label: 'Satellite (latency)',
-    description: 'Geostationary-satellite hop — a long one-way delay on every inbound read',
+    label: uiText('Satellite (latency)', "卫星网络（延迟）"),
+    description: uiText('Geostationary-satellite hop — a long one-way delay on every inbound read', "模拟地球同步卫星链路，对每次入站读取施加较长的单向延迟"),
     fault: { kind: 'latency', latencyMs: 500 },
   },
   {
     id: 'fragmented-link',
-    label: 'Fragmented link',
-    description: 'Congested wifi / small MTU — inbound data arrives in small slices, exercising partial-read handling (fragmentation only; the engine has no packet-loss fault)',
+    label: uiText('Fragmented link', "分片链路"),
+    description: uiText('Congested wifi / small MTU — inbound data arrives in small slices, exercising partial-read handling (fragmentation only; the engine has no packet-loss fault)', "模拟拥塞的 Wi-Fi 或较小的 MTU，让入站数据分片到达以测试部分读取。此预设只模拟分片。"),
     fault: { kind: 'fragmentation', slicerChunkSize: 512 },
   },
 ];

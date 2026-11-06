@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
@@ -60,8 +61,8 @@ export default function StandardReview({ matcher, action, baseUrl, originalJson 
       {originalJson !== undefined && (
         <Box sx={{ mb: 2 }} data-testid="standard-review-diff">
           <JsonDiffViewer
-            label="Changes vs the existing expectation (left = current, right = after update)"
-            ariaLabel="Changes vs the existing expectation"
+            label={uiText("Changes vs the existing expectation (left = current, right = after update)", "与现有规则的差异（左侧为当前内容，右侧为更新后的内容）")}
+            ariaLabel={uiText("Changes vs the existing expectation", "与现有规则的差异")}
             original={originalJson}
             modified={jsonCode}
             height={280}

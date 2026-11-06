@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -154,20 +155,20 @@ interface ActionTypeMeta {
 }
 
 const ACTION_TYPES: ActionTypeMeta[] = [
-  { value: 'static', label: 'Static HTTP response', description: 'Return a fixed status / headers / body for matching requests.' },
-  { value: 'forward', label: 'Forward to upstream', description: 'Proxy the request to a configured scheme://host:port.' },
-  { value: 'forward_override', label: 'Forward with override', description: 'Forward upstream while rewriting host / scheme / path on the outgoing request.' },
-  { value: 'forward_fallback', label: 'Forward with fallback', description: 'Forward upstream; if it returns a configured error status or times out, return a fallback mock response.' },
-  { value: 'callback', label: 'Class callback', description: 'Invoke a server-side class FQCN to build the response dynamically.' },
-  { value: 'template', label: 'Response template', description: 'Velocity / JavaScript / Mustache templates for dynamic responses.' },
-  { value: 'error', label: 'Error / fault injection', description: 'Drop the connection mid-request or send arbitrary bytes as the response.' },
-  { value: 'websocket', label: 'WebSocket response', description: 'Upgrade to a WebSocket connection and send messages, with optional bidirectional frame matchers.' },
-  { value: 'sse', label: 'SSE response', description: 'Server-Sent Events stream with typed events, data, and optional retry/close.' },
-  { value: 'binary_response', label: 'Binary response', description: 'Return raw binary data (base64-encoded) as the response body.' },
-  { value: 'dns_response', label: 'DNS response', description: 'Return a DNS response with a response code and answer records.' },
-  { value: 'forward_template', label: 'Forward template', description: 'Forward the request upstream using a Velocity / JavaScript / Mustache template to build the forwarded request.' },
-  { value: 'forward_class_callback', label: 'Forward class callback', description: 'Forward the request upstream via a server-side Java class implementing ExpectationForwardCallback.' },
-  { value: 'grpc_stream', label: 'gRPC stream response', description: 'Return a gRPC streaming response with status, messages, and optional close.' },
+  { value: 'static', label: uiText('Static HTTP response', "固定 HTTP 响应"), description: uiText('Return a fixed status / headers / body for matching requests.', "为匹配的请求返回固定的状态码、响应头和响应体。") },
+  { value: 'forward', label: uiText('Forward to upstream', "转发至上游"), description: uiText('Proxy the request to a configured scheme://host:port.', "将请求代理到配置的 scheme://host:port。") },
+  { value: 'forward_override', label: uiText('Forward with override', "改写后转发"), description: uiText('Forward upstream while rewriting host / scheme / path on the outgoing request.', "转发至上游前，改写出站请求的主机、协议或路径。") },
+  { value: 'forward_fallback', label: uiText('Forward with fallback', "转发失败时回退"), description: uiText('Forward upstream; if it returns a configured error status or times out, return a fallback mock response.', "将请求转发至上游。如果上游返回指定的错误状态码或超时，则返回备用 Mock 响应。") },
+  { value: 'callback', label: uiText('Class callback', "类回调"), description: uiText('Invoke a server-side class FQCN to build the response dynamically.', "调用服务器端 Java 类（使用全限定类名），动态构建响应。") },
+  { value: 'template', label: uiText('Response template', "响应模板"), description: uiText('Velocity / JavaScript / Mustache templates for dynamic responses.', "使用 Velocity、JavaScript 或 Mustache 模板动态生成响应。") },
+  { value: 'error', label: uiText('Error / fault injection', "故障注入"), description: uiText('Drop the connection mid-request or send arbitrary bytes as the response.', "在处理请求时断开连接，或返回任意字节。") },
+  { value: 'websocket', label: uiText('WebSocket response', "WebSocket 响应"), description: uiText('Upgrade to a WebSocket connection and send messages, with optional bidirectional frame matchers.', "将连接升级为 WebSocket 并发送消息，也可以配置双向帧匹配条件。") },
+  { value: 'sse', label: uiText('SSE response', "SSE 响应"), description: uiText('Server-Sent Events stream with typed events, data, and optional retry/close.', "向客户端发送事件流，可设置事件类型、数据、重连间隔以及是否关闭连接。") },
+  { value: 'binary_response', label: uiText('Binary response', "二进制响应"), description: uiText('Return raw binary data (base64-encoded) as the response body.', "将 Base64 编码的原始二进制数据作为响应体返回。") },
+  { value: 'dns_response', label: uiText('DNS response', "DNS 响应"), description: uiText('Return a DNS response with a response code and answer records.', "返回带有响应码和应答记录的 DNS 响应。") },
+  { value: 'forward_template', label: uiText('Forward template', "转发模板"), description: uiText('Forward the request upstream using a Velocity / JavaScript / Mustache template to build the forwarded request.', "使用 Velocity、JavaScript 或 Mustache 模板构建要转发至上游的请求。") },
+  { value: 'forward_class_callback', label: uiText('Forward class callback', "转发类回调"), description: uiText('Forward the request upstream via a server-side Java class implementing ExpectationForwardCallback.', "通过实现了 ExpectationForwardCallback 的服务器端 Java 类将请求转发至上游。") },
+  { value: 'grpc_stream', label: uiText('gRPC stream response', "gRPC 流式响应"), description: uiText('Return a gRPC streaming response with status, messages, and optional close.', "返回带有状态、消息以及可选关闭操作的 gRPC 流式响应。") },
 ];
 
 /**
@@ -255,7 +256,7 @@ function summaryForExpectation(value: Record<string, unknown>, expKind: Expectat
   const req = (value['httpRequest'] as Record<string, unknown> | undefined) ?? {};
 
   if (expKind === 'dns') {
-    const dnsName = (typeof req['dnsName'] === 'string' ? req['dnsName'] : '(unknown)') as string;
+    const dnsName = (typeof req['dnsName'] === 'string' ? req['dnsName'] : uiText('(unknown)', "（未知）")) as string;
     const dnsType = typeof req['dnsType'] === 'string' ? ` (${req['dnsType']})` : '';
     return `${dnsName}${dnsType}`;
   }
@@ -268,7 +269,7 @@ function summaryForExpectation(value: Record<string, unknown>, expKind: Expectat
 
   // HTTP / MCP — METHOD /path  → <what it does>
   const method = typeof req['method'] === 'string' ? (req['method'] as string) : 'ANY';
-  const path = typeof req['path'] === 'string' ? (req['path'] as string) : '(no path)';
+  const path = typeof req['path'] === 'string' ? (req['path'] as string) : uiText('(no path)', "（未指定路径）");
   const action = actionSummaryForExpectation(value);
   return action ? `${method} ${path}  ${action}` : `${method} ${path}`;
 }
@@ -287,22 +288,22 @@ function actionSummaryForExpectation(value: Record<string, unknown>): string {
     const status = typeof resp['statusCode'] === 'number' ? resp['statusCode'] : 200;
     return `→ ${status}`;
   }
-  if (value['httpResponses']) return '→ sequential';
-  if (value['httpResponseTemplate']) return '→ template';
-  if (value['httpResponseClassCallback'] || value['httpResponseObjectCallback']) return '→ callback';
-  if (value['binaryResponse']) return '→ binary';
+  if (value['httpResponses']) return uiText('→ sequential', "→ 顺序响应");
+  if (value['httpResponseTemplate']) return uiText('→ template', "→ 响应模板");
+  if (value['httpResponseClassCallback'] || value['httpResponseObjectCallback']) return uiText('→ callback', "→ 回调");
+  if (value['binaryResponse']) return uiText('→ binary', "→ 二进制响应");
   if (value['httpSseResponse']) return '→ SSE';
   if (value['httpWebSocketResponse']) return '→ WebSocket';
-  if (value['httpError']) return '→ error';
-  if (value['httpOverrideForwardedRequest']) return '→ forward + override';
-  if (value['httpForwardWithFallback']) return '→ forward (fallback)';
-  if (value['httpForwardTemplate']) return '→ forward (template)';
-  if (value['httpForwardClassCallback'] || value['httpForwardObjectCallback']) return '→ forward callback';
+  if (value['httpError']) return uiText('→ error', "→ 故障注入");
+  if (value['httpOverrideForwardedRequest']) return uiText('→ forward + override', "→ 改写后转发");
+  if (value['httpForwardWithFallback']) return uiText('→ forward (fallback)', "→ 转发失败时回退");
+  if (value['httpForwardTemplate']) return uiText('→ forward (template)', "→ 使用模板转发");
+  if (value['httpForwardClassCallback'] || value['httpForwardObjectCallback']) return uiText('→ forward callback', "→ 回调转发");
   const fwd = value['httpForward'] as Record<string, unknown> | undefined;
   if (fwd) {
     const host = typeof fwd['host'] === 'string' ? (fwd['host'] as string) : '';
     const port = typeof fwd['port'] === 'number' ? `:${fwd['port']}` : '';
-    return host ? `→ forward ${host}${port}` : '→ forward';
+    return host ? uiText(`→ forward ${host}${port}`, `→ 转发至 ${host}${port}`) : uiText('→ forward', "→ 转发");
   }
   return '';
 }
@@ -317,7 +318,7 @@ function kindLabel(k: ExpectationKind): string {
     case 'grpc': return 'gRPC';
     case 'dns': return 'DNS';
     case 'mcp': return 'MCP';
-    case 'import': return 'Import';
+    case 'import': return uiText('Import', "导入");
   }
 }
 
@@ -340,7 +341,7 @@ async function registerExpectation(
   action: StandardActionPayload,
 ): Promise<number> {
   if (action.editOriginal && isShortenedExpectation(action.editOriginal)) {
-    throw new Error('This expectation was shortened in the live update, so it was not saved: load it again from the list');
+    throw new Error(uiText('This expectation was shortened in the live update, so it was not saved: load it again from the list', "实时更新中的规则内容已被截断，未保存。请从列表重新加载完整规则。"));
   }
   const url = `${baseUrl(connectionParams)}/mockserver/expectation`;
   const body = buildExpectationJson(matcher, action);
@@ -532,18 +533,18 @@ function bodyEditorConfig(type: BodyMatcherType): { language: string; schema?: o
 function ignoredLinesWarning(text: string, separator: ':' | '=', formatHint: string): string | undefined {
   const n = ignoredKeyValueLines(text, separator).length;
   if (n === 0) return undefined;
-  return `${n} line${n === 1 ? '' : 's'} ignored — expected ${formatHint}`;
+  return uiText(`${n} line${n === 1 ? '' : 's'} ignored — expected ${formatHint}`, `已忽略 ${n} 行，需要采用 ${formatHint} 格式`);
 }
 
 const ALLOF_SUB_TYPES: { value: AllOfSubBodyType; label: string }[] = [
-  { value: 'string', label: 'String (exact)' },
+  { value: 'string', label: uiText('String (exact)', "字符串（精确匹配）") },
   { value: 'json', label: 'JSON' },
   { value: 'json-schema', label: 'JSON Schema' },
   { value: 'json-path', label: 'JSON Path' },
   { value: 'xml', label: 'XML' },
   { value: 'xml-schema', label: 'XML Schema' },
   { value: 'xpath', label: 'XPath' },
-  { value: 'regex', label: 'Regex' },
+  { value: 'regex', label: uiText('Regex', "正则表达式") },
 ];
 
 /** Repeatable sub-matcher rows for an `allOf` composite body (logical AND of body matchers). */
@@ -557,12 +558,12 @@ function AllOfMatcherRows({ matcher, setMatcher }: { matcher: MatcherState; setM
   return (
     <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }} data-testid="allof-section">
       <Typography variant="caption" color="text.secondary">
-        The request body must satisfy every sub-matcher below (logical AND). Add two or more.
+        {uiText("The request body must satisfy every sub-matcher below (logical AND). Add two or more.", "请求体必须满足下方的每个子条件（逻辑与）。请添加至少两项。")}
       </Typography>
       {rows.map((row, idx) => (
         <Paper key={idx} variant="outlined" sx={{ p: 1, display: 'flex', gap: 1, alignItems: 'flex-start' }} data-testid="allof-row">
           <TextField
-            label="Type"
+            label={uiText("Type", "类型")}
             size="small"
             select
             value={row.type}
@@ -575,7 +576,7 @@ function AllOfMatcherRows({ matcher, setMatcher }: { matcher: MatcherState; setM
             ))}
           </TextField>
           <TextField
-            label="Matcher value"
+            label={uiText("Matcher value", "匹配值")}
             size="small"
             fullWidth
             multiline
@@ -588,14 +589,14 @@ function AllOfMatcherRows({ matcher, setMatcher }: { matcher: MatcherState; setM
               htmlInput: { 'data-testid': `allof-value-${idx}` },
             }}
           />
-          <IconButton size="small" aria-label="Remove sub-matcher" onClick={() => removeRow(idx)} data-testid={`allof-remove-${idx}`}>
+          <IconButton size="small" aria-label={uiText("Remove sub-matcher", "移除子条件")} onClick={() => removeRow(idx)} data-testid={`allof-remove-${idx}`}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Paper>
       ))}
       <Box>
         <Button size="small" variant="outlined" onClick={addRow} data-testid="add-allof-row">
-          Add sub-matcher
+          {uiText("Add sub-matcher", "添加子条件")}
         </Button>
       </Box>
     </Box>
@@ -616,19 +617,19 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
             size="small"
             checked={enabled}
             onChange={(e) => setMatcher({ ...matcher, jwt: e.target.checked ? (matcher.jwt ?? {}) : undefined })}
-            slotProps={{ input: { 'aria-label': 'Match a JWT', 'data-testid': 'jwt-enable' } as Record<string, unknown> }}
+            slotProps={{ input: { 'aria-label': uiText('Match a JWT', "匹配 JWT"), 'data-testid': 'jwt-enable' } as Record<string, unknown> }}
           />
         }
-        label={<Typography variant="body2">Match a JWT (JSON Web Token)</Typography>}
+        label={<Typography variant="body2">{uiText("Match a JWT (JSON Web Token)", "匹配 JWT（JSON Web Token）")}</Typography>}
       />
       <Collapse in={enabled} unmountOnExit>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
           <Typography variant="caption" color="text.secondary">
-            Matches claims in a JWT carried in a request header. No signature is verified — this is request routing, not authentication.
+            {uiText("Matches claims in a JWT carried in a request header. No signature is verified — this is request routing, not authentication.", "匹配请求头中 JWT 的声明。此设置仅用于请求路由，不会验证签名或进行身份认证。")}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <TextField
-              label="Header (default authorization)"
+              label={uiText("Header (default authorization)", "请求头（默认为 authorization）")}
               size="small"
               value={jwt.header ?? ''}
               onChange={(e) => patch({ header: e.target.value })}
@@ -636,7 +637,7 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
               slotProps={{ htmlInput: { 'data-testid': 'jwt-header' } }}
             />
             <TextField
-              label="Scheme (default Bearer)"
+              label={uiText("Scheme (default Bearer)", "认证方案（默认为 Bearer）")}
               size="small"
               value={jwt.scheme ?? ''}
               onChange={(e) => patch({ scheme: e.target.value })}
@@ -645,7 +646,7 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
             />
           </Box>
           <TextField
-            label="Claims (name=value per line, ! negates)"
+            label={uiText("Claims (name=value per line, ! negates)", "声明（每行一项 name=value，前缀 ! 表示取反）")}
             size="small"
             multiline
             minRows={2}
@@ -660,7 +661,7 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
           />
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <TextField
-              label="Issuer (iss)"
+              label={uiText("Issuer (iss)", "签发方（iss）")}
               size="small"
               value={jwt.issuer ?? ''}
               onChange={(e) => patch({ issuer: e.target.value })}
@@ -668,7 +669,7 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
               slotProps={{ htmlInput: { 'data-testid': 'jwt-issuer' } }}
             />
             <TextField
-              label="Audience (aud)"
+              label={uiText("Audience (aud)", "受众（aud）")}
               size="small"
               value={jwt.audience ?? ''}
               onChange={(e) => patch({ audience: e.target.value })}
@@ -676,7 +677,7 @@ function JwtMatcherSection({ matcher, setMatcher }: { matcher: MatcherState; set
               slotProps={{ htmlInput: { 'data-testid': 'jwt-audience' } }}
             />
             <TextField
-              label="Algorithm (alg)"
+              label={uiText("Algorithm (alg)", "算法（alg）")}
               size="small"
               value={jwt.algorithm ?? ''}
               onChange={(e) => patch({ algorithm: e.target.value })}
@@ -705,17 +706,17 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Expectation ID (optional)"
+          label={uiText("Expectation ID (optional)", "规则 ID（可选）")}
           size="small"
           sx={{ flex: 1 }}
           value={matcher.id}
           onChange={(e) => setMatcher({ ...matcher, id: e.target.value })}
-          placeholder="leave blank to auto-generate; reuse an ID to update an existing expectation"
+          placeholder={uiText("leave blank to auto-generate; reuse an ID to update an existing expectation", "留空时自动生成。填写已有规则 ID 可更新该规则。")}
         />
       </Box>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
-          label="Method"
+          label={uiText("Method", "请求方法")}
           size="small"
           select
           value={matcher.method}
@@ -723,25 +724,25 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
           sx={{ minWidth: 110 }}
         >
           {['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'].map((m) => (
-            <MenuItem key={m} value={m === 'ANY' ? '' : m}>{m}</MenuItem>
+            <MenuItem key={m} value={m === 'ANY' ? '' : m}>{m === 'ANY' ? uiText('ANY', '不限') : m}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Path"
+          label={uiText("Path", "路径")}
           size="small"
           fullWidth
           sx={{ flex: 1, minWidth: 200 }}
           value={matcher.path}
           onChange={(e) => setMatcher({ ...matcher, path: e.target.value })}
-          placeholder="/foo/bar  ·  prefix with ! to negate"
+          placeholder={uiText("/foo/bar  ·  prefix with ! to negate", "/foo/bar · 在前面加 ! 表示取反")}
         />
       </Box>
       <Box sx={{ mt: -1, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
-          Prefix any string field or any line below with <code>!</code> to negate the match.
-          <InfoTip text="A leading ! means &quot;must NOT match this value&quot;. e.g. path !/admin matches every path except /admin; header !Authorization: … matches requests that do not carry that header. A value written as a JSON object is a matcher object, e.g. X-Issued-At: {&quot;after&quot;:&quot;now -1 hours&quot;} compares the header as a date-time." />
+          {uiText("Prefix any string field or any line below with ", "可在字符串字段或下方任意一行前加上 ")}<code>!</code>{uiText(" to negate the match.", " 来匹配不符合该值的请求。")}
+          <InfoTip text={uiText("A leading ! means \"must NOT match this value\". e.g. path !/admin matches every path except /admin; header !Authorization: … matches requests that do not carry that header. A value written as a JSON object is a matcher object, e.g. X-Issued-At: {\"after\":\"now -1 hours\"} compares the header as a date-time.", "前缀 ! 表示“不得匹配该值”。例如，路径 !/admin 匹配 /admin 以外的所有路径。请求头 !Authorization: … 匹配不含该头的请求。也可将值写成 JSON 匹配对象，例如 X-Issued-At: {\"after\":\"now -1 hours\"} 表示按日期时间比较该请求头。")} />
         </Typography>
-        <Button size="small" onClick={() => setDateTimeOpen(true)}>Add Date-Time Matcher</Button>
+        <Button size="small" onClick={() => setDateTimeOpen(true)}>{uiText("Add Date-Time Matcher", "添加日期时间条件")}</Button>
       </Box>
       <DateTimeMatcherDialog
         open={dateTimeOpen}
@@ -750,7 +751,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
       />
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Headers (Name: value per line)"
+          label={uiText("Headers (Name: value per line)", "请求头（每行一项 Name: value）")}
           multiline
           minRows={2}
           maxRows={6}
@@ -765,7 +766,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
           }}
         />
         <TextField
-          label="Query params (key=value per line)"
+          label={uiText("Query params (key=value per line)", "查询参数（每行一项 key=value）")}
           multiline
           minRows={2}
           maxRows={6}
@@ -782,7 +783,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
       </Box>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Cookies (name=value per line)"
+          label={uiText("Cookies (name=value per line)", "Cookie（每行一项 name=value）")}
           multiline
           minRows={2}
           maxRows={4}
@@ -797,14 +798,14 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
           }}
         />
         <TextField
-          label="Path parameters (name=value per line)"
+          label={uiText("Path parameters (name=value per line)", "路径参数（每行一项 name=value）")}
           multiline
           minRows={2}
           maxRows={4}
           sx={{ flex: 1 }}
           value={matcher.pathParams}
           onChange={(e) => setMatcher({ ...matcher, pathParams: e.target.value })}
-          placeholder={'id=42  (for paths like /users/{id})'}
+          placeholder={uiText('id=42  (for paths like /users/{id})', "id=42（适用于 /users/{id} 等路径）")}
           helperText={pathParamsWarning}
           slotProps={{
             input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } },
@@ -815,7 +816,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
       <Box>
         <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
           <TextField
-            label="Body type"
+            label={uiText("Body type", "请求体类型")}
             size="small"
             select
             value={matcher.bodyMatcherType}
@@ -829,19 +830,19 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
             }}
             sx={{ minWidth: 250 }}
           >
-            <MenuItem value="string">String (exact / subString)</MenuItem>
+            <MenuItem value="string">{uiText("String (exact / subString)", "字符串（精确匹配或子串匹配）")}</MenuItem>
             <MenuItem value="json">JSON</MenuItem>
             <MenuItem value="graphql">GraphQL</MenuItem>
-            <MenuItem value="binary">Binary (base64)</MenuItem>
+            <MenuItem value="binary">{uiText("Binary (base64)", "二进制（Base64）")}</MenuItem>
             <MenuItem value="json-schema">JSON Schema</MenuItem>
             <MenuItem value="json-path">JSON Path</MenuItem>
             <MenuItem value="xml">XML</MenuItem>
             <MenuItem value="xml-schema">XML Schema</MenuItem>
             <MenuItem value="xpath">XPath</MenuItem>
-            <MenuItem value="regex">Regex</MenuItem>
-            <MenuItem value="parameters">Parameters</MenuItem>
-            <MenuItem value="wasm">WASM module</MenuItem>
-            <MenuItem value="allOf">All of (compose matchers)</MenuItem>
+            <MenuItem value="regex">{uiText("Regex", "正则表达式")}</MenuItem>
+            <MenuItem value="parameters">{uiText("Parameters", "参数")}</MenuItem>
+            <MenuItem value="wasm">{uiText("WASM module", "WASM 模块")}</MenuItem>
+            <MenuItem value="allOf">{uiText("All of (compose matchers)", "全部满足（组合多个匹配条件）")}</MenuItem>
           </TextField>
         </Box>
         {matcher.bodyMatcherType === 'allOf' && (
@@ -850,28 +851,28 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
         {matcher.bodyMatcherType !== 'allOf' && (() => {
           const bodyLabel =
             matcher.bodyMatcherType === 'binary'
-              ? 'Body matcher (base64 bytes)'
+              ? uiText('Body matcher (base64 bytes)', "请求体匹配条件（Base64 字节）")
               : matcher.bodyMatcherType === 'graphql'
-                ? 'GraphQL query'
+                ? uiText('GraphQL query', "GraphQL 查询")
                 : matcher.bodyMatcherType === 'json'
-                  ? 'JSON body matcher'
+                  ? uiText('JSON body matcher', "JSON 请求体匹配条件")
                   : matcher.bodyMatcherType === 'json-schema'
                     ? 'JSON Schema'
                     : matcher.bodyMatcherType === 'json-path'
-                      ? 'JSON Path expression'
+                      ? uiText('JSON Path expression', "JSON Path 表达式")
                       : matcher.bodyMatcherType === 'xml'
-                        ? 'XML body'
+                        ? uiText('XML body', "XML 请求体")
                         : matcher.bodyMatcherType === 'xml-schema'
-                          ? 'XML Schema (XSD)'
+                          ? uiText('XML Schema (XSD)', "XML Schema（XSD）")
                           : matcher.bodyMatcherType === 'xpath'
-                            ? 'XPath expression'
+                            ? uiText('XPath expression', "XPath 表达式")
                             : matcher.bodyMatcherType === 'regex'
-                              ? 'Regex pattern'
+                              ? uiText('Regex pattern', "正则表达式")
                               : matcher.bodyMatcherType === 'parameters'
-                                ? 'Parameters (key=value per line)'
+                                ? uiText('Parameters (key=value per line)', "参数（每行一项 key=value）")
                                 : matcher.bodyMatcherType === 'wasm'
-                                  ? 'WASM module name'
-                                  : 'Body matcher (string)';
+                                  ? uiText('WASM module name', "WASM 模块名称")
+                                  : uiText('Body matcher (string)', "请求体匹配条件（字符串）");
           const bodyPlaceholder =
             matcher.bodyMatcherType === 'binary'
               ? 'SGVsbG8sIFdvcmxkIQ=='
@@ -895,7 +896,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
                                 ? 'username=admin\npassword=secret'
                                 : matcher.bodyMatcherType === 'wasm'
                                   ? 'myMatcher'
-                                  : 'e.g. hello world';
+                                  : uiText('e.g. hello world', "例如 hello world");
           const editorConfig = bodyEditorConfig(matcher.bodyMatcherType);
           const compact =
             matcher.bodyMatcherType === 'json-path' ||
@@ -917,17 +918,17 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
         {(matcher.bodyMatcherType === 'json-path' || matcher.bodyMatcherType === 'xpath') && (
           <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <TextField
-              label="Date-Time Comparison (optional)"
+              label={uiText("Date-Time Comparison (optional)", "日期时间比较（可选）")}
               size="small"
               sx={{ flex: 1, minWidth: 260 }}
               value={matcher.bodyDateTime ?? ''}
               onChange={(e) => setMatcher({ ...matcher, bodyDateTime: e.target.value })}
               placeholder='{"after":"now -1 days"}'
               error={!!bodyDateTimeProblem}
-              helperText={bodyDateTimeProblem ?? `Matches when a value the ${matcher.bodyMatcherType === 'xpath' ? 'XPath' : 'JSON Path'} selects is a date-time that satisfies this comparison.`}
+              helperText={bodyDateTimeProblem ?? uiText(`Matches when a value the ${matcher.bodyMatcherType === 'xpath' ? 'XPath' : 'JSON Path'} selects is a date-time that satisfies this comparison.`, `${matcher.bodyMatcherType === 'xpath' ? 'XPath' : 'JSON Path'} 选出的值是日期时间且符合此比较条件时匹配。`)}
               slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
             />
-            <Button size="small" sx={{ mt: 0.5 }} onClick={() => setBodyDateTimeOpen(true)}>Build Date-Time Comparison</Button>
+            <Button size="small" sx={{ mt: 0.5 }} onClick={() => setBodyDateTimeOpen(true)}>{uiText("Build Date-Time Comparison", "设置日期时间比较")}</Button>
             <DateTimeMatcherDialog
               open={bodyDateTimeOpen}
               onClose={() => setBodyDateTimeOpen(false)}
@@ -938,7 +939,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
         {matcher.bodyMatcherType === 'graphql' && (
           <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
             <TextField
-              label="Selection set match type"
+              label={uiText("Selection set match type", "字段选择集匹配方式")}
               size="small"
               select
               value={matcher.graphqlOptions.selectionSetMatchType}
@@ -953,14 +954,14 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
               }
               sx={{ width: { xs: '100%', sm: 260 } }}
             >
-              <MenuItem value="NORMALISED_STRING">Normalised string (default)</MenuItem>
-              <MenuItem value="AST_EXACT">AST exact</MenuItem>
-              <MenuItem value="AST_SUBSET">AST subset</MenuItem>
+              <MenuItem value="NORMALISED_STRING">{uiText("Normalised string (default)", "规范化字符串（默认）")}</MenuItem>
+              <MenuItem value="AST_EXACT">{uiText("AST exact", "AST 精确匹配")}</MenuItem>
+              <MenuItem value="AST_SUBSET">{uiText("AST subset", "AST 子集匹配")}</MenuItem>
             </TextField>
             {(matcher.graphqlOptions.selectionSetMatchType === 'AST_EXACT' ||
               matcher.graphqlOptions.selectionSetMatchType === 'AST_SUBSET') && (
               <TextField
-                label="Fields (comma-separated, optional)"
+                label={uiText("Fields (comma-separated, optional)", "字段（用逗号分隔，可选）")}
                 size="small"
                 value={matcher.graphqlOptions.fields}
                 onChange={(e) =>
@@ -978,7 +979,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
         {matcher.bodyMatcherType === 'json' && (
           <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <TextField
-              label="JSON match type"
+              label={uiText("JSON match type", "JSON 匹配方式")}
               size="small"
               select
               value={matcher.jsonMatchType}
@@ -987,10 +988,10 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
               }
               sx={{ width: { xs: '100%', sm: 260 } }}
             >
-              <MenuItem value="ONLY_MATCHING_FIELDS">Only matching fields (default)</MenuItem>
-              <MenuItem value="STRICT">Strict (all fields must match)</MenuItem>
+              <MenuItem value="ONLY_MATCHING_FIELDS">{uiText("Only matching fields (default)", "只匹配指定字段（默认）")}</MenuItem>
+              <MenuItem value="STRICT">{uiText("Strict (all fields must match)", "严格匹配（所有字段都必须匹配）")}</MenuItem>
             </TextField>
-            <InfoTip text="Only matching fields: the request must contain the fields you list (extra fields are ignored) — best for partial matches. Strict: the request body must match exactly, with no extra or missing fields." />
+            <InfoTip text={uiText("Only matching fields: the request must contain the fields you list (extra fields are ignored) — best for partial matches. Strict: the request body must match exactly, with no extra or missing fields.", "只匹配指定字段：请求体须包含列出的字段，其他字段会被忽略，适合部分匹配。严格匹配：请求体必须完全一致，不能多出或缺少字段。")} />
           </Box>
         )}
         {matcher.bodyMatcherType === 'string' && (
@@ -1003,7 +1004,7 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
                   onChange={(e) => setMatcher({ ...matcher, bodySubString: e.target.checked })}
                 />
               }
-              label={<Typography variant="body2">SubString match</Typography>}
+              label={<Typography variant="body2">{uiText("SubString match", "子串匹配")}</Typography>}
             />
           </Box>
         )}
@@ -1021,45 +1022,45 @@ function MatcherPanel({ matcher, setMatcher }: { matcher: MatcherState; setMatch
           value={triValue(matcher.secure)}
           onChange={(e) => setMatcher({ ...matcher, secure: triParse(e.target.value) })}
         >
-          <MenuItem value="">Any</MenuItem>
-          <MenuItem value="true">HTTPS only</MenuItem>
-          <MenuItem value="false">HTTP only</MenuItem>
+          <MenuItem value="">{uiText("Any", "任意")}</MenuItem>
+          <MenuItem value="true">{uiText("HTTPS only", "仅 HTTPS")}</MenuItem>
+          <MenuItem value="false">{uiText("HTTP only", "仅 HTTP")}</MenuItem>
         </TextField>
         <TextField
-          label="Client IP"
+          label={uiText("Client IP", "客户端 IP")}
           size="small"
           placeholder="10.0.0.0/8"
-          helperText="IP or CIDR, ! to negate; TCP peer, not X-Forwarded-For"
+          helperText={uiText("IP or CIDR, ! to negate; TCP peer, not X-Forwarded-For", "支持 IP 或 CIDR，前缀 ! 表示取反。使用 TCP 对端地址，不读取 X-Forwarded-For。")}
           sx={{ width: { xs: '100%', sm: 220 } }}
           value={matcher.clientIp}
           onChange={(e) => setMatcher({ ...matcher, clientIp: e.target.value })}
         />
         <TextField
-          label="Priority (higher = wins)"
+          label={uiText("Priority (higher = wins)", "优先级（数值越大越优先）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 230 } }}
           value={matcher.priority}
           onChange={(e) => setMatcher({ ...matcher, priority: Number(e.target.value) || 0 })}
-          slotProps={{ input: infoAdornment('When several mocks match the same request, the one with the highest priority wins. Leave at 0 unless you need to override a more general mock.') }}
+          slotProps={{ input: infoAdornment(uiText('When several mocks match the same request, the one with the highest priority wins. Leave at 0 unless you need to override a more general mock.', "若多条规则匹配同一请求，将使用优先级最高的规则。通常保留为 0，如需覆盖更通用的规则再调整。")) }}
         />
         <TextField
-          label="Times (0 = unlimited)"
+          label={uiText("Times (0 = unlimited)", "可命中次数（0 表示不限）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 200 } }}
           value={matcher.times}
           onChange={(e) => setMatcher({ ...matcher, times: Math.max(0, Number(e.target.value) || 0) })}
-          slotProps={{ input: infoAdornment('How many times this mock will respond before it stops matching. 0 means unlimited — it responds to every matching request.') }}
+          slotProps={{ input: infoAdornment(uiText('How many times this mock will respond before it stops matching. 0 means unlimited — it responds to every matching request.', "此规则最多响应多少次。0 表示不限次数，会响应每个匹配的请求。")) }}
         />
         <TextField
-          label="Time to live (s, 0 = forever)"
+          label={uiText("Time to live (s, 0 = forever)", "有效期（秒，0 表示永久有效）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 230 } }}
           value={matcher.ttlSeconds}
           onChange={(e) => setMatcher({ ...matcher, ttlSeconds: Math.max(0, Number(e.target.value) || 0) })}
-          slotProps={{ input: infoAdornment('The mock auto-expires this many seconds after it is registered. 0 means it never expires.') }}
+          slotProps={{ input: infoAdornment(uiText('The mock auto-expires this many seconds after it is registered. 0 means it never expires.', "规则会在注册后经过指定秒数失效。0 表示永久有效。")) }}
         />
       </Box>
     </Box>
@@ -1087,47 +1088,47 @@ function DnsMatcherPanel({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Expectation ID (optional)"
+          label={uiText("Expectation ID (optional)", "规则 ID（可选）")}
           size="small"
           sx={{ flex: 1 }}
           value={matcher.id}
           onChange={(e) => setMatcher({ ...matcher, id: e.target.value })}
-          placeholder="leave blank to auto-generate; reuse an ID to update an existing expectation"
+          placeholder={uiText("leave blank to auto-generate; reuse an ID to update an existing expectation", "留空时自动生成。填写已有规则 ID 可更新该规则。")}
         />
       </Box>
       <TextField
-        label="DNS name"
+        label={uiText("DNS name", "DNS 名称")}
         size="small"
         fullWidth
         value={dnsMatcher.dnsName}
         onChange={(e) => setDnsMatcher({ ...dnsMatcher, dnsName: e.target.value })}
         placeholder="example.com"
-        helperText="required — the server routes to a DNS matcher when dnsName is present"
+        helperText={uiText("required — the server routes to a DNS matcher when dnsName is present", "必填。请求含 dnsName 字段时，服务器会使用 DNS 匹配条件。")}
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Record type"
+          label={uiText("Record type", "记录类型")}
           size="small"
           select
           value={dnsMatcher.dnsType}
           onChange={(e) => setDnsMatcher({ ...dnsMatcher, dnsType: e.target.value as DnsRecordType | '' })}
           sx={{ minWidth: 160 }}
         >
-          <MenuItem value="">(any)</MenuItem>
+          <MenuItem value="">{uiText("(any)", "（任意）")}</MenuItem>
           {(['A', 'AAAA', 'CNAME', 'MX', 'SRV', 'TXT', 'PTR'] as const).map((t) => (
             <MenuItem key={t} value={t}>{t}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Record class"
+          label={uiText("Record class", "记录类别")}
           size="small"
           select
           value={dnsMatcher.dnsClass}
           onChange={(e) => setDnsMatcher({ ...dnsMatcher, dnsClass: e.target.value as DnsRecordClass | '' })}
           sx={{ minWidth: 140 }}
         >
-          <MenuItem value="">(any)</MenuItem>
+          <MenuItem value="">{uiText("(any)", "（任意）")}</MenuItem>
           {(['IN', 'CH', 'HS', 'ANY'] as const).map((c) => (
             <MenuItem key={c} value={c}>{c}</MenuItem>
           ))}
@@ -1135,31 +1136,31 @@ function DnsMatcherPanel({
       </Box>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
-          label="Priority (higher = wins)"
+          label={uiText("Priority (higher = wins)", "优先级（数值越大越优先）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 230 } }}
           value={matcher.priority}
           onChange={(e) => setMatcher({ ...matcher, priority: Number(e.target.value) || 0 })}
-          slotProps={{ input: infoAdornment('When several mocks match the same request, the one with the highest priority wins. Leave at 0 unless you need to override a more general mock.') }}
+          slotProps={{ input: infoAdornment(uiText('When several mocks match the same request, the one with the highest priority wins. Leave at 0 unless you need to override a more general mock.', "若多条规则匹配同一请求，将使用优先级最高的规则。通常保留为 0，如需覆盖更通用的规则再调整。")) }}
         />
         <TextField
-          label="Times (0 = unlimited)"
+          label={uiText("Times (0 = unlimited)", "可命中次数（0 表示不限）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 200 } }}
           value={matcher.times}
           onChange={(e) => setMatcher({ ...matcher, times: Math.max(0, Number(e.target.value) || 0) })}
-          slotProps={{ input: infoAdornment('How many times this mock will respond before it stops matching. 0 means unlimited — it responds to every matching request.') }}
+          slotProps={{ input: infoAdornment(uiText('How many times this mock will respond before it stops matching. 0 means unlimited — it responds to every matching request.', "此规则最多响应多少次。0 表示不限次数，会响应每个匹配的请求。")) }}
         />
         <TextField
-          label="Time to live (s, 0 = forever)"
+          label={uiText("Time to live (s, 0 = forever)", "有效期（秒，0 表示永久有效）")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 230 } }}
           value={matcher.ttlSeconds}
           onChange={(e) => setMatcher({ ...matcher, ttlSeconds: Math.max(0, Number(e.target.value) || 0) })}
-          slotProps={{ input: infoAdornment('The mock auto-expires this many seconds after it is registered. 0 means it never expires.') }}
+          slotProps={{ input: infoAdornment(uiText('The mock auto-expires this many seconds after it is registered. 0 means it never expires.', "规则会在注册后经过指定秒数失效。0 表示永久有效。")) }}
         />
       </Box>
     </Box>
@@ -1842,6 +1843,11 @@ function triParse(v: string): boolean | undefined {
  * A response status code input. A blank field is held as NaN rather than snapping
  * to 0 or 200, so the form can refuse it (see {@link responseStatusCodeError}).
  */
+function statusCodeHint(value: number): string | undefined {
+  const error = responseStatusCodeError(value);
+  return error ? uiText(error, '状态码必须为 100 至 999 之间的整数') : undefined;
+}
+
 function StatusCodeField({
   value,
   onChange,
@@ -1851,10 +1857,10 @@ function StatusCodeField({
   onChange: (statusCode: number) => void;
   width?: number;
 }) {
-  const error = responseStatusCodeError(value);
+  const error = statusCodeHint(value);
   return (
     <TextField
-      label="Status code"
+      label={uiText("Status code", "状态码")}
       size="small"
       type="number"
       value={Number.isNaN(value) ? '' : value}
@@ -1872,7 +1878,7 @@ function StatusCodeField({
  * instead of the fixed value) or a template (which falls back to the fixed value). A delay is saved
  * whole, so typing a fixed value would replace, and lose, either one.
  */
-const LOCKED_DELAY_HELP = 'This delay uses a distribution, or a template with the fixed value only as its fallback, kept under Other fields. Remove it there to set a fixed delay.';
+const LOCKED_DELAY_HELP = uiText('This delay uses a distribution, or a template with the fixed value only as its fallback, kept under Other fields. Remove it there to set a fixed delay.', "此延迟使用概率分布，或使用以固定值作为备用值的模板。相关设置保留在“其他字段”中。可在那里移除后再设置固定延迟。");
 
 function isPlainRecord(v: unknown): v is Record<string, unknown> {
   return !!v && typeof v === 'object' && !Array.isArray(v);
@@ -1893,12 +1899,12 @@ function StaticHttpPanel({
       <Box sx={{ display: 'flex', gap: 1 }}>
         <StatusCodeField value={state.statusCode} onChange={(statusCode) => setState({ ...state, statusCode })} />
         <TextField
-          label="Reason phrase (optional)"
+          label={uiText("Reason phrase (optional)", "原因短语（可选）")}
           size="small"
           value={state.reasonPhrase}
           onChange={(e) => setState({ ...state, reasonPhrase: e.target.value })}
           sx={{ width: { xs: '100%', sm: 200 } }}
-          placeholder="e.g. Not Found"
+          placeholder={uiText("e.g. Not Found", "例如 Not Found")}
         />
         <TextField
           label="Content-Type"
@@ -1909,7 +1915,7 @@ function StaticHttpPanel({
         />
       </Box>
       <TextField
-        label="Response headers (one per line, Name: value)"
+        label={uiText("Response headers (one per line, Name: value)", "响应头（每行一项 Name: value）")}
         multiline
         minRows={2}
         maxRows={8}
@@ -1919,7 +1925,7 @@ function StaticHttpPanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Response cookies (name=value per line)"
+        label={uiText("Response cookies (name=value per line)", "响应 Cookie（每行一项 name=value）")}
         multiline
         minRows={2}
         maxRows={4}
@@ -1930,19 +1936,19 @@ function StaticHttpPanel({
       />
       <TextField
         select
-        label="Body source"
+        label={uiText("Body source", "响应体来源")}
         size="small"
         value={state.bodyFromFile ? 'file' : 'inline'}
         onChange={(e) => setState({ ...state, bodyFromFile: e.target.value === 'file' })}
         sx={{ width: { xs: '100%', sm: 220 } }}
       >
-        <MenuItem value="inline">Inline body</MenuItem>
-        <MenuItem value="file">From file</MenuItem>
+        <MenuItem value="inline">{uiText("Inline body", "直接填写")}</MenuItem>
+        <MenuItem value="file">{uiText("From file", "读取文件")}</MenuItem>
       </TextField>
       {state.bodyFromFile ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <TextField
-            label="Body file path"
+            label={uiText("Body file path", "响应体文件路径")}
             size="small"
             value={state.filePath}
             onChange={(e) => setState({ ...state, filePath: e.target.value })}
@@ -1951,14 +1957,14 @@ function StaticHttpPanel({
           />
           <TextField
             select
-            label="Template engine (optional)"
+            label={uiText("Template engine (optional)", "模板引擎（可选）")}
             size="small"
             value={state.fileTemplateType}
             onChange={(e) => setState({ ...state, fileTemplateType: e.target.value as StaticState['fileTemplateType'] })}
             sx={{ width: { xs: '100%', sm: 320 } }}
-            helperText="Render the file as a template against the request. JavaScript is not supported for body files — use a Response template for that."
+            helperText={uiText("Render the file as a template against the request. JavaScript is not supported for body files — use a Response template for that.", "根据请求渲染文件模板。响应体文件不支持 JavaScript，如需使用，请选择响应模板。")}
           >
-            <MenuItem value="">None (serve file verbatim)</MenuItem>
+            <MenuItem value="">{uiText("None (serve file verbatim)", "无（原样返回文件）")}</MenuItem>
             <MenuItem value="MUSTACHE">Mustache</MenuItem>
             <MenuItem value="VELOCITY">Velocity</MenuItem>
           </TextField>
@@ -1975,7 +1981,7 @@ function StaticHttpPanel({
               }
               label={
                 <Typography variant="body2">
-                  Choose the file from the request (template the path, e.g. {'responses/{{ request.pathParameters.name.0 }}.json'})
+                  {uiText("Choose the file from the request (template the path, e.g. ", "按请求选择文件（使用模板生成路径，例如 ")}{'responses/{{ request.pathParameters.name.0 }}.json'})
                 </Typography>
               }
             />
@@ -1983,8 +1989,8 @@ function StaticHttpPanel({
         </Box>
       ) : (
         <JsonEditor
-          label="Response body"
-          ariaLabel="Response body"
+          label={uiText("Response body", "响应体")}
+          ariaLabel={uiText("Response body", "响应体")}
           language={responseBodyLanguage(state.contentType)}
           value={state.body}
           onChange={(next) => setState({ ...state, body: next })}
@@ -1994,17 +2000,17 @@ function StaticHttpPanel({
       )}
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
         <TextField
-          label="Response delay"
+          label={uiText("Response delay", "响应延迟")}
           size="small"
           type="number"
           value={state.delayValue}
           onChange={(e) => setState({ ...state, delayValue: Number(e.target.value) || 0 })}
           sx={{ width: { xs: '100%', sm: delayLocked ? 360 : 180 } }}
           disabled={delayLocked}
-          helperText={delayLocked ? LOCKED_DELAY_HELP : '0 = no delay'}
+          helperText={delayLocked ? LOCKED_DELAY_HELP : uiText('0 = no delay', "0 表示无延迟")}
         />
         <TextField
-          label="Unit"
+          label={uiText("Unit", "单位")}
           size="small"
           select
           disabled={delayLocked}
@@ -2012,9 +2018,9 @@ function StaticHttpPanel({
           onChange={(e) => setState({ ...state, delayUnit: e.target.value as StaticDelayUnit })}
           sx={{ width: { xs: '100%', sm: 160 } }}
         >
-          <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-          <MenuItem value="SECONDS">seconds</MenuItem>
-          <MenuItem value="MINUTES">minutes</MenuItem>
+          <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+          <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+          <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
         </TextField>
       </Box>
       <ConnectionOptionsFields
@@ -2042,31 +2048,31 @@ function ConnectionOptionsFields({
   };
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary">Connection options (advanced)</Typography>
+      <Typography variant="caption" color="text.secondary">{uiText("Connection options (advanced)", "连接选项（高级）")}</Typography>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
-        <TextField select size="small" label="Keep-alive" sx={{ width: { xs: '100%', sm: 130 } }} value={triValue(co.keepAliveOverride)}
+        <TextField select size="small" label={uiText("Keep-alive", "持久连接")} sx={{ width: { xs: '100%', sm: 130 } }} value={triValue(co.keepAliveOverride)}
           onChange={(e) => update({ keepAliveOverride: triParse(e.target.value) })}>
-          <MenuItem value="">Default</MenuItem>
-          <MenuItem value="true">Keep alive</MenuItem>
-          <MenuItem value="false">Close</MenuItem>
+          <MenuItem value="">{uiText("Default", "默认")}</MenuItem>
+          <MenuItem value="true">{uiText("Keep alive", "保持连接")}</MenuItem>
+          <MenuItem value="false">{uiText("Close", "关闭")}</MenuItem>
         </TextField>
-        <TextField select size="small" label="Close socket" sx={{ width: { xs: '100%', sm: 150 } }} value={triValue(co.closeSocket)}
+        <TextField select size="small" label={uiText("Close socket", "关闭套接字")} sx={{ width: { xs: '100%', sm: 150 } }} value={triValue(co.closeSocket)}
           onChange={(e) => update({ closeSocket: triParse(e.target.value) })}>
-          <MenuItem value="">Default</MenuItem>
-          <MenuItem value="true">Yes</MenuItem>
-          <MenuItem value="false">No</MenuItem>
+          <MenuItem value="">{uiText("Default", "默认")}</MenuItem>
+          <MenuItem value="true">{uiText("Yes", "是")}</MenuItem>
+          <MenuItem value="false">{uiText("No", "否")}</MenuItem>
         </TextField>
-        <TextField size="small" type="number" label="Content-Length override" sx={{ width: { xs: '100%', sm: 210 } }}
+        <TextField size="small" type="number" label={uiText("Content-Length override", "改写 Content-Length")} sx={{ width: { xs: '100%', sm: 210 } }}
           value={co.contentLengthHeaderOverride ?? ''}
           onChange={(e) => update({ contentLengthHeaderOverride: e.target.value === '' ? undefined : Math.max(0, Number(e.target.value) || 0) })} />
         {/* ml: 1 cancels MUI FormControlLabel's default -11px left margin (which made the
             switch crowd the Content-Length field) and leaves a clear gap before each switch. */}
         <FormControlLabel sx={{ ml: 1 }} control={<Switch size="small" checked={co.suppressContentLengthHeader === true}
           onChange={(e) => update({ suppressContentLengthHeader: e.target.checked || undefined })} />}
-          label={<Typography variant="body2">Suppress Content-Length</Typography>} />
+          label={<Typography variant="body2">{uiText("Suppress Content-Length", "省略 Content-Length")}</Typography>} />
         <FormControlLabel sx={{ ml: 1 }} control={<Switch size="small" checked={co.suppressConnectionHeader === true}
           onChange={(e) => update({ suppressConnectionHeader: e.target.checked || undefined })} />}
-          label={<Typography variant="body2">Suppress Connection</Typography>} />
+          label={<Typography variant="body2">{uiText("Suppress Connection", "省略 Connection")}</Typography>} />
       </Box>
     </Box>
   );
@@ -2092,12 +2098,11 @@ function ForwardPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        MockServer will proxy the matched request to <code>{state.scheme.toLowerCase()}://{state.host || 'host'}:{state.port}</code>,
-        preserving the path / headers / body.
+        {uiText("MockServer will proxy the matched request to ", "MockServer 会将匹配的请求代理到 ")}<code>{state.scheme.toLowerCase()}://{state.host || uiText('host', "主机")}:{state.port}</code>{uiText(", preserving the path / headers / body.", "，保留路径、请求头和请求体。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Scheme"
+          label={uiText("Scheme", "协议")}
           size="small"
           select
           value={state.scheme}
@@ -2108,7 +2113,7 @@ function ForwardPanel({
           <MenuItem value="HTTPS">HTTPS</MenuItem>
         </TextField>
         <TextField
-          label="Host"
+          label={uiText("Host", "主机")}
           size="small"
           sx={{ flex: 1 }}
           value={state.host}
@@ -2116,7 +2121,7 @@ function ForwardPanel({
           placeholder="api.example.com"
         />
         <TextField
-          label="Port"
+          label={uiText("Port", "端口")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 110 } }}
@@ -2152,12 +2157,11 @@ function ForwardOverridePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Forward the matched request upstream after rewriting any of the fields below.
-        Leave a field blank to keep the incoming value. At least one override must be set.
+        {uiText("Forward the matched request upstream after rewriting any of the fields below. Leave a field blank to keep the incoming value. At least one override must be set.", "将匹配的请求转发到上游，并改写下方指定的字段。留空可保留原值，至少需设置一个改写项。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Method"
+          label={uiText("Method", "请求方法")}
           size="small"
           select
           value={state.overrideMethod}
@@ -2165,23 +2169,23 @@ function ForwardOverridePanel({
           sx={{ width: { xs: '100%', sm: 130 } }}
         >
           {['', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map((m) => (
-            <MenuItem key={m || 'unchanged'} value={m}>{m || '(unchanged)'}</MenuItem>
+            <MenuItem key={m || 'unchanged'} value={m}>{m || uiText('(unchanged)', "（保持原值）")}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Scheme"
+          label={uiText("Scheme", "协议")}
           size="small"
           select
           value={state.overrideScheme}
           onChange={(e) => setState({ ...state, overrideScheme: e.target.value as ForwardOverrideState['overrideScheme'] })}
           sx={{ width: { xs: '100%', sm: 140 } }}
         >
-          <MenuItem value="">(unchanged)</MenuItem>
+          <MenuItem value="">{uiText("(unchanged)", "（保持原值）")}</MenuItem>
           <MenuItem value="HTTP">HTTP</MenuItem>
           <MenuItem value="HTTPS">HTTPS</MenuItem>
         </TextField>
         <TextField
-          label="Host header"
+          label={uiText("Host header", "Host 请求头")}
           size="small"
           sx={{ flex: 1 }}
           value={state.overrideHost}
@@ -2190,14 +2194,14 @@ function ForwardOverridePanel({
         />
       </Box>
       <TextField
-        label="Path"
+        label={uiText("Path", "路径")}
         size="small"
         value={state.overridePath}
         onChange={(e) => setState({ ...state, overridePath: e.target.value })}
         placeholder="/v2/redirected-endpoint"
       />
       <TextField
-        label="Query string parameters (one per line, key=value)"
+        label={uiText("Query string parameters (one per line, key=value)", "查询字符串参数（每行一项 key=value）")}
         multiline
         minRows={2}
         maxRows={6}
@@ -2207,7 +2211,7 @@ function ForwardOverridePanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Headers (one per line, Name: value)"
+        label={uiText("Headers (one per line, Name: value)", "请求头（每行一项 Name: value）")}
         multiline
         minRows={2}
         maxRows={6}
@@ -2217,7 +2221,7 @@ function ForwardOverridePanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Body override"
+        label={uiText("Body override", "改写请求体")}
         multiline
         minRows={3}
         maxRows={12}
@@ -2248,12 +2252,10 @@ function CallbackPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Invoke a Java class implementing <code>ExpectationResponseCallback</code> on
-        the MockServer instance. The class must already be on MockServer's classpath —
-        the dashboard does not upload code.
+        {uiText("Invoke a Java class implementing ", "调用实现了 ")}<code>ExpectationResponseCallback</code>{uiText(" on the MockServer instance. The class must already be on MockServer's classpath — the dashboard does not upload code.", " 的 Java 类动态生成响应。该类必须已在 MockServer 的类路径中，控制台无法上传代码。")}
       </Typography>
       <TextField
-        label="Callback class (fully-qualified name)"
+        label={uiText("Callback class (fully-qualified name)", "回调类（全限定类名）")}
         size="small"
         value={state.callbackClass}
         onChange={(e) => setState({ ...state, callbackClass: e.target.value })}
@@ -2284,7 +2286,7 @@ function TestTemplateButton({
   const blank = !template.trim();
   return (
     <>
-      <Tooltip title={blank ? 'Write an inline template to test it; a template file cannot be tested here' : 'Render this template against a recorded request without registering it'}>
+      <Tooltip title={blank ? uiText('Write an inline template to test it; a template file cannot be tested here', "请填写内联模板后测试。此处无法测试从文件加载的模板。") : uiText('Render this template against a recorded request without registering it', "使用已记录的请求渲染模板，无需注册规则。")}>
         <span>
           <Button
             size="small"
@@ -2293,7 +2295,7 @@ function TestTemplateButton({
             disabled={blank}
             onClick={() => setOpen(true)}
           >
-            Test Template
+            {uiText("Test Template", "测试模板")}
           </Button>
         </span>
       </Tooltip>
@@ -2324,10 +2326,10 @@ interface TemplateState {
 
 /** The JSON-object field shared by the response and forward template panels. */
 function TemplateParametersField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const error = templateParametersError(value);
+  const error = templateParametersHint(value);
   return (
     <TextField
-      label="Parameters (optional JSON object)"
+      label={uiText("Parameters (optional JSON object)", "参数（可选 JSON 对象）")}
       size="small"
       multiline
       minRows={2}
@@ -2336,7 +2338,7 @@ function TemplateParametersField({ value, onChange }: { value: string; onChange:
       onChange={(e) => onChange(e.target.value)}
       placeholder='{ "greeting": "hello", "names": ["ann", "bob"] }'
       error={error != null}
-      helperText={error ?? 'Values the template reads as parameters, such as parameters.greeting, so one template can be reused with different values.'}
+      helperText={error ?? uiText('Values the template reads as parameters, such as parameters.greeting, so one template can be reused with different values.', "模板可通过 parameters.greeting 等名称读取这些参数，便于使用不同的参数值复用同一模板。")}
       slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
     />
   );
@@ -2347,6 +2349,11 @@ const TEMPLATE_PLACEHOLDERS: Record<TemplateType, string> = {
   JAVASCRIPT: 'return { statusCode: 200, body: request.path };',
   MUSTACHE: '{ "statusCode": 200, "body": "{{request.path}}" }',
 };
+
+function templateParametersHint(value: string | undefined): string | null {
+  const error = templateParametersError(value);
+  return error ? uiText(error, '模板参数必须为有效的 JSON 对象，例如 {"greeting": "hello"}') : null;
+}
 
 function TemplatePanel({
   state,
@@ -2372,12 +2379,11 @@ function TemplatePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Build the response dynamically from the incoming request. The template engine
-        receives a <code>request</code> object exposing method / path / headers / body.
+        {uiText("Build the response dynamically from the incoming request. The template engine receives a ", "根据传入的请求动态构建响应。模板引擎会接收一个 ")}<code>request</code>{uiText(" object exposing method / path / headers / body.", " 对象，其中包含请求方法、路径、请求头和请求体。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
-          label="Template engine"
+          label={uiText("Template engine", "模板引擎")}
           size="small"
           select
           value={state.templateType}
@@ -2400,7 +2406,7 @@ function TemplatePanel({
         />
       </Box>
       <TextField
-        label="Template body"
+        label={uiText("Template body", "模板内容")}
         multiline
         minRows={6}
         maxRows={20}
@@ -2410,12 +2416,12 @@ function TemplatePanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Or load template from file (optional)"
+        label={uiText("Or load template from file (optional)", "或从文件加载模板（可选）")}
         size="small"
         value={state.templateFile}
         onChange={(e) => setState({ ...state, templateFile: e.target.value })}
         placeholder="templates/some_response.mustache"
-        helperText="Classpath or filesystem path. Used when the inline template above is empty; the inline template wins when both are set."
+        helperText={uiText("Classpath or filesystem path. Used when the inline template above is empty; the inline template wins when both are set.", "可填写类路径或文件系统路径。内联模板为空时会读取文件，同时配置时以内联模板为准。")}
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TemplateParametersField value={state.parameters ?? ''} onChange={(parameters) => setState({ ...state, parameters })} />
@@ -2450,9 +2456,7 @@ function ErrorPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Inject a fault for matched requests — close or reset the TCP connection,
-        and / or return arbitrary bytes that are NOT a valid HTTP response. Useful
-        for testing client error handling.
+        {uiText("Inject a fault for matched requests — close or reset the TCP connection, and / or return arbitrary bytes that are NOT a valid HTTP response. Useful for testing client error handling.", "对匹配的请求注入故障，例如关闭或重置 TCP 连接，或返回不符合 HTTP 响应格式的任意字节，用于测试客户端的异常处理。")}
       </Typography>
       <FormControlLabel
         control={
@@ -2464,7 +2468,7 @@ function ErrorPanel({
         }
         label={
           <Typography variant="body2">
-            Drop connection (clean close)
+            {uiText("Drop connection (clean close)", "断开连接（正常关闭）")}
           </Typography>
         }
       />
@@ -2478,32 +2482,32 @@ function ErrorPanel({
         }
         label={
           <Typography variant="body2">
-            Reset connection (TCP RST, client sees "connection reset by peer")
+            {uiText("Reset connection (TCP RST, client sees \"connection reset by peer\")", "重置连接（发送 TCP RST，客户端会收到“connection reset by peer”）")}
           </Typography>
         }
       />
       <TextField
-        label="Response bytes (base64, optional)"
+        label={uiText("Response bytes (base64, optional)", "响应字节（Base64，可选）")}
         size="small"
         value={state.responseBytesB64}
         onChange={(e) => setState({ ...state, responseBytesB64: e.target.value })}
         placeholder="SFRUUC8xLjEgNTAwIEludGVybmFsIFNlcnZlciBFcnJvcg=="
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
-        helperText="Sent before the connection is dropped (if drop is enabled). Base64-encoded raw bytes."
+        helperText={uiText("Sent before the connection is dropped (if drop is enabled). Base64-encoded raw bytes.", "Base64 编码的原始字节。如果启用了断开连接，这些字节会在连接关闭前发送。")}
       />
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
         <TextField
-          label="Pre-action delay"
+          label={uiText("Pre-action delay", "执行动作前的延迟")}
           size="small"
           type="number"
           value={state.delayValue}
           onChange={(e) => setState({ ...state, delayValue: Number(e.target.value) || 0 })}
           sx={{ width: { xs: '100%', sm: delayLocked ? 360 : 180 } }}
           disabled={delayLocked}
-          helperText={delayLocked ? LOCKED_DELAY_HELP : '0 = no delay'}
+          helperText={delayLocked ? LOCKED_DELAY_HELP : uiText('0 = no delay', "0 表示无延迟")}
         />
         <TextField
-          label="Unit"
+          label={uiText("Unit", "单位")}
           size="small"
           select
           disabled={delayLocked}
@@ -2511,9 +2515,9 @@ function ErrorPanel({
           onChange={(e) => setState({ ...state, delayUnit: e.target.value as DelayUnit })}
           sx={{ width: { xs: '100%', sm: 160 } }}
         >
-          <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-          <MenuItem value="SECONDS">seconds</MenuItem>
-          <MenuItem value="MINUTES">minutes</MenuItem>
+          <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+          <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+          <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
         </TextField>
       </Box>
     </Box>
@@ -2536,15 +2540,14 @@ function ForwardFallbackPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Forward the matched request to an upstream host. If the upstream returns one of the
-        configured status codes or times out, MockServer returns the fallback response instead.
+        {uiText("Forward the matched request to an upstream host. If the upstream returns one of the configured status codes or times out, MockServer returns the fallback response instead.", "将匹配的请求转发至上游主机。如果上游返回指定的状态码或超时，MockServer 会返回备用响应。")}
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mt: 0.5 }}>
-        Forward target
+        {uiText("Forward target", "转发目标")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Scheme"
+          label={uiText("Scheme", "协议")}
           size="small"
           select
           value={state.scheme}
@@ -2555,7 +2558,7 @@ function ForwardFallbackPanel({
           <MenuItem value="HTTPS">HTTPS</MenuItem>
         </TextField>
         <TextField
-          label="Host"
+          label={uiText("Host", "主机")}
           size="small"
           sx={{ flex: 1 }}
           value={state.host}
@@ -2563,7 +2566,7 @@ function ForwardFallbackPanel({
           placeholder="api.example.com"
         />
         <TextField
-          label="Port"
+          label={uiText("Port", "端口")}
           size="small"
           type="number"
           sx={{ width: { xs: '100%', sm: 110 } }}
@@ -2573,7 +2576,7 @@ function ForwardFallbackPanel({
       </Box>
       <Divider sx={{ my: 0.5 }} />
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-        Fallback response
+        {uiText("Fallback response", "备用响应")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <StatusCodeField
@@ -2581,7 +2584,7 @@ function ForwardFallbackPanel({
           onChange={(fallbackStatusCode) => setState({ ...state, fallbackStatusCode })}
         />
         <TextField
-          label="Fallback on status codes (comma-separated)"
+          label={uiText("Fallback on status codes (comma-separated)", "触发回退的状态码（用逗号分隔）")}
           size="small"
           sx={{ flex: 1 }}
           value={state.fallbackOnStatusCodes}
@@ -2591,7 +2594,7 @@ function ForwardFallbackPanel({
         />
       </Box>
       <TextField
-        label="Fallback body"
+        label={uiText("Fallback body", "备用响应体")}
         multiline
         minRows={3}
         maxRows={10}
@@ -2610,7 +2613,7 @@ function ForwardFallbackPanel({
         }
         label={
           <Typography variant="body2">
-            Fallback on timeout / connection error
+            {uiText("Fallback on timeout / connection error", "超时或连接出错时回退")}
           </Typography>
         }
       />
@@ -2637,6 +2640,9 @@ interface WebSocketState {
 }
 
 /** Up / down / remove buttons for row `idx` of a list of `count` rows, named e.g. "Move message 2 up". */
+const ROW_NOUN_ZH = { message: '消息', response: '响应', matcher: '匹配条件', event: '事件' } as const;
+type RowNoun = keyof typeof ROW_NOUN_ZH;
+
 function RowControls({
   noun,
   idx,
@@ -2644,7 +2650,7 @@ function RowControls({
   onMove,
   onRemove,
 }: {
-  noun: string;
+  noun: RowNoun;
   idx: number;
   count: number;
   onMove: (delta: -1 | 1) => void;
@@ -2667,13 +2673,13 @@ function RowControls({
   };
   return (
     <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
-      <IconButton ref={up} size="small" onClick={() => move(-1)} disabled={idx === 0} aria-label={`Move ${noun} ${idx + 1} up`}>
+      <IconButton ref={up} size="small" onClick={() => move(-1)} disabled={idx === 0} aria-label={uiText(`Move ${noun} ${idx + 1} up`, `上移第 ${idx + 1} 项${ROW_NOUN_ZH[noun]}`)}>
         <ArrowUpwardIcon fontSize="small" />
       </IconButton>
-      <IconButton ref={down} size="small" onClick={() => move(1)} disabled={idx === count - 1} aria-label={`Move ${noun} ${idx + 1} down`}>
+      <IconButton ref={down} size="small" onClick={() => move(1)} disabled={idx === count - 1} aria-label={uiText(`Move ${noun} ${idx + 1} down`, `下移第 ${idx + 1} 项${ROW_NOUN_ZH[noun]}`)}>
         <ArrowDownwardIcon fontSize="small" />
       </IconButton>
-      <IconButton size="small" color="error" onClick={onRemove} aria-label={`Remove ${noun} ${idx + 1}`}>
+      <IconButton size="small" color="error" onClick={onRemove} aria-label={uiText(`Remove ${noun} ${idx + 1}`, `移除第 ${idx + 1} 项${ROW_NOUN_ZH[noun]}`)}>
         <DeleteIcon fontSize="small" />
       </IconButton>
     </Box>
@@ -2713,7 +2719,7 @@ function MessageRows({
   onChange,
   placeholder,
 }: {
-  noun: string;
+  noun: RowNoun;
   groupLabel: string;
   items: StandardListItemDraft[];
   onChange: (items: StandardListItemDraft[]) => void;
@@ -2728,7 +2734,7 @@ function MessageRows({
           <Box key={item.itemId ?? idx} sx={{ display: 'flex', gap: 0.5, alignItems: 'flex-start' }}>
             <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
               <TextField
-                label={`${label} ${idx + 1}`}
+                label={uiText(`${label} ${idx + 1}`, `${ROW_NOUN_ZH[noun]} ${idx + 1}`)}
                 size="small"
                 multiline
                 maxRows={6}
@@ -2753,7 +2759,7 @@ function MessageRows({
               />
               {lines > 1 && (
                 <Button size="small" onClick={() => onChange(splitRow(items, idx, item.text))} sx={{ px: 0.5 }}>
-                  Split {noun} {idx + 1} into {lines} {noun}s
+                  {uiText(`Split ${noun} ${idx + 1} into ${lines} ${noun}s`, `将第 ${idx + 1} 条${ROW_NOUN_ZH[noun]}拆分为 ${lines} 条`)}
                 </Button>
               )}
             </Box>
@@ -2769,10 +2775,10 @@ function MessageRows({
       })}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Button size="small" variant="outlined" onClick={() => onChange([...items, listItemRow('')])}>
-          Add {noun}
+          {uiText(`Add ${noun}`, `添加${ROW_NOUN_ZH[noun]}`)}
         </Button>
         <Typography variant="caption" color="text.secondary">
-          One {noun} per row; use Add {noun} for another.
+          {uiText(`One ${noun} per row; use Add ${noun} for another.`, `每行一条${ROW_NOUN_ZH[noun]}。点击“添加${ROW_NOUN_ZH[noun]}”可继续添加。`)}
         </Typography>
       </Box>
     </Box>
@@ -2802,11 +2808,10 @@ function WebSocketPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Upgrade the connection to a WebSocket and send initial messages. Optionally add
-        bidirectional frame matchers that respond to incoming frames.
+        {uiText("Upgrade the connection to a WebSocket and send initial messages. Optionally add bidirectional frame matchers that respond to incoming frames.", "将连接升级为 WebSocket 并发送初始消息。可添加双向帧匹配条件来响应收到的帧。")}
       </Typography>
       <TextField
-        label="Subprotocol (optional)"
+        label={uiText("Subprotocol (optional)", "子协议（可选）")}
         size="small"
         value={state.subprotocol}
         onChange={(e) => setState({ ...state, subprotocol: e.target.value })}
@@ -2814,11 +2819,11 @@ function WebSocketPanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-        Initial messages
+        {uiText("Initial messages", "初始消息")}
       </Typography>
       <MessageRows
         noun="message"
-        groupLabel="Initial messages"
+        groupLabel={uiText("Initial messages", "初始消息")}
         items={state.messages}
         onChange={(messages) => setState({ ...state, messages })}
         placeholder={'{"type":"connection_ack"}'}
@@ -2833,7 +2838,7 @@ function WebSocketPanel({
         }
         label={
           <Typography variant="body2">
-            Close connection after messages
+            {uiText("Close connection after messages", "发送完消息后关闭连接")}
           </Typography>
         }
       />
@@ -2841,10 +2846,10 @@ function WebSocketPanel({
       <Divider sx={{ my: 0.5 }} />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Bidirectional frame matchers
+          {uiText("Bidirectional frame matchers", "双向帧匹配条件")}
         </Typography>
         <Button size="small" variant="outlined" onClick={addMatcher}>
-          Add matcher
+          {uiText("Add matcher", "添加匹配条件")}
         </Button>
       </Box>
       {state.matchers.map((m, idx) => (
@@ -2853,12 +2858,12 @@ function WebSocketPanel({
           variant="outlined"
           data-testid={`websocket-matcher-${idx + 1}`}
           role="group"
-          aria-label={`Matcher ${idx + 1}`}
+          aria-label={uiText(`Matcher ${idx + 1}`, `匹配条件 ${idx + 1}`)}
           sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}
         >
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <TextField
-              label="Frame type"
+              label={uiText("Frame type", "帧类型")}
               size="small"
               select
               value={m.frameType}
@@ -2870,12 +2875,12 @@ function WebSocketPanel({
               ))}
             </TextField>
             <TextField
-              label="Text matcher"
+              label={uiText("Text matcher", "文本匹配条件")}
               size="small"
               sx={{ flex: 1 }}
               value={m.textMatcher}
               onChange={(e) => updateMatcher(idx, { textMatcher: e.target.value })}
-              placeholder='e.g. {"type":"ping"}'
+              placeholder={uiText("e.g. {\"type\":\"ping\"}", "例如 {\"type\":\"ping\"}")}
               slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
             />
             <RowControls
@@ -2887,11 +2892,11 @@ function WebSocketPanel({
             />
           </Box>
           <Typography variant="caption" color="text.secondary">
-            Responses
+            {uiText("Responses", "响应")}
           </Typography>
           <MessageRows
             noun="response"
-            groupLabel={`Matcher ${idx + 1} responses`}
+            groupLabel={uiText(`Matcher ${idx + 1} responses`, `匹配条件 ${idx + 1} 的响应`)}
             items={m.responses}
             onChange={(responses) => updateMatcher(idx, { responses })}
             placeholder={'{"type":"pong"}'}
@@ -2917,29 +2922,28 @@ function ChaosPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Inject probabilistic faults (error status, latency) into responses for
-        matched requests. This works on mocked, forwarded, and proxied responses.
+        {uiText("Inject probabilistic faults (error status, latency) into responses for matched requests. This works on mocked, forwarded, and proxied responses.", "按配置的概率为匹配的请求注入故障，例如返回错误状态码或增加延迟。适用于 Mock、转发和代理响应。")}
       </Typography>
       <Box sx={CHAOS_PANEL_GRID}>
         <TextField
-          label="Error status"
+          label={uiText("Error status", "错误状态码")}
           size="small"
           type="number"
           value={chaos.errorStatus ?? ''}
           error={!!standardChaosErrorStatusError(chaos.errorStatus)}
           onChange={(e) => { const n = parseInt(e.target.value, 10); setChaos({ ...chaos, errorStatus: e.target.value === '' || Number.isNaN(n) ? undefined : n }); }}
           fullWidth
-          helperText={standardChaosErrorStatusError(chaos.errorStatus) ?? 'e.g. 500, 503, 429'}
+          helperText={standardChaosErrorStatusError(chaos.errorStatus) ?? uiText('e.g. 500, 503, 429', '例如 500、503、429')}
         />
         <TextField
-          label="Error prob (0-1)"
+          label={uiText('Error prob (0-1)', '错误概率（0–1）')}
           size="small"
           type="number"
           value={chaos.errorProbability ?? ''}
           error={!!standardChaosErrorProbabilityError(chaos.errorProbability)}
           onChange={(e) => { const n = parseFloat(e.target.value); setChaos({ ...chaos, errorProbability: e.target.value === '' || Number.isNaN(n) ? undefined : n }); }}
           fullWidth
-          helperText={standardChaosErrorProbabilityError(chaos.errorProbability) ?? '1.0 = always'}
+          helperText={standardChaosErrorProbabilityError(chaos.errorProbability) ?? uiText('1.0 = always', "1.0 表示每次都触发")}
         />
         <TextField
           label="Retry-After"
@@ -2947,59 +2951,59 @@ function ChaosPanel({
           value={chaos.retryAfter ?? ''}
           onChange={(e) => setChaos({ ...chaos, retryAfter: e.target.value || undefined })}
           fullWidth
-          helperText='e.g. "30"'
+          helperText={uiText("e.g. \"30\"", "例如 \"30\"")}
         />
       </Box>
       <Box sx={CHAOS_PANEL_GRID}>
         <TextField
-          label="Latency value"
+          label={uiText("Latency value", "延迟时长")}
           size="small"
           type="number"
           value={chaos.latencyValue ?? ''}
           onChange={(e) => setChaos({ ...chaos, latencyValue: e.target.value === '' ? undefined : parseInt(e.target.value, 10) })}
           fullWidth
-          helperText="0 = no latency"
+          helperText={uiText("0 = no latency", "0 表示无延迟")}
         />
         <TextField
-          label="Latency unit"
+          label={uiText("Latency unit", "延迟单位")}
           size="small"
           select
           value={chaos.latencyUnit ?? 'MILLISECONDS'}
           onChange={(e) => setChaos({ ...chaos, latencyUnit: e.target.value as ChaosDelayUnit })}
           fullWidth
         >
-          <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-          <MenuItem value="SECONDS">seconds</MenuItem>
-          <MenuItem value="MINUTES">minutes</MenuItem>
+          <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+          <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+          <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
         </TextField>
         <TextField
-          label="Seed"
+          label={uiText("Seed", "随机种子")}
           size="small"
           type="number"
           value={chaos.seed ?? ''}
           onChange={(e) => setChaos({ ...chaos, seed: e.target.value === '' ? undefined : parseInt(e.target.value, 10) })}
           fullWidth
-          helperText="reproducible prob"
+          helperText={uiText("reproducible prob", "用于复现随机故障")}
         />
       </Box>
       <Box sx={CHAOS_PANEL_GRID}>
         <TextField
-          label="Succeed first (N)"
+          label={uiText("Succeed first (N)", "先成功的请求数（N）")}
           size="small"
           type="number"
           value={chaos.succeedFirst ?? ''}
           onChange={(e) => setChaos({ ...chaos, succeedFirst: e.target.value === '' ? undefined : parseInt(e.target.value, 10) })}
           fullWidth
-          helperText="first N requests OK"
+          helperText={uiText("first N requests OK", "前 N 次请求成功")}
         />
         <TextField
-          label="Fail request count"
+          label={uiText("Fail request count", "随后失败的请求数")}
           size="small"
           type="number"
           value={chaos.failRequestCount ?? ''}
           onChange={(e) => setChaos({ ...chaos, failRequestCount: e.target.value === '' ? undefined : parseInt(e.target.value, 10) })}
           fullWidth
-          helperText="then next M fail"
+          helperText={uiText("then next M fail", "接下来的 M 次请求失败")}
         />
       </Box>
     </Box>
@@ -3030,14 +3034,13 @@ function SsePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Stream Server-Sent Events to the client. Each event has an optional type, data payload,
-        ID, and retry interval.
+        {uiText("Stream Server-Sent Events to the client. Each event has an optional type, data payload, ID, and retry interval.", "向客户端流式发送 SSE。每个事件可指定类型、数据、ID 和重连间隔。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <StatusCodeField value={state.statusCode} onChange={(statusCode) => setState({ ...state, statusCode })} />
       </Box>
       <TextField
-        label="Headers (Name: value per line)"
+        label={uiText("Headers (Name: value per line)", "请求头（每行一项 Name: value）")}
         multiline
         minRows={2}
         maxRows={4}
@@ -3048,17 +3051,17 @@ function SsePanel({
       />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Events
+          {uiText("Events", "事件")}
         </Typography>
         <Button size="small" variant="outlined" onClick={addEvent}>
-          Add event
+          {uiText("Add event", "添加事件")}
         </Button>
       </Box>
       {state.events.map((ev, idx) => (
-        <Paper key={ev.itemId ?? idx} variant="outlined" role="group" aria-label={`Event ${idx + 1}`} sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Paper key={ev.itemId ?? idx} variant="outlined" role="group" aria-label={uiText(`Event ${idx + 1}`, `事件 ${idx + 1}`)} sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <TextField
-              label="Event type"
+              label={uiText("Event type", "事件类型")}
               size="small"
               sx={{ flex: 1 }}
               value={ev.event}
@@ -3073,7 +3076,7 @@ function SsePanel({
               onChange={(e) => updateEvent(idx, { id: e.target.value })}
             />
             <TextField
-              label="Retry (ms)"
+              label={uiText("Retry (ms)", "重连间隔（毫秒）")}
               size="small"
               type="number"
               sx={{ width: { xs: '100%', sm: 100 } }}
@@ -3089,7 +3092,7 @@ function SsePanel({
             />
           </Box>
           <TextField
-            label="Data"
+            label={uiText("Data", "数据")}
             multiline
             minRows={2}
             maxRows={6}
@@ -3110,7 +3113,7 @@ function SsePanel({
         }
         label={
           <Typography variant="body2">
-            Close connection after events
+            {uiText("Close connection after events", "发送完事件后关闭连接")}
           </Typography>
         }
       />
@@ -3140,11 +3143,11 @@ function BinaryResponsePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Return raw binary data as the response body. Provide the data as a base64-encoded string.
+        {uiText("Return raw binary data as the response body. Provide the data as a base64-encoded string.", "以 Base64 字符串提供二进制数据，MockServer 将原始字节作为响应体返回。")}
       </Typography>
       <TextField
-        label="Binary data (base64)"
-        helperText="Leave empty to send no reply: MockServer writes nothing for the matched message and keeps the connection open."
+        label={uiText("Binary data (base64)", "二进制数据（Base64）")}
+        helperText={uiText("Leave empty to send no reply: MockServer writes nothing for the matched message and keeps the connection open.", "留空则不回复。收到匹配的消息后，MockServer 不会发送数据，并保持连接开启。")}
         multiline
         minRows={4}
         maxRows={12}
@@ -3154,7 +3157,7 @@ function BinaryResponsePanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Upstream"
+        label={uiText("Upstream", "上游")}
         size="small"
         select
         value={state.upstream ?? 'ANSWER_ONLY'}
@@ -3164,12 +3167,12 @@ function BinaryResponsePanel({
           if (upstream === 'ANSWER_ONLY') delete next.upstream;
           setState(next);
         }}
-        helperText="Only on a binary connection MockServer relays to an upstream (matchBinaryExpectationsWhenProxying). Forwarding needs binaryMessageFraming POSTGRESQL; without it the match answers only."
+        helperText={uiText("Only on a binary connection MockServer relays to an upstream (matchBinaryExpectationsWhenProxying). Forwarding needs binaryMessageFraming POSTGRESQL; without it the match answers only.", "仅在二进制连接中可转发到上游（matchBinaryExpectationsWhenProxying）。转发要求将 binaryMessageFraming 设为 POSTGRESQL，否则只返回响应。")}
         sx={{ width: { xs: '100%', sm: 360 } }}
       >
-        <MenuItem value="ANSWER_ONLY">Answer only (default)</MenuItem>
-        <MenuItem value="ANSWER_AND_FORWARD">Answer and forward (drop the upstream reply)</MenuItem>
-        <MenuItem value="FORWARD_AND_REPLACE">Forward and replace the upstream reply</MenuItem>
+        <MenuItem value="ANSWER_ONLY">{uiText("Answer only (default)", "仅响应（默认）")}</MenuItem>
+        <MenuItem value="ANSWER_AND_FORWARD">{uiText("Answer and forward (drop the upstream reply)", "响应并转发（丢弃上游回复）")}</MenuItem>
+        <MenuItem value="FORWARD_AND_REPLACE">{uiText("Forward and replace the upstream reply", "转发并替换上游回复")}</MenuItem>
       </TextField>
     </Box>
   );
@@ -3237,12 +3240,12 @@ function KeptFieldsPanel({ items }: { items: KeptFieldItem[] }) {
   if (items.length === 0) return null;
   return (
     <Box data-testid="kept-action-fields" sx={{ mt: 1.5, p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-      <Typography variant="subtitle2" color="text.secondary">Other fields</Typography>
+      <Typography variant="subtitle2" color="text.secondary">{uiText("Other fields", "其他字段")}</Typography>
       <Typography variant="caption" color="text.secondary" component="div" sx={{ mb: 0.5 }}>
-        Kept from the loaded expectation and saved as shown; this form cannot edit them.
+        {uiText("Kept from the loaded expectation and saved as shown; this form cannot edit them.", "这些字段从已加载的规则中保留，将按显示内容保存。此表单无法编辑它们。")}
       </Typography>
       {items.map((item) => {
-        const action = item.formValue === undefined ? `Remove ${item.label}` : `Use the form's ${item.label}`;
+        const action = item.formValue === undefined ? uiText(`Remove ${item.label}`, `移除 ${item.label}`) : uiText(`Use the form's ${item.label}`, `使用表单中的 ${item.label}`);
         return (
           <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography
@@ -3251,7 +3254,7 @@ function KeptFieldsPanel({ items }: { items: KeptFieldItem[] }) {
             >
               {item.label} {formatKeptValue(item.value)}
               {item.formValue !== undefined && (
-                <Box component="span" sx={{ color: 'text.secondary' }}> (form shows {formatKeptValue(item.formValue)})</Box>
+                <Box component="span" sx={{ color: 'text.secondary' }}>{uiText(" (form shows ", " （表单显示 ")}{formatKeptValue(item.formValue)})</Box>
               )}
             </Typography>
             <Tooltip title={action}>
@@ -3280,11 +3283,10 @@ function DnsResponsePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Return a DNS response with a response code and answer records. Records are provided as a JSON
-        array of objects with name, type, value, ttl, etc.
+        {uiText("Return a DNS response with a response code and answer records. Records are provided as a JSON array of objects with name, type, value, ttl, etc.", "返回带有响应码和应答记录的 DNS 响应。记录使用 JSON 对象数组，可填写 name、type、value、ttl 等字段。")}
       </Typography>
       <TextField
-        label="Response code"
+        label={uiText("Response code", "响应码")}
         size="small"
         select
         value={state.responseCode}
@@ -3303,7 +3305,7 @@ function DnsResponsePanel({
         }
         return (
           <TextField
-            label="Answer records (JSON array)"
+            label={uiText("Answer records (JSON array)", "应答记录（JSON 数组）")}
             multiline
             minRows={4}
             maxRows={12}
@@ -3313,8 +3315,8 @@ function DnsResponsePanel({
             placeholder={'[\n  { "name": "example.com", "type": "A", "value": "127.0.0.1", "ttl": 300 }\n]'}
             slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
             helperText={invalid
-              ? 'Not valid JSON — must be an array of records, e.g. [ { "name": "...", "type": "A", "value": "..." } ]'
-              : 'Each record supports: name, type (A/AAAA/CNAME/MX/SRV/TXT/PTR), value, ttl, priority, weight, port. Advanced records are best authored via the REST API.'}
+              ? uiText('Not valid JSON — must be an array of records, e.g. [ { "name": "...", "type": "A", "value": "..." } ]', "JSON 无效。必须是记录数组，例如 [ { \"name\": \"...\", \"type\": \"A\", \"value\": \"...\" } ]。")
+              : uiText('Each record supports: name, type (A/AAAA/CNAME/MX/SRV/TXT/PTR), value, ttl, priority, weight, port. Advanced records are best authored via the REST API.', "每条记录支持 name、type（A/AAAA/CNAME/MX/SRV/TXT/PTR）、value、ttl、priority、weight 和 port。高级记录可通过 REST API 配置。")}
           />
         );
       })()}
@@ -3350,12 +3352,11 @@ function ForwardTemplatePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Build the forwarded request dynamically using a template engine. The template receives
-        a <code>request</code> object. This is the forward-direction counterpart of the response template.
+        {uiText("Build the forwarded request dynamically using a template engine. The template receives a ", "使用模板引擎动态构建转发请求。模板会接收一个 ")}<code>request</code>{uiText(" object. This is the forward-direction counterpart of the response template.", " 对象，构建的是发送至上游的请求。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
-          label="Template engine"
+          label={uiText("Template engine", "模板引擎")}
           size="small"
           select
           value={state.templateType}
@@ -3378,7 +3379,7 @@ function ForwardTemplatePanel({
         />
       </Box>
       <TextField
-        label="Template body"
+        label={uiText("Template body", "模板内容")}
         multiline
         minRows={6}
         maxRows={20}
@@ -3388,12 +3389,12 @@ function ForwardTemplatePanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TextField
-        label="Or load template from file (optional)"
+        label={uiText("Or load template from file (optional)", "或从文件加载模板（可选）")}
         size="small"
         value={state.templateFile ?? ''}
         onChange={(e) => setState({ ...state, templateFile: e.target.value })}
         placeholder="templates/forward_request.mustache"
-        helperText="Classpath or filesystem path. Used when the inline template above is empty; the inline template wins when both are set."
+        helperText={uiText("Classpath or filesystem path. Used when the inline template above is empty; the inline template wins when both are set.", "可填写类路径或文件系统路径。内联模板为空时会读取文件，同时配置时以内联模板为准。")}
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <TemplateParametersField value={state.parameters ?? ''} onChange={(parameters) => setState({ ...state, parameters })} />
@@ -3415,12 +3416,10 @@ function ForwardClassCallbackPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Invoke a Java class implementing <code>ExpectationForwardCallback</code> on
-        the MockServer instance to build the forwarded request dynamically. The class must already
-        be on MockServer's classpath.
+        {uiText("Invoke a Java class implementing ", "调用实现了 ")}<code>ExpectationForwardCallback</code>{uiText(" on the MockServer instance to build the forwarded request dynamically. The class must already be on MockServer's classpath.", " 的 Java 类动态构建转发请求。该类必须已在 MockServer 的类路径中。")}
       </Typography>
       <TextField
-        label="Callback class (fully-qualified name)"
+        label={uiText("Callback class (fully-qualified name)", "回调类（全限定类名）")}
         size="small"
         value={state.callbackClass}
         onChange={(e) => setState({ ...state, callbackClass: e.target.value })}
@@ -3448,12 +3447,11 @@ function GrpcStreamPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Return a gRPC streaming response. Each message is a JSON-encoded protobuf payload
-        sent as a stream frame.
+        {uiText("Return a gRPC streaming response. Each message is a JSON-encoded protobuf payload sent as a stream frame.", "返回 gRPC 流式响应。每条消息是一个 JSON 编码的 Protobuf 负载，作为一帧发送。")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
-          label="Status name"
+          label={uiText("Status name", "状态名称")}
           size="small"
           sx={{ flex: 1 }}
           value={state.statusName}
@@ -3461,16 +3459,16 @@ function GrpcStreamPanel({
           placeholder="OK"
         />
         <TextField
-          label="Status message"
+          label={uiText("Status message", "状态详情")}
           size="small"
           sx={{ flex: 1 }}
           value={state.statusMessage}
           onChange={(e) => setState({ ...state, statusMessage: e.target.value })}
-          placeholder="optional status detail"
+          placeholder={uiText("optional status detail", "可填写状态详情")}
         />
       </Box>
       <TextField
-        label="Headers (Name: value per line)"
+        label={uiText("Headers (Name: value per line)", "请求头（每行一项 Name: value）")}
         multiline
         minRows={2}
         maxRows={4}
@@ -3480,11 +3478,11 @@ function GrpcStreamPanel({
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
       />
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-        Messages (JSON)
+        {uiText("Messages (JSON)", "消息（JSON）")}
       </Typography>
       <MessageRows
         noun="message"
-        groupLabel="Messages"
+        groupLabel={uiText("Messages", "消息")}
         items={state.messages}
         onChange={(messages) => setState({ ...state, messages })}
         placeholder={'{"name":"Alice"}'}
@@ -3499,7 +3497,7 @@ function GrpcStreamPanel({
         }
         label={
           <Typography variant="body2">
-            Close connection after messages
+            {uiText("Close connection after messages", "发送完消息后关闭连接")}
           </Typography>
         }
       />
@@ -3557,6 +3555,15 @@ function captureExpressionPlaceholder(source: CaptureSource): string {
   }
 }
 
+const CAPTURE_SOURCE_LABELS_ZH: Record<CaptureSource, string> = {
+  jsonPath: 'JSON Path（请求体）',
+  xpath: 'XPath（请求体）',
+  header: '请求头',
+  queryStringParameter: '查询参数',
+  cookie: 'Cookie',
+  pathParameter: '路径参数',
+};
+
 function CapturePanel({
   capture,
   setCapture,
@@ -3573,22 +3580,21 @@ function CapturePanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Extract a value from the matched request and store it in scenario state.
-        Response templates can read captured values via the <code>scenario</code> helper.
+        {uiText("Extract a value from the matched request and store it in scenario state. Response templates can read captured values via the ", "从匹配的请求中提取值并保存到场景状态中。响应模板可通过 ")}<code>scenario</code>{uiText(" helper.", " 辅助对象读取已提取的值。")}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Rules ({capture.length})
+          {uiText(`Rules (${capture.length})`, `规则（${capture.length}）`)}
         </Typography>
         <Button size="small" variant="outlined" onClick={addRow} data-testid="add-capture-rule">
-          Add rule
+          {uiText("Add rule", "添加规则")}
         </Button>
       </Box>
       {capture.map((c, idx) => (
         <Paper key={idx} variant="outlined" sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }} data-testid="capture-rule-row">
           <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(160px, 1fr) minmax(160px, 1.4fr) minmax(120px, 1fr) auto', gap: 1, alignItems: 'center' }}>
             <TextField
-              label="Source"
+              label={uiText("Source", "来源")}
               size="small"
               select
               value={c.source}
@@ -3598,11 +3604,11 @@ function CapturePanel({
               slotProps={{ htmlInput: { 'data-testid': `capture-source-${idx}` } }}
             >
               {CAPTURE_SOURCES.map((s) => (
-                <MenuItem key={s} value={s}>{CAPTURE_SOURCE_LABELS[s]}</MenuItem>
+                <MenuItem key={s} value={s}>{uiText(CAPTURE_SOURCE_LABELS[s], CAPTURE_SOURCE_LABELS_ZH[s])}</MenuItem>
               ))}
             </TextField>
             <TextField
-              label="Expression"
+              label={uiText("Expression", "表达式")}
               size="small"
               value={c.expression}
               onChange={(e) => updateRow(idx, { expression: e.target.value })}
@@ -3612,7 +3618,7 @@ function CapturePanel({
               fullWidth
             />
             <TextField
-              label="Into (state key)"
+              label={uiText("Into (state key)", "保存至（状态键）")}
               size="small"
               value={c.into}
               onChange={(e) => updateRow(idx, { into: e.target.value })}
@@ -3625,7 +3631,7 @@ function CapturePanel({
               size="small"
               color="error"
               onClick={() => removeRow(idx)}
-              aria-label="Remove capture rule"
+              aria-label={uiText("Remove capture rule", "移除提取规则")}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -3652,23 +3658,22 @@ function SideEffectsPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Fire HTTP webhook requests before and/or after the main response action.
-        Before-actions can optionally block the response until the webhook completes.
+        {uiText("Fire HTTP webhook requests before and/or after the main response action. Before-actions can optionally block the response until the webhook completes.", "可在主响应动作之前或之后发送 HTTP Webhook 请求。前置动作可选择等待 Webhook 完成后再返回响应。")}
         {/* Future increment: class/object callback targets. */}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Actions ({sideEffects.length})
+          {uiText(`Actions (${sideEffects.length})`, `动作（${sideEffects.length}）`)}
         </Typography>
         <Button size="small" variant="outlined" onClick={addRow} data-testid="add-side-effect">
-          Add action
+          {uiText("Add action", "添加动作")}
         </Button>
       </Box>
       {sideEffects.map((se, idx) => (
         <Paper key={idx} variant="outlined" sx={{ p: 1.5, display: 'flex', flexDirection: 'column', gap: 1 }} data-testid="side-effect-row">
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr)) auto', gap: 1, alignItems: 'center' }}>
             <TextField
-              label="Position"
+              label={uiText("Position", "执行时机")}
               size="small"
               select
               value={se.position}
@@ -3676,11 +3681,11 @@ function SideEffectsPanel({
               sx={{ ...SIDE_EFFECT_FIELD_SX }}
               fullWidth
             >
-              <MenuItem value="before">Before</MenuItem>
-              <MenuItem value="after">After</MenuItem>
+              <MenuItem value="before">{uiText("Before", "之前")}</MenuItem>
+              <MenuItem value="after">{uiText("After", "之后")}</MenuItem>
             </TextField>
             <TextField
-              label="Request"
+              label={uiText("Request", "请求")}
               size="small"
               select
               value={se.templateType ?? ''}
@@ -3689,13 +3694,13 @@ function SideEffectsPanel({
               slotProps={{ htmlInput: { 'data-testid': 'side-effect-request-kind' } }}
               fullWidth
             >
-              <MenuItem value="">Fields</MenuItem>
-              <MenuItem value="VELOCITY">Velocity Template</MenuItem>
-              <MenuItem value="MUSTACHE">Mustache Template</MenuItem>
-              <MenuItem value="JAVASCRIPT">JavaScript Template</MenuItem>
+              <MenuItem value="">{uiText("Fields", "填写字段")}</MenuItem>
+              <MenuItem value="VELOCITY">{uiText("Velocity Template", "Velocity 模板")}</MenuItem>
+              <MenuItem value="MUSTACHE">{uiText("Mustache Template", "Mustache 模板")}</MenuItem>
+              <MenuItem value="JAVASCRIPT">{uiText("JavaScript Template", "JavaScript 模板")}</MenuItem>
             </TextField>
             {!se.templateType && <TextField
-              label="Method"
+              label={uiText("Method", "请求方法")}
               size="small"
               value={se.method}
               onChange={(e) => updateRow(idx, { method: e.target.value })}
@@ -3704,7 +3709,7 @@ function SideEffectsPanel({
               fullWidth
             />}
             {!se.templateType && <TextField
-              label="Path"
+              label={uiText("Path", "路径")}
               size="small"
               sx={{ minWidth: 0, ...SIDE_EFFECT_FIELD_SX }}
               value={se.path}
@@ -3717,28 +3722,28 @@ function SideEffectsPanel({
               size="small"
               color="error"
               onClick={() => removeRow(idx)}
-              aria-label="Remove side-effect"
+              aria-label={uiText("Remove side-effect", "移除附加动作")}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Box>
           {se.templateType ? (
             <TextField
-              label="Request template"
+              label={uiText("Request template", "请求模板")}
               size="small"
               multiline
               minRows={3}
               value={se.template ?? ''}
               onChange={(e) => updateRow(idx, { template: e.target.value })}
               placeholder={'{ "method": "POST", "path": "/notify", "headers": { "Host": [ "audit.svc:8080" ] } }'}
-              helperText="Renders the whole webhook request from the triggering request. Escape request values, and never build the Host or URL from them."
+              helperText={uiText("Renders the whole webhook request from the triggering request. Escape request values, and never build the Host or URL from them.", "根据触发请求渲染完整的 Webhook 请求。请转义来自请求的值，且不要用这些值构造 Host 或 URL。")}
               slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } }, htmlInput: { 'data-testid': 'side-effect-template' } }}
               fullWidth
             />
           ) : (
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 1, alignItems: 'start' }}>
             <TextField
-              label="Host (optional)"
+              label={uiText("Host (optional)", "主机（可选）")}
               size="small"
               value={se.host}
               onChange={(e) => updateRow(idx, { host: e.target.value })}
@@ -3748,7 +3753,7 @@ function SideEffectsPanel({
               fullWidth
             />
             <TextField
-              label="Body (optional)"
+              label={uiText("Body (optional)", "请求体（可选）")}
               size="small"
               sx={{ minWidth: 0, ...SIDE_EFFECT_FIELD_SX }}
               value={se.body}
@@ -3761,17 +3766,17 @@ function SideEffectsPanel({
           )}
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 1, alignItems: 'start' }}>
             <TextField
-              label="Delay"
+              label={uiText("Delay", "延迟")}
               size="small"
               type="number"
               value={se.delayValue}
               onChange={(e) => updateRow(idx, { delayValue: Number(e.target.value) || 0 })}
               sx={{ ...SIDE_EFFECT_FIELD_SX }}
-              helperText="0 = no delay"
+              helperText={uiText("0 = no delay", "0 表示无延迟")}
               fullWidth
             />
             <TextField
-              label="Delay unit"
+              label={uiText("Delay unit", "延迟单位")}
               size="small"
               select
               value={se.delayUnit}
@@ -3779,9 +3784,9 @@ function SideEffectsPanel({
               sx={{ ...SIDE_EFFECT_FIELD_SX }}
               fullWidth
             >
-              <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-              <MenuItem value="SECONDS">seconds</MenuItem>
-              <MenuItem value="MINUTES">minutes</MenuItem>
+              <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+              <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+              <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
             </TextField>
           </Box>
           {/* Before-only fields: blocking, timeout, failurePolicy */}
@@ -3797,12 +3802,12 @@ function SideEffectsPanel({
                 }
                 label={
                   <Typography variant="body2">
-                    Blocking
+                    {uiText("Blocking", "等待完成")}
                   </Typography>
                 }
               />
               <TextField
-                label="Timeout (0 = none)"
+                label={uiText("Timeout (0 = none)", "超时（0 表示不限制）")}
                 size="small"
                 type="number"
                 value={se.timeoutValue}
@@ -3811,7 +3816,7 @@ function SideEffectsPanel({
                 fullWidth
               />
               <TextField
-                label="Timeout unit"
+                label={uiText("Timeout unit", "超时单位")}
                 size="small"
                 select
                 value={se.timeoutUnit}
@@ -3819,12 +3824,12 @@ function SideEffectsPanel({
                 sx={{ ...SIDE_EFFECT_FIELD_SX }}
                 fullWidth
               >
-                <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-                <MenuItem value="SECONDS">seconds</MenuItem>
-                <MenuItem value="MINUTES">minutes</MenuItem>
+                <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+                <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+                <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
               </TextField>
               <TextField
-                label="Failure policy"
+                label={uiText("Failure policy", "失败处理策略")}
                 size="small"
                 select
                 value={se.failurePolicy}
@@ -3832,8 +3837,8 @@ function SideEffectsPanel({
                 sx={{ ...SIDE_EFFECT_FIELD_SX }}
                 fullWidth
               >
-                <MenuItem value="BEST_EFFORT">BEST_EFFORT</MenuItem>
-                <MenuItem value="FAIL_FAST">FAIL_FAST</MenuItem>
+                <MenuItem value="BEST_EFFORT">{uiText("BEST_EFFORT", "尽力执行（BEST_EFFORT）")}</MenuItem>
+                <MenuItem value="FAIL_FAST">{uiText("FAIL_FAST", "失败即停止（FAIL_FAST）")}</MenuItem>
               </TextField>
             </Box>
           )}
@@ -3859,6 +3864,19 @@ function emptyStep(): StandardExpectationStep {
     timeoutUnit: 'SECONDS',
     failurePolicy: 'BEST_EFFORT',
   };
+}
+
+const STEP_ACTION_LABELS_ZH: Record<StepActionType, string> = {
+  httpResponse: '固定 HTTP 响应',
+  httpForward: '转发至上游',
+  httpOverrideForwardedRequest: '改写后转发',
+  httpError: '故障注入',
+  httpRequest: 'Webhook（HTTP 请求）',
+  httpClassCallback: '类回调',
+};
+
+function stepActionLabel(type: StepActionType): string {
+  return uiText(STEP_ACTION_LABELS[type], STEP_ACTION_LABELS_ZH[type]);
 }
 
 function StepsPanel({
@@ -3899,28 +3917,27 @@ function StepsPanel({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Typography variant="body2" color="text.secondary">
-        Define an ordered pipeline of actions. Exactly one step must be the <strong>responder</strong>{' '}
-        (produces the HTTP response); all other steps are side-effects that run before or after it
-        in list order. Steps cannot be combined with top-level before/after actions.
+        {uiText("Define an ordered pipeline of actions. Exactly one step must be the ", "按顺序定义动作流程。其中必须有且只有一个步骤作为 ")}<strong>{uiText("responder", "响应步骤")}</strong>{' '}
+        {uiText("(produces the HTTP response); all other steps are side-effects that run before or after it in list order. Steps cannot be combined with top-level before/after actions.", "，用于生成 HTTP 响应。其余步骤按列表顺序在响应之前或之后执行。步骤流程不能和规则顶层的前置或后置动作同时使用。")}
       </Typography>
 
       {responderCount === 0 && steps.length > 0 && (
         <Alert severity="warning" variant="outlined" sx={{ fontSize: '0.78rem' }} data-testid="steps-no-responder-warning">
-          No responder selected. Exactly one step must be marked as the responder.
+          {uiText("No responder selected. Exactly one step must be marked as the responder.", "尚未选择响应步骤。必须指定且只能指定一个响应步骤。")}
         </Alert>
       )}
       {responderCount > 1 && (
         <Alert severity="error" variant="outlined" sx={{ fontSize: '0.78rem' }} data-testid="steps-multi-responder-error">
-          Multiple responders selected ({responderCount}). Only one step can be the responder.
+          {uiText("Multiple responders selected (", "已选择多个响应步骤（")}{responderCount}{uiText("). Only one step can be the responder.", "）。只能保留一个。")}
         </Alert>
       )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          Steps ({steps.length})
+          {uiText(`Steps (${steps.length})`, `步骤（${steps.length}）`)}
         </Typography>
         <Button size="small" variant="outlined" onClick={addStep} data-testid="add-step">
-          Add step
+          {uiText("Add step", "添加步骤")}
         </Button>
       </Box>
 
@@ -3943,7 +3960,7 @@ function StepsPanel({
               #{idx + 1}
             </Typography>
             <TextField
-              label="Action type"
+              label={uiText("Action type", "动作类型")}
               size="small"
               select
               value={step.actionType}
@@ -3972,16 +3989,16 @@ function StepsPanel({
               data-testid="step-action-type"
             >
               {STEP_ACTION_TYPES.map((at) => (
-                <MenuItem key={at} value={at}>{STEP_ACTION_LABELS[at]}</MenuItem>
+                <MenuItem key={at} value={at}>{stepActionLabel(at)}</MenuItem>
               ))}
             </TextField>
 
             <Tooltip title={
               !RESPONDER_CAPABLE_ACTIONS.has(step.actionType)
-                ? `${STEP_ACTION_LABELS[step.actionType]} cannot be a responder`
+                ? uiText(`${stepActionLabel(step.actionType)} cannot be a responder`, `${stepActionLabel(step.actionType)} 不能用作响应步骤`)
                 : step.responder
-                  ? 'This step produces the HTTP response'
-                  : 'Click to make this the responder'
+                  ? uiText('This step produces the HTTP response', "此步骤会生成 HTTP 响应")
+                  : uiText('Click to make this the responder', "点击将此步骤设为响应步骤")
             }>
               <span>
                 <FormControlLabel
@@ -3995,7 +4012,7 @@ function StepsPanel({
                   }
                   label={
                     <Typography variant="body2" sx={{ fontWeight: step.responder ? 600 : 400 }}>
-                      Responder
+                      {uiText("Responder", "响应步骤")}
                     </Typography>
                   }
                   sx={{ mr: 0 }}
@@ -4008,7 +4025,7 @@ function StepsPanel({
                 size="small"
                 onClick={() => moveStep(idx, -1)}
                 disabled={idx === 0}
-                aria-label="Move step up"
+                aria-label={uiText("Move step up", "上移步骤")}
                 data-testid="step-move-up"
               >
                 <ArrowUpwardIcon fontSize="small" />
@@ -4017,7 +4034,7 @@ function StepsPanel({
                 size="small"
                 onClick={() => moveStep(idx, 1)}
                 disabled={idx === steps.length - 1}
-                aria-label="Move step down"
+                aria-label={uiText("Move step down", "下移步骤")}
                 data-testid="step-move-down"
               >
                 <ArrowDownwardIcon fontSize="small" />
@@ -4026,7 +4043,7 @@ function StepsPanel({
                 size="small"
                 color="error"
                 onClick={() => removeStep(idx)}
-                aria-label="Remove step"
+                aria-label={uiText("Remove step", "移除步骤")}
                 data-testid="step-remove"
               >
                 <DeleteIcon fontSize="small" />
@@ -4035,7 +4052,7 @@ function StepsPanel({
           </Box>
 
           <TextField
-            label={`${STEP_ACTION_LABELS[step.actionType]} payload (JSON)`}
+            label={uiText(`${stepActionLabel(step.actionType)} payload (JSON)`, `${stepActionLabel(step.actionType)} 数据（JSON）`)}
             multiline
             minRows={3}
             maxRows={12}
@@ -4056,10 +4073,10 @@ function StepsPanel({
                     onChange={(e) => updateStep(idx, { blocking: e.target.checked })}
                   />
                 }
-                label={<Typography variant="body2">Blocking</Typography>}
+                label={<Typography variant="body2">{uiText("Blocking", "等待完成")}</Typography>}
               />
               <TextField
-                label="Delay"
+                label={uiText("Delay", "延迟")}
                 size="small"
                 type="number"
                 value={step.delayValue}
@@ -4067,19 +4084,19 @@ function StepsPanel({
                 sx={{ width: { xs: '100%', sm: 100 } }}
               />
               <TextField
-                label="Delay unit"
+                label={uiText("Delay unit", "延迟单位")}
                 size="small"
                 select
                 value={step.delayUnit}
                 onChange={(e) => updateStep(idx, { delayUnit: e.target.value as SideEffectDelayUnit })}
                 sx={{ width: { xs: '100%', sm: 140 } }}
               >
-                <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-                <MenuItem value="SECONDS">seconds</MenuItem>
-                <MenuItem value="MINUTES">minutes</MenuItem>
+                <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+                <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+                <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
               </TextField>
               <TextField
-                label="Timeout"
+                label={uiText("Timeout", "超时")}
                 size="small"
                 type="number"
                 value={step.timeoutValue}
@@ -4087,27 +4104,27 @@ function StepsPanel({
                 sx={{ width: { xs: '100%', sm: 100 } }}
               />
               <TextField
-                label="Timeout unit"
+                label={uiText("Timeout unit", "超时单位")}
                 size="small"
                 select
                 value={step.timeoutUnit}
                 onChange={(e) => updateStep(idx, { timeoutUnit: e.target.value as SideEffectDelayUnit })}
                 sx={{ width: { xs: '100%', sm: 140 } }}
               >
-                <MenuItem value="MILLISECONDS">milliseconds</MenuItem>
-                <MenuItem value="SECONDS">seconds</MenuItem>
-                <MenuItem value="MINUTES">minutes</MenuItem>
+                <MenuItem value="MILLISECONDS">{uiText("milliseconds", "毫秒")}</MenuItem>
+                <MenuItem value="SECONDS">{uiText("seconds", "秒")}</MenuItem>
+                <MenuItem value="MINUTES">{uiText("minutes", "分钟")}</MenuItem>
               </TextField>
               <TextField
-                label="Failure policy"
+                label={uiText("Failure policy", "失败处理策略")}
                 size="small"
                 select
                 value={step.failurePolicy}
                 onChange={(e) => updateStep(idx, { failurePolicy: e.target.value as SideEffectFailurePolicy })}
                 sx={{ width: { xs: '100%', sm: 150 } }}
               >
-                <MenuItem value="BEST_EFFORT">BEST_EFFORT</MenuItem>
-                <MenuItem value="FAIL_FAST">FAIL_FAST</MenuItem>
+                <MenuItem value="BEST_EFFORT">{uiText("BEST_EFFORT", "尽力执行（BEST_EFFORT）")}</MenuItem>
+                <MenuItem value="FAIL_FAST">{uiText("FAIL_FAST", "失败即停止（FAIL_FAST）")}</MenuItem>
               </TextField>
             </Box>
           )}
@@ -4221,7 +4238,7 @@ function ExistingMocksList({
     else onSelectItem(item);
   };
 
-  const label = kind === 'mcp' ? 'MCP (HTTP response)' : kindLabel(kind);
+  const label = kind === 'mcp' ? uiText('MCP (HTTP response)', "MCP（HTTP 响应）") : kindLabel(kind);
   const showSearch = ofKind.length > 0 || truncated;
 
   return (
@@ -4237,7 +4254,7 @@ function ExistingMocksList({
             color: 'text.secondary',
           }}
         >
-          Existing {label} mocks
+          {uiText(`Existing ${label} mocks`, `已有 ${label} 规则`)}
         </Typography>
         {selectedKey && (
           <Button
@@ -4246,21 +4263,23 @@ function ExistingMocksList({
             onClick={onClear}
             sx={{ fontSize: '0.7rem', py: 0, px: 1, minHeight: 24 }}
           >
-            New / clear
+            {uiText("New / clear", "新建 / 清空")}
           </Button>
         )}
       </Box>
 
       {selectedKey && (
         <Alert severity="info" variant="outlined" sx={{ fontSize: '0.72rem', py: 0, px: 1, mb: 0.5, alignItems: 'center', '& .MuiAlert-message': { py: 0.3 }, '& .MuiAlert-icon': { py: 0, alignItems: 'center' } }}>
-          Editing {selectedKey.slice(0, 12)}... — changes update this expectation.
+          {uiText("Editing ", "正在编辑 ")}{selectedKey.slice(0, 12)}{uiText("... — changes update this expectation.", "… 修改将保存到此规则。")}
         </Alert>
       )}
 
       {truncated && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }} data-testid="existing-mocks-window-notice">
-          This list holds the {windowSize} expectations the dashboard keeps live, of {total} on the server.
-          Search by path or id to reach any of them.
+          {uiText(
+            `This list holds the ${windowSize} expectations the dashboard keeps live, of ${total} on the server. Search by path or id to reach any of them.`,
+            `此列表显示控制台实时跟踪的 ${windowSize} 条规则，服务器共有 ${total} 条。可按路径或 ID 搜索任意规则。`,
+          )}
         </Typography>
       )}
 
@@ -4268,7 +4287,7 @@ function ExistingMocksList({
         <TextField
           size="small"
           fullWidth
-          label="Search by path or id"
+          label={uiText("Search by path or id", "按路径或 ID 搜索")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ mb: 0.5 }}
@@ -4277,19 +4296,19 @@ function ExistingMocksList({
 
       {serverResult?.error && (
         <Alert severity="error" variant="outlined" sx={{ fontSize: '0.72rem', py: 0, px: 1, mb: 0.5 }}>
-          Could not search the server: {serverResult.error}
+          {uiText("Could not search the server: ", "无法在服务器上搜索： ")}{serverResult.error}
         </Alert>
       )}
 
       {searching ? (
         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 1 }}>
-          Searching all {total} expectations…
+          {uiText(`Searching all ${total} expectations…`, `正在搜索全部 ${total} 条规则…`)}
         </Typography>
       ) : filtered.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 1 }}>
           {query
-            ? `No ${kindLabel(kind)} mocks match “${query}”.`
-            : `No ${kindLabel(kind)} mocks yet — fill in the form below to add one.`}
+            ? uiText(`No ${kindLabel(kind)} mocks match “${query}”.`, `没有与“${query}”匹配的 ${kindLabel(kind)} Mock 规则。`)
+            : uiText(`No ${kindLabel(kind)} mocks yet — fill in the form below to add one.`, `暂无 ${kindLabel(kind)} Mock 规则。填写下方表单即可创建。`)}
         </Typography>
       ) : (
         <Box sx={{ maxHeight: 200, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
@@ -4329,7 +4348,7 @@ function ExistingMocksList({
                       isResponseSequence ? (
                         <Tooltip
                           arrow
-                          title="Force a specific variant per request with the x-mockserver-response-index header (0-based); it peeks without advancing the sequence."
+                          title={uiText("Force a specific variant per request with the x-mockserver-response-index header (0-based); it peeks without advancing the sequence.", "使用 x-mockserver-response-index 请求头可为单次请求指定响应序号（从 0 开始），不会推进原有序列。")}
                         >
                           {summaryLabel}
                         </Tooltip>
@@ -4348,7 +4367,7 @@ function ExistingMocksList({
 
       {!selectedKey && filtered.length > 0 && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-          Select a mock to edit it, or fill in the form below to add a new one.
+          {uiText("Select a mock to edit it, or fill in the form below to add a new one.", "选择一条规则进行编辑，或填写下方表单新建规则。")}
         </Typography>
       )}
     </Paper>
@@ -4393,17 +4412,17 @@ function QuickMockForm({
 }: QuickMockFormProps) {
   const disabledReason =
     matcher.path.trim().length === 0
-      ? 'Enter a request path to match'
-      : responseStatusCodeError(staticState.statusCode) ?? null;
+      ? uiText('Enter a request path to match', "请填写要匹配的请求路径")
+      : statusCodeHint(staticState.statusCode) ?? null;
   return (
     <Paper variant="outlined" sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }} data-testid="quick-mock-form">
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          1 · When this request arrives
+          {uiText("1 · When this request arrives", "1 · 匹配传入请求")}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
-            label="Method"
+            label={uiText("Method", "请求方法")}
             size="small"
             select
             value={matcher.method}
@@ -4411,11 +4430,11 @@ function QuickMockForm({
             sx={{ minWidth: 110 }}
           >
             {['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'].map((m) => (
-              <MenuItem key={m} value={m === 'ANY' ? '' : m}>{m}</MenuItem>
+              <MenuItem key={m} value={m === 'ANY' ? '' : m}>{m === 'ANY' ? uiText('ANY', '不限') : m}</MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Path"
+            label={uiText("Path", "路径")}
             size="small"
             sx={{ flex: 1, minWidth: 200 }}
             value={matcher.path}
@@ -4427,7 +4446,7 @@ function QuickMockForm({
 
       <Box>
         <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          2 · Respond with
+          {uiText("2 · Respond with", "2 · 配置响应")}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
           <StatusCodeField
@@ -4446,20 +4465,20 @@ function QuickMockForm({
         </Box>
         {staticState.bodyFromFile ? (
           <TextField
-            label="Response body"
+            label={uiText("Response body", "响应体")}
             fullWidth
             multiline
             minRows={3}
             maxRows={12}
             value={staticState.body}
             disabled
-            helperText="This mock serves its body from a file — switch to Advanced to edit that."
+            helperText={uiText("This mock serves its body from a file — switch to Advanced to edit that.", "此规则会从文件读取响应体。切换到高级模式可进行编辑。")}
             slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
           />
         ) : (
           <JsonEditor
-            label="Response body"
-            ariaLabel="Response body"
+            label={uiText("Response body", "响应体")}
+            ariaLabel={uiText("Response body", "响应体")}
             language={responseBodyLanguage(staticState.contentType)}
             value={staticState.body}
             onChange={(next) => setStaticState({ ...staticState, body: next })}
@@ -4478,8 +4497,8 @@ function QuickMockForm({
           data-testid="quick-preserved-fields-info"
           sx={{ py: 0, '& .MuiAlert-message': { py: 0.75 } }}
         >
-          Preserving {preservedFields.length}{' '}
-          {preservedFields.length === 1 ? 'field' : 'fields'} not shown in this form:{' '}
+          {uiText("Preserving ", "将保留此表单未显示的 ")}{preservedFields.length}{' '}
+          {preservedFields.length === 1 ? uiText('field', "个字段") : uiText('fields', "个字段")}{uiText(" not shown in this form:", " ：")}{' '}
           <Box component="span" sx={{ fontFamily: monospaceFontFamily }}>
             {preservedFields.join(', ')}
           </Box>
@@ -4496,17 +4515,17 @@ function QuickMockForm({
               disabled={registering || disabledReason !== null}
             >
               {registering
-                ? 'Registering…'
+                ? uiText('Registering…', "正在注册…")
                 : editingExisting
-                  ? 'Update mock'
-                  : 'Register mock'}
+                  ? uiText('Update mock', "更新规则")
+                  : uiText('Register mock', "注册规则")}
             </Button>
           </span>
         </Tooltip>
         <Typography variant="caption" color="text.secondary">
-          Need headers, matchers, forwarding, fault injection, or other response types?{' '}
+          {uiText("Need headers, matchers, forwarding, fault injection, or other response types?", "需要设置请求头、匹配条件、转发、故障注入或其他响应类型？")}{' '}
           <Link component="button" type="button" variant="caption" underline="hover" onClick={onSwitchToAdvanced}>
-            Switch to Advanced
+            {uiText("Switch to Advanced", "切换到高级模式")}
           </Link>.
         </Typography>
       </Box>
@@ -4838,7 +4857,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
         trackFeature('expectation_created');
         setRegisteredLintWarnings(lintWarnings);
         const label = m.dns ? m.dns.dnsName : `${m.method || 'ANY'} ${m.path}`;
-        setSnackMessage(`Registered ${label}`);
+        setSnackMessage(uiText(`Registered ${label}`, `已注册 ${label}`));
         // Surface a persistent next-step banner (the snackbar auto-hides).
         setRegisteredLabel(label);
       } catch (e) {
@@ -5246,8 +5265,8 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
         onChange={(_, v: number) => setComposerTab(v)}
         sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, typography: 'body2' } }}
       >
-        <Tab label="Compose" />
-        <Tab label="Scenarios" />
+        <Tab label={uiText("Compose", "编辑规则")} />
+        <Tab label={uiText("Scenarios", "场景")} />
       </Tabs>
 
       {composerTab === 1 && (
@@ -5268,7 +5287,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
           <Typography variant="h5">
-            Mocks
+            {uiText("Mocks", "Mock 规则")}
           </Typography>
           {/* Quick vs Advanced mode. Quick shows only the 90%-case fields for a
               simple HTTP mock; Advanced reveals every option. */}
@@ -5288,7 +5307,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
               }
               setMode(next);
             }}
-            aria-label="Form complexity"
+            aria-label={uiText("Form complexity", "表单模式")}
             color="primary"
             sx={{
               // Make the active mode obvious and on-brand: the selected segment is
@@ -5312,8 +5331,8 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
               },
             }}
           >
-            <ToggleButton value="quick" aria-label="Quick mock">Quick mock</ToggleButton>
-            <ToggleButton value="advanced" aria-label="Advanced">Advanced</ToggleButton>
+            <ToggleButton value="quick" aria-label={uiText("Quick mock", "快速模式")}>{uiText("Quick mock", "快速模式")}</ToggleButton>
+            <ToggleButton value="advanced" aria-label={uiText("Advanced", "高级模式")}>{uiText("Advanced", "高级模式")}</ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
@@ -5358,7 +5377,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
         {mode === 'advanced' && (
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-            Expectation kind
+            {uiText("Expectation kind", "规则类型")}
           </Typography>
           <RadioGroup
             row
@@ -5402,7 +5421,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
             <FormControlLabel
               value="llm_conversation"
               control={<Radio size="small" />}
-              label={<Typography variant="body2">LLM Conversation</Typography>}
+              label={<Typography variant="body2">{uiText("LLM Conversation", "LLM 对话")}</Typography>}
             />
             <FormControlLabel
               value="grpc"
@@ -5422,7 +5441,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
             <FormControlLabel
               value="import"
               control={<Radio size="small" />}
-              label={<Typography variant="body2">Import</Typography>}
+              label={<Typography variant="body2">{uiText("Import", "导入")}</Typography>}
             />
           </RadioGroup>
         </Paper>
@@ -5456,7 +5475,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                     color: 'text.secondary',
                   }}
                 >
-                  Existing LLM scenarios
+                  {uiText("Existing LLM scenarios", "已有 LLM 场景")}
                 </Typography>
                 {llmScenarioName && (
                   <Button
@@ -5465,20 +5484,20 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                     onClick={() => setLlmScenarioName('')}
                     sx={{ fontSize: '0.7rem', py: 0, px: 1, minHeight: 24 }}
                   >
-                    New / clear
+                    {uiText("New / clear", "新建 / 清空")}
                   </Button>
                 )}
               </Box>
 
               {llmScenarioName && (
                 <Alert severity="info" variant="outlined" sx={{ fontSize: '0.72rem', py: 0, px: 1, mb: 0.5, alignItems: 'center', '& .MuiAlert-message': { py: 0.3 }, '& .MuiAlert-icon': { py: 0, alignItems: 'center' } }}>
-                  Editing {llmScenarioName.replace(/^__llm_conv_/, '').replace(/__iso=.*$/, '')} — changes update this scenario.
+                  {uiText("Editing ", "正在编辑 ")}{llmScenarioName.replace(/^__llm_conv_/, '').replace(/__iso=.*$/, '')}{uiText(" — changes update this scenario.", " ，修改将保存到此场景。")}
                 </Alert>
               )}
 
               {llmScenarios.length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', py: 1 }}>
-                  No LLM mocks yet — fill in the form below to add one.
+                  {uiText("No LLM mocks yet — fill in the form below to add one.", "暂无 LLM 规则。填写下方表单即可创建。")}
                 </Typography>
               ) : (
                 <Box sx={{ maxHeight: 200, overflowY: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
@@ -5503,7 +5522,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                               component="span"
                               sx={{ fontSize: '0.78rem', fontFamily: monospaceFontFamily }}
                             >
-                              {s.shortName} ({s.expectations.length} turn{s.expectations.length === 1 ? '' : 's'})
+                              {uiText(`${s.shortName} (${s.expectations.length} turn${s.expectations.length === 1 ? '' : 's'})`, `${s.shortName}（${s.expectations.length} 轮）`)}
                             </Typography>
                           }
                           sx={{ m: 0 }}
@@ -5516,7 +5535,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
 
               {!llmScenarioName && llmScenarios.length > 0 && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                  Select a scenario to edit it, or fill in the form below to add a new one.
+                  {uiText("Select a scenario to edit it, or fill in the form below to add a new one.", "选择场景进行编辑，或填写下方表单新建场景。")}
                 </Typography>
               )}
             </Paper>
@@ -5539,23 +5558,17 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
           <>
             {kind === 'grpc' && (
               <Alert severity="info" variant="outlined" sx={{ fontSize: '0.78rem' }}>
-                gRPC requests are transcoded to HTTP and matched by normal expectations. The matcher
-                is pre-shaped with POST and a <code>/package.Service/Method</code> path pattern.
-                Choose a standard HTTP response or a gRPC stream response action.
+                {uiText("gRPC requests are transcoded to HTTP and matched by normal expectations. The matcher is pre-shaped with POST and a ", "gRPC 请求会被转换成 HTTP 请求，再由普通规则匹配。已预填 POST 方法和路径格式 ")}<code>/package.Service/Method</code>{uiText(" path pattern. Choose a standard HTTP response or a gRPC stream response action.", " 。可选择标准 HTTP 响应或 gRPC 流式响应。")}
               </Alert>
             )}
             {kind === 'dns' && (
               <Alert severity="info" variant="outlined" sx={{ fontSize: '0.78rem' }}>
-                DNS expectations are served by the DNS handler on the MockServer DNS port. The
-                request matcher matches by DNS name, record type, and record class; the action
-                returns a DNS response with a response code and answer records.
+                {uiText("DNS expectations are served by the DNS handler on the MockServer DNS port. The request matcher matches by DNS name, record type, and record class; the action returns a DNS response with a response code and answer records.", "DNS 请求由 MockServer DNS 端口的处理程序接收。规则按 DNS 名称、记录类型和类别进行匹配，并返回响应码和应答记录。")}
               </Alert>
             )}
             {kind === 'mcp' && (
               <Alert severity="info" variant="outlined" sx={{ fontSize: '0.78rem' }}>
-                MCP tools are generated automatically from HTTP response expectations — create a
-                response mock and it appears as a callable tool on the MCP endpoint. The derived tools
-                are shown below after you register.
+                {uiText("MCP tools are generated automatically from HTTP response expectations — create a response mock and it appears as a callable tool on the MCP endpoint. The derived tools are shown below after you register.", "MCP 工具会根据 HTTP 响应规则自动生成。注册响应规则后，对应工具会显示在下方，并可通过 MCP 端点调用。")}
               </Alert>
             )}
             {/* MCP kind: show the derived tools at the top so it is clear the MCP
@@ -5573,7 +5586,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 / body fields. */}
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                1 · Match a request
+                {uiText("1 · Match a request", "1 · 配置请求匹配")}
               </Typography>
               {kind === 'dns' ? (
                 <>
@@ -5584,9 +5597,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                     setDnsMatcher={setDnsMatcher}
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                    DNS queries are matched by dnsName (required), record type, and record class.
-                    Leave type and class empty to match any. The server routes to a DnsRequestDefinition
-                    when the request object contains a dnsName field.
+                    {uiText("DNS queries are matched by dnsName (required), record type, and record class. Leave type and class empty to match any. The server routes to a DnsRequestDefinition when the request object contains a dnsName field.", "按 dnsName（必填）、记录类型和记录类别匹配 DNS 查询。类型和类别留空可匹配任意记录。请求对象包含 dnsName 字段时，服务器会使用 DnsRequestDefinition 处理。")}
                   </Typography>
                 </>
               ) : (
@@ -5599,7 +5610,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                       startIcon={<ScienceOutlinedIcon fontSize="small" />}
                       onClick={() => setMatcherPlaygroundOpen(true)}
                     >
-                      Test Matcher
+                      {uiText("Test Matcher", "预览规则匹配")}
                     </Button>
                     {/* Dry-run's live sibling: Test Matcher predicts a verdict in the
                         browser, Try It actually fires the request at MockServer and
@@ -5610,7 +5621,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                       startIcon={<SendOutlinedIcon fontSize="small" />}
                       onClick={() => setTryItOpen((open) => !open)}
                     >
-                      {tryItOpen ? 'Hide Try It' : 'Try It'}
+                      {tryItOpen ? uiText('Hide Try It', "关闭试发面板") : uiText('Try It', "试发 HTTP 请求…")}
                     </Button>
                   </Box>
                   {/* Mounted only while open so it re-derives from the latest draft
@@ -5624,9 +5635,9 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                   )}
                   <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                     {kind === 'grpc'
-                      ? 'gRPC path convention: /package.Service/Method. gRPC clients send Content-Type: application/grpc — add it to the matcher headers to restrict to gRPC traffic only.'
-                      : 'Protocol (HTTP/1.1 vs HTTP/2), keep-alive, respond-before-body, the socket-address override, and client certificate chains are not yet exposed in the form — use the REST API or raw JSON for those.'}
-                    {' '}Object callbacks (httpResponseObjectCallback / httpForwardObjectCallback) require live WebSocket registration and are not form-authorable.
+                      ? uiText('gRPC path convention: /package.Service/Method. gRPC clients send Content-Type: application/grpc — add it to the matcher headers to restrict to gRPC traffic only.', "gRPC 路径格式为 /package.Service/Method。gRPC 客户端会发送 Content-Type: application/grpc，请将该请求头加入匹配条件以限定 gRPC 流量。")
+                      : uiText('Protocol (HTTP/1.1 vs HTTP/2), keep-alive, respond-before-body, the socket-address override, and client certificate chains are not yet exposed in the form — use the REST API or raw JSON for those.', "表单暂不支持设置协议（HTTP/1.1 或 HTTP/2）、持久连接、在请求体接收完前响应、覆盖套接字地址或客户端证书链。可使用 REST API 或直接编辑 JSON。")}
+                    {' '}{uiText("Object callbacks (httpResponseObjectCallback / httpForwardObjectCallback) require live WebSocket registration and are not form-authorable.", "对象回调（httpResponseObjectCallback、httpForwardObjectCallback）必须通过有效的 WebSocket 连接注册，表单暂不支持。")}
                   </Typography>
                 </>
               )}
@@ -5635,7 +5646,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
             {/* Step 2: action type */}
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                2 · Respond with
+                {uiText("2 · Respond with", "2 · 配置响应")}
               </Typography>
               <RadioGroup
                 value={actionType}
@@ -5739,7 +5750,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                   }
                   label={
                     <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                      Inject fault / chaos (optional)
+                      {uiText("Inject fault / chaos (optional)", "故障注入（可选）")}
                     </Typography>
                   }
                   sx={{ m: 0 }}
@@ -5755,7 +5766,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
             {/* Side-effect actions (before / after) — optional, cross-cutting.
                 Disabled when Steps mode is active (they conflict). */}
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Tooltip title={stepsEnabled ? 'Side-effects cannot be combined with steps mode' : ''}>
+              <Tooltip title={stepsEnabled ? uiText('Side-effects cannot be combined with steps mode', "步骤模式与前置或后置动作不能同时使用") : ''}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -5770,7 +5781,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                   }
                   label={
                     <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: stepsEnabled ? 'text.disabled' : 'text.secondary' }}>
-                      Before &amp; after actions (optional)
+                      {uiText("Before & after actions (optional)", "前置和后置动作（可选）")}
                     </Typography>
                   }
                   sx={{ m: 0 }}
@@ -5806,15 +5817,14 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 }
                 label={
                   <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                    Steps pipeline (advanced, optional)
+                    {uiText("Steps pipeline (advanced, optional)", "步骤流程（高级，可选）")}
                   </Typography>
                 }
                 sx={{ m: 0 }}
               />
               {stepsEnabled && (
                 <Alert severity="info" variant="outlined" sx={{ fontSize: '0.72rem', mt: 1, mb: 0.5 }}>
-                  Steps mode replaces the top-level response action and before/after side-effects
-                  with an ordered pipeline. The action type above is ignored when steps are active.
+                  {uiText("Steps mode replaces the top-level response action and before/after side-effects with an ordered pipeline. The action type above is ignored when steps are active.", "启用步骤模式后，有序流程会取代顶层响应动作以及前置和后置动作。上方选择的动作类型不生效。")}
                 </Alert>
               )}
               <Collapse in={stepsEnabled} unmountOnExit>
@@ -5846,7 +5856,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 }
                 label={
                   <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                    Capture into scenario state (optional)
+                    {uiText("Capture into scenario state (optional)", "提取到场景状态（可选）")}
                   </Typography>
                 }
                 sx={{ m: 0 }}
@@ -5864,31 +5874,29 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 Quick path preserves them untouched as passthrough. */}
             <Paper variant="outlined" sx={{ p: 2 }} data-testid="scenario-section">
               <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                Scenario (optional)
+                {uiText("Scenario (optional)", "场景（可选）")}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, mb: 1 }}>
-                Bind this mock to a scenario state machine: it matches only while the scenario is in
-                the required state, then advances it to the transition state. Leave blank for a
-                stateless mock.
+                {uiText("Bind this mock to a scenario state machine: it matches only while the scenario is in the required state, then advances it to the transition state. Leave blank for a stateless mock.", "将此规则绑定到场景状态机。仅在场景处于指定状态时匹配，并在匹配后切换到目标状态。留空则创建无状态规则。")}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 <TextField
                   size="small"
-                  label="Scenario Name"
+                  label={uiText("Scenario Name", "场景名称")}
                   value={scenarioBindingName}
                   onChange={(e) => setScenarioBindingName(e.target.value)}
                   sx={{ flex: 1, minWidth: 160 }}
                 />
                 <TextField
                   size="small"
-                  label="Required State"
+                  label={uiText("Required State", "匹配所需状态")}
                   value={scenarioBindingState}
                   onChange={(e) => setScenarioBindingState(e.target.value)}
                   sx={{ flex: 1, minWidth: 140 }}
                 />
                 <TextField
                   size="small"
-                  label="Transition To"
+                  label={uiText("Transition To", "切换至状态")}
                   value={scenarioBindingNext}
                   onChange={(e) => setScenarioBindingNext(e.target.value)}
                   sx={{ flex: 1, minWidth: 140 }}
@@ -5922,9 +5930,9 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
               // DNS kind validates dnsName instead of matcher.path.
               const disabledReason: string | null = (() => {
                 if (kind === 'dns') {
-                  if (dnsMatcher.dnsName.trim().length === 0) return 'Enter a DNS name to match';
+                  if (dnsMatcher.dnsName.trim().length === 0) return uiText('Enter a DNS name to match', "请填写要匹配的 DNS 名称");
                 } else {
-                  if (matcher.path.trim().length === 0) return 'Enter a request path to match';
+                  if (matcher.path.trim().length === 0) return uiText('Enter a request path to match', "请填写要匹配的请求路径");
                 }
 
                 // Cross-cutting chaos validation — applies regardless of action type.
@@ -5933,14 +5941,14 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 // Bounds verified against HttpChaosProfile.java: errorStatus 100–599,
                 // errorProbability 0.0–1.0
                 if (chaosEnabled && hasStandardChaosRangeErrors(chaosState)) {
-                  return 'Chaos profile has out-of-range values (errorStatus: 100–599, errorProbability: 0.0–1.0)';
+                  return uiText('Chaos profile has out-of-range values (errorStatus: 100–599, errorProbability: 0.0–1.0)', "故障注入配置超出范围（errorStatus：100–599，errorProbability：0.0–1.0）");
                 }
 
                 // A binary body matcher must be valid base64 — otherwise the
                 // generated `Base64.getDecoder().decode(...)` throws and the
                 // server rejects the registration.
                 if (kind !== 'dns' && (matcher.bodyMatcherType === 'binary' || matcher.bodyBinary) && matcher.body.trim().length > 0 && !isValidBase64(matcher.body)) {
-                  return 'Binary body matcher is not valid base64';
+                  return uiText('Binary body matcher is not valid base64', "二进制请求体匹配条件必须为有效的 Base64");
                 }
 
                 // A JSON or JSON-Schema body matcher must be well-formed JSON —
@@ -5957,24 +5965,24 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                     JSON.parse(matcher.body);
                   } catch {
                     return matcher.bodyMatcherType === 'json-schema'
-                      ? 'JSON Schema body matcher is not valid JSON'
-                      : 'JSON body matcher is not valid JSON';
+                      ? uiText('JSON Schema body matcher is not valid JSON', "JSON Schema 匹配条件必须为有效的 JSON")
+                      : uiText('JSON body matcher is not valid JSON', "JSON 请求体匹配条件必须为有效的 JSON");
                   }
                 }
 
                 // Steps mode validation — exactly one responder required
                 if (stepsEnabled) {
-                  if (stepsState.length === 0) return 'Add at least one step';
+                  if (stepsState.length === 0) return uiText('Add at least one step', "请至少添加一个步骤");
                   const responderCount = stepsState.filter((s) => s.responder).length;
-                  if (responderCount === 0) return 'Exactly one step must be the responder';
-                  if (responderCount > 1) return 'Only one step can be the responder';
+                  if (responderCount === 0) return uiText('Exactly one step must be the responder', "请指定一个响应步骤");
+                  if (responderCount > 1) return uiText('Only one step can be the responder', "只能指定一个响应步骤");
                   return null;
                 }
                 switch (actionType) {
                   case 'static':
                     return (staticState.bodyFromFile && staticState.filePath.trim().length === 0)
-                      ? 'Enter the response body file path' : responseStatusCodeError(staticState.statusCode) ?? null;
-                  case 'forward': return (forwardState.host.trim().length > 0 && forwardState.port > 0) ? null : 'Enter a forward host and port';
+                      ? uiText('Enter the response body file path', "请填写响应体文件路径") : statusCodeHint(staticState.statusCode) ?? null;
+                  case 'forward': return (forwardState.host.trim().length > 0 && forwardState.port > 0) ? null : uiText('Enter a forward host and port', "请填写转发目标的主机和端口");
                   case 'forward_override':
                     return (
                       forwardOverrideState.overrideMethod.trim().length > 0 ||
@@ -5984,39 +5992,39 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                       forwardOverrideState.overrideQueryString.trim().length > 0 ||
                       forwardOverrideState.overrideHeaders.trim().length > 0 ||
                       forwardOverrideState.overrideBody.trim().length > 0
-                    ) ? null : 'Set at least one override field';
+                    ) ? null : uiText('Set at least one override field', "请至少设置一个要改写的字段");
                   case 'forward_fallback':
                     return (forwardFallbackState.host.trim().length > 0 && forwardFallbackState.port > 0)
-                      ? responseStatusCodeError(forwardFallbackState.fallbackStatusCode) ?? null
-                      : 'Enter a fallback host and port';
-                  case 'callback': return callbackState.callbackClass.trim().length > 0 ? null : 'Enter the callback class name';
-                  case 'template': return (templateState.template.trim().length > 0 || (templateState.templateFile ?? '').trim().length > 0) ? templateParametersError(templateState.parameters) : 'Enter a response template or a template file path';
+                      ? statusCodeHint(forwardFallbackState.fallbackStatusCode) ?? null
+                      : uiText('Enter a fallback host and port', "请填写带回退的转发目标主机和端口");
+                  case 'callback': return callbackState.callbackClass.trim().length > 0 ? null : uiText('Enter the callback class name', "请填写回调类名");
+                  case 'template': return (templateState.template.trim().length > 0 || (templateState.templateFile ?? '').trim().length > 0) ? templateParametersHint(templateState.parameters) : uiText('Enter a response template or a template file path', "请填写响应模板或模板文件路径");
                   case 'error':
-                    if (errorState.responseBytesB64.trim().length > 0 && !isValidBase64(errorState.responseBytesB64)) return 'Response bytes are not valid base64';
-                    return (errorState.dropConnection || errorState.resetConnection || errorState.responseBytesB64.trim().length > 0) ? null : 'Enable drop-connection or reset-connection, or enter response bytes';
+                    if (errorState.responseBytesB64.trim().length > 0 && !isValidBase64(errorState.responseBytesB64)) return uiText('Response bytes are not valid base64', "响应字节必须为有效的 Base64");
+                    return (errorState.dropConnection || errorState.resetConnection || errorState.responseBytesB64.trim().length > 0) ? null : uiText('Enable drop-connection or reset-connection, or enter response bytes', "请启用断开连接或重置连接，或填写响应字节");
                   case 'websocket': return null;
                   case 'sse':
-                    if (!sseState.events.some((ev) => ev.data.trim().length > 0 || ev.event.trim().length > 0)) return 'Add at least one SSE event';
-                    return responseStatusCodeError(sseState.statusCode) ?? null;
+                    if (!sseState.events.some((ev) => ev.data.trim().length > 0 || ev.event.trim().length > 0)) return uiText('Add at least one SSE event', "请至少添加一个 SSE 事件");
+                    return statusCodeHint(sseState.statusCode) ?? null;
                   case 'binary_response':
                     // No data is valid: the matched message gets no reply.
                     if (binaryResponseState.binaryData.trim().length === 0) return null;
-                    return isValidBase64(binaryResponseState.binaryData) ? null : 'Binary data is not valid base64';
+                    return isValidBase64(binaryResponseState.binaryData) ? null : uiText('Binary data is not valid base64', "二进制数据必须为有效的 Base64");
                   case 'dns_response': {
                     // Surface invalid answer-records JSON instead of silently dropping it (the
                     // codegen omits unparseable records, which would register an empty DNS answer).
                     const recs = dnsResponseState.answerRecords.trim();
                     if (recs.length > 0) {
                       try {
-                        if (!Array.isArray(JSON.parse(recs))) return 'Answer records must be a JSON array';
+                        if (!Array.isArray(JSON.parse(recs))) return uiText('Answer records must be a JSON array', "应答记录必须为 JSON 数组");
                       } catch {
-                        return 'Answer records must be valid JSON (an array of records)';
+                        return uiText('Answer records must be valid JSON (an array of records)', "请填写有效的 JSON 应答记录数组");
                       }
                     }
                     return null;
                   }
-                  case 'forward_template': return (forwardTemplateState.template.trim().length > 0 || (forwardTemplateState.templateFile ?? '').trim().length > 0) ? templateParametersError(forwardTemplateState.parameters) : 'Enter a forward template or a template file path';
-                  case 'forward_class_callback': return forwardClassCallbackState.callbackClass.trim().length > 0 ? null : 'Enter the forward callback class name';
+                  case 'forward_template': return (forwardTemplateState.template.trim().length > 0 || (forwardTemplateState.templateFile ?? '').trim().length > 0) ? templateParametersHint(forwardTemplateState.parameters) : uiText('Enter a forward template or a template file path', "请填写转发模板或模板文件路径");
+                  case 'forward_class_callback': return forwardClassCallbackState.callbackClass.trim().length > 0 ? null : uiText('Enter the forward callback class name', "请填写转发回调类名");
                   case 'grpc_stream': return null;
                 }
               })();
@@ -6027,7 +6035,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
               return (
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                    4 · Review &amp; register
+                    {uiText("4 · Review & register", "4 · 确认并注册")}
                   </Typography>
                   <Divider sx={{ mb: 1 }} />
                   {preservedFields.length > 0 && (
@@ -6038,8 +6046,8 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                       data-testid="preserved-fields-info"
                       sx={{ mb: 1, py: 0, '& .MuiAlert-message': { py: 0.75 } }}
                     >
-                      Preserving {preservedFields.length}{' '}
-                      {preservedFields.length === 1 ? 'field' : 'fields'} not shown in this form:{' '}
+                      {uiText("Preserving ", "将保留此表单未显示的 ")}{preservedFields.length}{' '}
+                      {preservedFields.length === 1 ? uiText('field', "个字段") : uiText('fields', "个字段")}{uiText(" not shown in this form:", " ：")}{' '}
                       <Box component="span" sx={{ fontFamily: monospaceFontFamily }}>
                         {preservedFields.join(', ')}
                       </Box>
@@ -6062,20 +6070,20 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                           disabled={registering || !canRegister}
                         >
                           {registering
-                            ? 'Registering…'
+                            ? uiText('Registering…', "正在注册…")
                             : editingExisting
-                              ? 'Update expectation'
-                              : 'Register expectation'}
+                              ? uiText('Update expectation', "更新规则")
+                              : uiText('Register expectation', "注册规则")}
                         </Button>
                       </span>
                     </Tooltip>
                     {editingExisting ? (
                       <Typography variant="caption" color="success.main">
-                        Editing — the Expectation ID will be reused so this updates in place.
+                        {uiText("Editing — the Expectation ID will be reused so this updates in place.", "将沿用现有规则 ID 并更新该规则。")}
                       </Typography>
                     ) : (
                       <Typography variant="caption" color="text.secondary">
-                        Leave the Expectation ID blank to create a new one, or paste an existing ID above to update in place.
+                        {uiText("Leave the Expectation ID blank to create a new one, or paste an existing ID above to update in place.", "规则 ID 留空可创建新规则，也可填写已有规则 ID 进行更新。")}
                       </Typography>
                     )}
                   </Box>
@@ -6095,9 +6103,9 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
             data-testid="register-success"
             onClose={() => setRegisteredLabel(null)}
           >
-            <AlertTitle sx={{ mb: 0.5 }}>Mock Registered</AlertTitle>
+            <AlertTitle sx={{ mb: 0.5 }}>{uiText("Mock Registered", "Mock 规则已注册")}</AlertTitle>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              <code>{registeredLabel}</code> is now live. What next?
+              <code>{registeredLabel}</code>{uiText(" is now live. What next?", " 已生效。接下来要做什么？")}
             </Typography>
             {registeredLintWarnings > 0 && (
               <Box sx={{ mb: 1 }}>
@@ -6114,7 +6122,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                   setView('dashboard');
                 }}
               >
-                View on dashboard
+                {uiText("View on dashboard", "在运行面板查看")}
               </Button>
               <Button
                 size="small"
@@ -6122,7 +6130,7 @@ export default function ComposerView({ connectionParams }: ComposerViewProps) {
                 color="success"
                 onClick={resetForm}
               >
-                Add another
+                {uiText("Add another", "再添加一条")}
               </Button>
             </Box>
           </Alert>

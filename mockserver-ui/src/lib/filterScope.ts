@@ -33,6 +33,7 @@
  * error state and this translation cannot drift apart.
  */
 import { parseSearchTerm } from './filterDSL';
+import { uiText } from './dashboardLocale';
 import type { KeyToMultiValue } from '../types';
 
 /**
@@ -117,7 +118,10 @@ export function parseRequestScope(
     return {
       scope: {},
       unsupportedFields: parsed.unsupportedFields,
-      error: `"${parsed.text}" is not a scope operator - use ${fields.map((f) => `${f}:`).join(', ')}, or type it into the fields below.`,
+      error: uiText(
+        `"${parsed.text}" is not a scope operator - use ${fields.map((f) => `${f}:`).join(', ')}, or type it into the fields below.`,
+        `「${parsed.text}」不是可用的筛选条件。请使用 ${fields.map((f) => `${f}:`).join('、')}，或在下方对应的字段中填写。`,
+      ),
     };
   }
 
@@ -129,7 +133,10 @@ export function parseRequestScope(
         return {
           scope: {},
           unsupportedFields: parsed.unsupportedFields,
-          error: `${shown} - a status is a whole number from 0 to 999, e.g. status:>=400 or status:404.`,
+          error: uiText(
+            `${shown} - a status is a whole number from 0 to 999, e.g. status:>=400 or status:404.`,
+            `${shown} 中的状态码须为 0 至 999 的整数，例如 status:>=400 或 status:404。`,
+          ),
         };
       }
       const { min, max } = statusBounds(op.comparator, Number(op.expr));
@@ -142,14 +149,17 @@ export function parseRequestScope(
       return {
         scope: {},
         unsupportedFields: parsed.unsupportedFields,
-        error: `${op.field}:${op.comparator}${op.expr} - comparators (>= <= > <) need a numeric operator, and this scope has none.`,
+        error: uiText(
+          `${op.field}:${op.comparator}${op.expr} - comparators (>= <= > <) need a numeric operator, and this scope has none.`,
+          `${op.field}:${op.comparator}${op.expr} 不能使用比较符。比较符（>=、<=、>、<）只适用于数值筛选。`,
+        ),
       };
     }
     if (op.expr.length === 0) {
       return {
         scope: {},
         unsupportedFields: parsed.unsupportedFields,
-        error: `${op.field}: has no value.`,
+        error: uiText(`${op.field}: has no value.`, `请在 ${op.field}: 后填写值。`),
       };
     }
     // The search box ANDs repeated operators, so `path:/a path:/b` selects
@@ -160,7 +170,10 @@ export function parseRequestScope(
       return {
         scope: {},
         unsupportedFields: parsed.unsupportedFields,
-        error: `${op.field}: appears more than once - a matcher has a single ${op.field}.`,
+        error: uiText(
+          `${op.field}: appears more than once - a matcher has a single ${op.field}.`,
+          `${op.field}: 出现了多次。每组匹配条件只能包含一个 ${op.field}。`,
+        ),
       };
     }
     if (op.field === 'method') {
@@ -168,7 +181,7 @@ export function parseRequestScope(
         return {
           scope: {},
           unsupportedFields: parsed.unsupportedFields,
-          error: 'method: matches one exact method, so * is not supported there.',
+          error: uiText('method: matches one exact method, so * is not supported there.', 'method: 仅匹配一个确切的 HTTP 方法，不支持通配符 *。'),
         };
       }
       scope.method = op.expr.toUpperCase();
@@ -186,7 +199,7 @@ export function parseRequestScope(
       return {
         scope: {},
         unsupportedFields: parsed.unsupportedFields,
-        error: 'status: selects no status code - check the comparators.',
+        error: uiText('status: selects no status code - check the comparators.', '当前 status: 条件无法匹配任何状态码，请检查比较符。'),
       };
     }
   }
@@ -268,8 +281,11 @@ export function verificationStatusFor(scope: RequestScope): VerificationStatus |
     if (min === max) return { statusCode: String(min), statusCodeRange: '' };
     if (min % 100 === 0 && max === min + 99) return { statusCode: '', statusCodeRange: `${min / 100}XX` };
     return {
-      error: `status: selects ${min}-${max}, which needs two comparisons; a verification response matcher takes one ` +
-        '(e.g. status:>=400), an exact code, or a whole class (status:>=400 status:<500 is 4XX).',
+      error: uiText(
+        `status: selects ${min}-${max}, which needs two comparisons; a verification response matcher takes one ` +
+          '(e.g. status:>=400), an exact code, or a whole class (status:>=400 status:<500 is 4XX).',
+        `status: 选中了 ${min} 至 ${max}，需要两个比较条件。响应验证仅支持一个比较条件（如 status:>=400）、一个确切的状态码，或一整类状态码（如 status:>=400 status:<500 对应 4XX）。`,
+      ),
     };
   }
   if (min != null) return { statusCode: '', statusCodeRange: `>= ${min}` };
@@ -283,5 +299,8 @@ const STATUS_COMPARISON = /^\s*(>=|<=|==|>|<)\s*-?\d+(?:\.\d+)?\s*$/;
 /** Why a typed status range would never match (the server treats it as a non-match), or null when it is valid. */
 export function statusRangeProblem(range: string): string | null {
   if (range.trim() === '' || STATUS_CLASS.test(range) || STATUS_COMPARISON.test(range)) return null;
-  return 'Use a class such as 4XX or one comparison such as >= 400 (>, >=, <, <=, ==).';
+  return uiText(
+    'Use a class such as 4XX or one comparison such as >= 400 (>, >=, <, <=, ==).',
+    '请输入一类状态码（如 4XX），或一个比较条件（如 >= 400）。支持 >、>=、<、<=、==。',
+  );
 }

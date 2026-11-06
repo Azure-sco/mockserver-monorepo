@@ -14,12 +14,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The dashboard can be built in Simplified Chinese, including navigation, the mock editor, and request inspection.
+
 ### Changed
 
 - The nightly client conformance sweep (CI) no longer re-runs the seven client pipelines when `master` has not moved since the last passed sweep
 - Snapshot builds are now published once a night (02:00 UTC) from `master` instead of after every commit: the `mockserver/mockserver:snapshot` image and its variant tags on Docker Hub and ECR Public, the SNAPSHOT jars in the Sonatype snapshot repository, and the snapshot binary bundles the client launchers download. A snapshot can be up to a day behind `master`
 
 ### Fixed
+
+- Dashboard frame-limit guidance now points to filtering retained records without suggesting that clearing the log reveals older requests.
 
 - HTTP `CONNECT` and SOCKS proxying answered `502` when `localBoundIP` was set: on Linux with IPv6 when MockServer was bound to `127.0.0.1`, on macOS when it was bound to `::1`, and everywhere when it was bound to any other address of the host. The tunnel now reaches MockServer at the address it is bound to. Without `localBoundIP`, requests sent through a tunnel on Linux with IPv6 were recorded with `::1` as their local and remote addresses, and are now recorded with `127.0.0.1`.
 - Fixtures written by the `record_llm_fixtures` MCP tool now redact the configured body fields (`fixtureBodyRedactFields` and the tool's `redactBodyFields`) in the data of each server-sent event. A complete streamed response is saved as an `httpSseResponse`, and its events were written unredacted; only a truncated stream, saved as a static body, was redacted ([#2929](https://github.com/mock-server/mockserver-monorepo/issues/2929))

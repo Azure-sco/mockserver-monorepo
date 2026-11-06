@@ -1,3 +1,4 @@
+import { uiText } from './dashboardLocale';
 /**
  * Shared filter DSL — one operator vocabulary for every filter surface.
  *
@@ -246,7 +247,7 @@ const BUILT_IN_FIELDS: readonly FilterField[] = [
     name: 'status',
     numeric: true,
     example: 'status:>=400',
-    description: 'response status (comparators >= <= > < =)',
+    description: uiText('response status (comparators >= <= > < =)', '响应状态码（支持 >= <= > < =）'),
     resolve: (value) => {
       const sc = responseOf(value)?.['statusCode'];
       return typeof sc === 'number' ? { text: String(sc), num: sc } : undefined;
@@ -255,7 +256,7 @@ const BUILT_IN_FIELDS: readonly FilterField[] = [
   {
     name: 'method',
     example: 'method:POST',
-    description: 'request method (case-insensitive)',
+    description: uiText('request method (case-insensitive)', '请求方法（忽略大小写）'),
     resolve: (value) => {
       const m = denote(requestOf(value)?.['method']);
       return m != null ? { text: m } : undefined;
@@ -265,7 +266,7 @@ const BUILT_IN_FIELDS: readonly FilterField[] = [
     name: 'path',
     glob: true,
     example: 'path:/api/*',
-    description: 'request path glob (* = any characters)',
+    description: uiText('request path glob (* = any characters)', '请求路径通配模式（* 匹配任意字符）'),
     resolve: (value) => {
       const p = denote(requestOf(value)?.['path']);
       return p != null ? { text: p } : undefined;
@@ -275,7 +276,7 @@ const BUILT_IN_FIELDS: readonly FilterField[] = [
     name: 'host',
     glob: true,
     example: 'host:*.example.com',
-    description: 'request Host header glob (* = any characters)',
+    description: uiText('request Host header glob (* = any characters)', '请求的 Host 头通配模式（* 匹配任意字符）'),
     resolve: (value) => {
       const h = hostFromHeaders(requestOf(value)?.['headers']);
       return h ? { text: h } : undefined;
@@ -285,7 +286,7 @@ const BUILT_IN_FIELDS: readonly FilterField[] = [
     name: 'operation',
     glob: true,
     example: 'operation:GetUser',
-    description: 'request body operationName glob (GraphQL operation)',
+    description: uiText('request body operationName glob (GraphQL operation)', '请求正文中的 operationName 通配模式（GraphQL 操作）'),
     // Resolves from the ONE place an operation name is already available without
     // parsing a GraphQL document: the `operationName` member of a JSON request
     // body — the shape a GraphQL-over-HTTP POST uses (`{ query, operationName,
@@ -392,9 +393,9 @@ export function describeUnsupportedOperators(
     .map((f) => `${f.toLowerCase()}:`)
     .join(', ');
   const supportedText = allowed.length > 0
-    ? `Supported here: ${allowed}.`
-    : 'No field operators are supported here.';
-  return `${bad} not supported here — nothing will match. ${supportedText}`;
+    ? uiText(`Supported here: ${allowed}.`, `此处支持 ${allowed}。`)
+    : uiText('No field operators are supported here.', '此处不支持字段运算符。');
+  return uiText(`${bad} not supported here — nothing will match. ${supportedText}`, `此处不支持 ${bad}，因此无法匹配任何结果。${supportedText}`);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -79,45 +80,43 @@ export default function ScimDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth fullScreen={fullScreen} aria-labelledby="scim-dialog-title">
-      <DialogTitle id="scim-dialog-title">Mock SCIM Provider</DialogTitle>
+      <DialogTitle id="scim-dialog-title">{uiText("Mock SCIM Provider", "模拟 SCIM 服务提供方")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Register a mock SCIM 2.0 provider — Users and Groups resource endpoints plus the
-          service-provider discovery documents — as expectations. Leave a field blank to use the
-          server default.
+          {uiText("Register a mock SCIM 2.0 provider — Users and Groups resource endpoints plus the service-provider discovery documents — as expectations. Leave a field blank to use the server default.", "将 SCIM 2.0 服务注册为 Mock 规则，涵盖用户和组资源接口以及服务提供方的发现文档。字段留空时使用服务器默认值。")}
         </Typography>
         {error && <HumanErrorAlert error={error} sx={{ mb: 1.5 }} />}
         {created !== null && (
-          <Alert severity="success" sx={{ mb: 1.5 }}>Created {created} expectation{created === 1 ? '' : 's'} for the mock SCIM provider.</Alert>
+          <Alert severity="success" sx={{ mb: 1.5 }}>{uiText("Created ", "已创建 ")}{created}{uiText(" expectation", " 条规则")}{created === 1 ? '' : uiText('s', "")}{uiText(" for the mock SCIM provider.", " ，用于模拟 SCIM 服务提供方。")}</Alert>
         )}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <TextField size="small" label="Base path" placeholder="/scim/v2" value={basePath} onChange={(e) => setBasePath(e.target.value)} sx={{ flex: 1 }} />
+            <TextField size="small" label={uiText("Base path", "基础路径")} placeholder="/scim/v2" value={basePath} onChange={(e) => setBasePath(e.target.value)} sx={{ flex: 1 }} />
             <TextField
               size="small"
               select
-              label="ID strategy"
+              label={uiText("ID strategy", "ID 生成方式")}
               value={idStrategy}
               onChange={(e) => setIdStrategy(e.target.value as ScimIdStrategy)}
               sx={{ width: { xs: '100%', sm: 170 } }}
             >
               <MenuItem value="UUID">UUID</MenuItem>
-              <MenuItem value="AUTO_INCREMENT">Auto-increment</MenuItem>
+              <MenuItem value="AUTO_INCREMENT">{uiText("Auto-increment", "自增")}</MenuItem>
             </TextField>
           </Box>
           <Box>
-            <Typography variant="caption" color="text.secondary">Behaviour</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText("Behaviour", "行为设置")}</Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControlLabel control={<Switch size="small" checked={enforceFilter} onChange={(e) => setEnforceFilter(e.target.checked)} />} label={<Typography variant="body2">Enforce filter</Typography>} />
-              <FormControlLabel control={<Switch size="small" checked={enforcePatch} onChange={(e) => setEnforcePatch(e.target.checked)} />} label={<Typography variant="body2">Enforce PATCH</Typography>} />
-              <FormControlLabel control={<Switch size="small" checked={requireBearerToken} onChange={(e) => setRequireBearerToken(e.target.checked)} />} label={<Typography variant="body2">Require bearer token</Typography>} />
+              <FormControlLabel control={<Switch size="small" checked={enforceFilter} onChange={(e) => setEnforceFilter(e.target.checked)} />} label={<Typography variant="body2">{uiText("Enforce filter", "校验过滤条件")}</Typography>} />
+              <FormControlLabel control={<Switch size="small" checked={enforcePatch} onChange={(e) => setEnforcePatch(e.target.checked)} />} label={<Typography variant="body2">{uiText("Enforce PATCH", "校验 PATCH")}</Typography>} />
+              <FormControlLabel control={<Switch size="small" checked={requireBearerToken} onChange={(e) => setRequireBearerToken(e.target.checked)} />} label={<Typography variant="body2">{uiText("Require bearer token", "要求提供 Bearer 令牌")}</Typography>} />
             </Box>
           </Box>
           {requireBearerToken && (
             <TextField
               size="small"
-              label="Expected bearer token"
-              placeholder="Any non-empty token accepted when blank"
+              label={uiText("Expected bearer token", "要求的 Bearer 令牌")}
+              placeholder={uiText("Any non-empty token accepted when blank", "留空时接受任意非空令牌")}
               value={expectedBearerToken}
               onChange={(e) => setExpectedBearerToken(e.target.value)}
             />
@@ -125,8 +124,8 @@ export default function ScimDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        <Button variant="contained" disabled={busy} onClick={() => void submit()}>Create provider</Button>
+        <Button onClick={handleClose}>{uiText("Close", "关闭")}</Button>
+        <Button variant="contained" disabled={busy} onClick={() => void submit()}>{uiText("Create provider", "创建服务提供方")}</Button>
       </DialogActions>
     </Dialog>
   );

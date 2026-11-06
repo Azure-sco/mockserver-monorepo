@@ -4,6 +4,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Reusable confirmation dialog for destructive / irreversible actions (reset, bulk clear,
@@ -13,8 +14,8 @@ export default function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = uiText('Confirm', '确认'),
+  cancelLabel = uiText('Cancel', '取消'),
   destructive = true,
   onConfirm,
   onClose,

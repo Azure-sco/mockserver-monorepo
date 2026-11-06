@@ -8,6 +8,7 @@ import { useLogPressure } from '../hooks/useLogPressure';
 import { useDashboardStore } from '../store';
 import { totalDropped } from '../lib/logPressure';
 import { monospaceFontFamily } from '../theme';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Dismissible banner shown in the traffic/log views when MockServer's event log
@@ -91,38 +92,49 @@ export default function LogPressureBanner({ connectionParams }: LogPressureBanne
       sx={{ mx: 1, mt: 1, flexShrink: 0 }}
       data-testid="log-pressure-banner"
     >
-      <AlertTitle>{hasDrops ? 'Log Events Dropped' : 'Log Events Evicted'}</AlertTitle>
-      Verification and the dashboard may be missing requests.
+      <AlertTitle>{hasDrops ? uiText('Log Events Dropped', '日志事件已丢弃') : uiText('Log Events Evicted', '旧日志事件已淘汰')}</AlertTitle>
+      {uiText('Verification and the dashboard may be missing requests.', '请求与响应验证页面和运行面板可能缺少部分请求记录。')}
       <Box component="ul" sx={{ my: 0.5, pl: 2.5 }}>
         {pressure.ringFull > 0 && (
           <li data-testid="log-pressure-ring-full">
-            {plural(pressure.ringFull, 'event was', 'events were')} dropped because they arrived faster than
-            the single logging thread could record them. If this happens under steady load, lower the log
-            level (<Code>logLevel</Code> <Code>WARN</Code> or <Code>ERROR</Code>), or keep the log level and
-            set <Code>maxLoggedMatchFailures</Code> (e.g. <Code>10</Code>) to cap the did-not-match entries
-            logged per request; raising <Code>ringBufferSize</Code> only absorbs short bursts.
+            {uiText(
+              `${plural(pressure.ringFull, 'event was', 'events were')} dropped because they arrived faster than the single logging thread could record them. If this happens under steady load, lower the log level (`,
+              `${pressure.ringFull.toLocaleString()} 条事件因写入速度超过单个日志线程的处理能力而被丢弃。如果在稳定负载下仍出现此问题，可以将 `,
+            )}
+            <Code>logLevel</Code>{uiText(' ', ' 调低到 ')}<Code>WARN</Code>{uiText(' or ', ' 或 ')}<Code>ERROR</Code>
+            {uiText('), or keep the log level and set ', '，也可以保留日志级别，设置 ')}
+            <Code>maxLoggedMatchFailures</Code>{uiText(' (e.g. ', '（例如 ')}<Code>10</Code>
+            {uiText(') to cap the did-not-match entries logged per request; raising ', '）以限制每次请求的未匹配日志条数。增大 ')}
+            <Code>ringBufferSize</Code>{uiText(' only absorbs short bursts.', ' 只能应对短时的流量突增。')}
           </li>
         )}
         {pressure.inFlightBytes > 0 && (
           <li data-testid="log-pressure-in-flight-bytes">
-            {plural(pressure.inFlightBytes, 'event was', 'events were')} dropped because the request and
-            response bodies waiting to be logged exceeded the in-flight memory cap. Lower the log level
-            (e.g. <Code>WARN</Code>), which raises that cap and drains it faster; if you have heap to
-            spare, raise <Code>maxEventLogSizeInBytes</Code>.
+            {uiText(
+              `${plural(pressure.inFlightBytes, 'event was', 'events were')} dropped because the request and response bodies waiting to be logged exceeded the in-flight memory cap. Lower the log level (e.g. `,
+              `${pressure.inFlightBytes.toLocaleString()} 条事件因待写入日志的请求和响应正文超出内存上限而被丢弃。可以调低日志级别（例如设为 `,
+            )}
+            <Code>WARN</Code>
+            {uiText('), which raises that cap and drains it faster; if you have heap to spare, raise ', '），提高上限并加快写入。如果堆内存充足，可以增大 ')}
+            <Code>maxEventLogSizeInBytes</Code>{uiText('.', '。')}
           </li>
         )}
         {pressure.unattributed > 0 && (
           <li data-testid="log-pressure-unattributed">
-            {plural(pressure.unattributed, 'event was', 'events were')} dropped before being recorded. If
-            this happens under steady load, lower the log level (e.g. <Code>WARN</Code> or{' '}
-            <Code>ERROR</Code>).
+            {uiText(
+              `${plural(pressure.unattributed, 'event was', 'events were')} dropped before being recorded. If this happens under steady load, lower the log level (e.g. `,
+              `${pressure.unattributed.toLocaleString()} 条事件在写入日志之前被丢弃。如果在稳定负载下仍出现此问题，可以调低日志级别（例如设为 `,
+            )}
+            <Code>WARN</Code>{uiText(' or ', ' 或 ')}<Code>ERROR</Code>{uiText(').', '）。')}
           </li>
         )}
         {evicted > 0 && (
           <li data-testid="log-pressure-evicted">
-            {plural(evicted, 'of the oldest entries was', 'of the oldest entries were')} evicted to stay within
-            the log&apos;s retention limit. To keep more history, raise <Code>maxLogEntries</Code> or{' '}
-            <Code>maxEventLogSizeInBytes</Code>.
+            {uiText(
+              `${plural(evicted, 'of the oldest entries was', 'of the oldest entries were')} evicted to stay within the log's retention limit. To keep more history, raise `,
+              `为满足日志保留上限，系统淘汰了最早的 ${evicted.toLocaleString()} 条记录。要保留更多历史记录，可以增大 `,
+            )}
+            <Code>maxLogEntries</Code>{uiText(' or ', ' 或 ')}<Code>maxEventLogSizeInBytes</Code>{uiText('.', '。')}
           </li>
         )}
       </Box>
@@ -134,7 +146,7 @@ export default function LogPressureBanner({ connectionParams }: LogPressureBanne
         underline="always"
         data-testid="log-pressure-banner-learn-more"
       >
-        Learn more
+        {uiText('Learn more', '了解更多')}
       </Link>
     </Alert>
   );

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useMemo, useState, type ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -19,7 +20,7 @@ import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ConfirmDialog from './ConfirmDialog';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
-import { humanizeError } from '../lib/errorMessage';
+import { humanizeError, unavailableFeatureMessage } from '../lib/errorMessage';
 import type { ConnectionParams } from '../hooks/useConnectionParams';
 import {
   fetchDriftRecords,
@@ -44,7 +45,8 @@ function isUnavailable(message: string): boolean {
   return (
     message.includes('404') ||
     message.includes('Not Found') ||
-    message.includes('isn’t available')
+    message.includes('isn’t available') ||
+    message === unavailableFeatureMessage
   );
 }
 
@@ -151,24 +153,24 @@ export default function DriftPanel({ connectionParams }: DriftPanelProps) {
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Drift Detection
+          {uiText('Drift Detection', '契约漂移检测')}
         </Typography>
         <Chip
           size="small"
-          label={`${data.count} detected`}
+          label={uiText(`${data.count} detected`, `检测到 ${data.count} 条`)}
           color={data.count > 0 ? 'warning' : 'default'}
           variant="outlined"
         />
         <Box sx={{ flex: 1 }} />
         <TextField
           size="small"
-          label="Filter by expectation"
-          placeholder="expectation ID..."
+          label={uiText('Filter by expectation', '按 Mock 规则筛选')}
+          placeholder={uiText('expectation ID...', '规则 ID…')}
           value={filterText}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
           sx={{ width: 220 }}
         />
-        <Tooltip title="Clear all drift records">
+        <Tooltip title={uiText('Clear all drift records', '清除所有漂移记录')}>
           <span>
             <Button
               size="small"
@@ -177,19 +179,19 @@ export default function DriftPanel({ connectionParams }: DriftPanelProps) {
               disabled={busy || data.count === 0}
               onClick={() => { setConfirmCount(data.count); setConfirmOpen(true); }}
             >
-              Clear
+              {uiText('Clear', '清除')}
             </Button>
           </span>
         </Tooltip>
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh drift">
+        <Tooltip title={uiText('Refresh now', '立即刷新')}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText('Refresh drift', '刷新漂移记录')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        MockServer compares proxied responses against stubs in proxy mode and reports field-level drifts.
+        {uiText('MockServer compares proxied responses against stubs in proxy mode and reports field-level drifts.', '在代理模式下，MockServer 将上游响应与 Mock 规则对比，并报告字段级差异。')}
       </Typography>
 
       {loadError && (
@@ -197,16 +199,16 @@ export default function DriftPanel({ connectionParams }: DriftPanelProps) {
           severity={isUnavailable(loadError) ? 'info' : 'error'}
           sx={{ mb: 1.5 }}
           action={
-            <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry"><RefreshIcon fontSize="small" /></IconButton>
+            <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText('Retry', '重试')}><RefreshIcon fontSize="small" /></IconButton>
           }
         >
           <AlertTitle>
             {isUnavailable(loadError)
-              ? 'Drift detection not available'
-              : 'Could not load drift records'}
+              ? uiText('Drift detection not available', '漂移检测不可用')
+              : uiText('Could not load drift records', '无法加载漂移记录')}
           </AlertTitle>
           {isUnavailable(loadError)
-            ? 'The connected server does not support drift detection. This feature requires a newer version of MockServer.'
+            ? uiText('The connected server does not support drift detection. This feature requires a newer version of MockServer.', '当前连接的服务不支持漂移检测。此功能需要较新版本的 MockServer。')
             : loadError}
         </Alert>
       )}
@@ -220,25 +222,25 @@ export default function DriftPanel({ connectionParams }: DriftPanelProps) {
       <Paper variant="outlined" sx={{ p: 1.25 }}>
         {filteredDrifts.length === 0 && data.drifts.length > 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            No drift records match the filter &ldquo;{filterText.trim()}&rdquo;.
+            {uiText('No drift records match the filter “', '没有符合筛选条件「')}{filterText.trim()}{uiText('”.', '」的漂移记录。')}
           </Typography>
         ) : filteredDrifts.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            No drift detected. MockServer compares proxied responses against stubs in proxy mode.
+            {uiText('No drift detected. MockServer compares proxied responses against stubs in proxy mode.', '未检测到漂移。在代理模式下，MockServer 会将上游响应与 Mock 规则对比。')}
           </Typography>
         ) : (
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Expectation</TableCell>
-                  <TableCell>Drift Type</TableCell>
-                  <TableCell>Field</TableCell>
-                  <TableCell>Expected</TableCell>
-                  <TableCell>Actual</TableCell>
-                  <TableCell align="right">Confidence</TableCell>
-                  <TableCell>Severity</TableCell>
-                  <TableCell>Time</TableCell>
+                  <TableCell>{uiText('Expectation', 'Mock 规则')}</TableCell>
+                  <TableCell>{uiText('Drift Type', '漂移类型')}</TableCell>
+                  <TableCell>{uiText('Field', '字段')}</TableCell>
+                  <TableCell>{uiText('Expected', '预期')}</TableCell>
+                  <TableCell>{uiText('Actual', '实际')}</TableCell>
+                  <TableCell align="right">{uiText('Confidence', '置信度')}</TableCell>
+                  <TableCell>{uiText('Severity', '严重程度')}</TableCell>
+                  <TableCell>{uiText('Time', '时间')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -309,9 +311,9 @@ export default function DriftPanel({ connectionParams }: DriftPanelProps) {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Clear all drift records?"
-        message={`This removes all ${confirmCount} detected drift record${confirmCount === 1 ? '' : 's'}. This cannot be undone.`}
-        confirmLabel="Clear drift records"
+        title={uiText('Clear all drift records?', '清除所有漂移记录？')}
+        message={uiText(`This removes all ${confirmCount} detected drift record${confirmCount === 1 ? '' : 's'}. This cannot be undone.`, `这会移除全部 ${confirmCount} 条漂移记录。此操作无法撤销。`)}
+        confirmLabel={uiText('Clear drift records', '清除漂移记录')}
         onConfirm={handleClear}
         onClose={() => setConfirmOpen(false)}
       />

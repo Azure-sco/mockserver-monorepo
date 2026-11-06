@@ -5,6 +5,7 @@
  */
 import { buildBaseUrl } from './mcpClient';
 import type { ConnectionParams } from '../hooks/useConnectionParams';
+import { uiText } from './dashboardLocale';
 
 export type Configuration = Record<string, unknown>;
 
@@ -68,12 +69,12 @@ export interface EffectiveConfigProperty {
 
 /** Human-readable label + ordering weight for each known source tier. */
 export const CONFIG_SOURCE_LABELS: Record<string, string> = {
-  unrecognised: 'Unrecognised (ignored)',
-  'runtime-set': 'Runtime',
-  'system-property': 'System property',
-  'environment-variable': 'Environment variable',
-  'properties-file': 'Properties file',
-  default: 'Default',
+  unrecognised: uiText('Unrecognised (ignored)', '无法识别（已忽略）'),
+  'runtime-set': uiText('Runtime', '运行时设置'),
+  'system-property': uiText('System property', '系统属性'),
+  'environment-variable': uiText('Environment variable', '环境变量'),
+  'properties-file': uiText('Properties file', '属性文件'),
+  default: uiText('Default', '默认值'),
 };
 
 /**
@@ -252,119 +253,119 @@ export const EDITABLE_PROPERTIES: readonly EditablePropertyDescriptor[] = [
   // running server would mislead (no effect), so it stays in the read-only table.
   {
     key: 'generateRealisticExampleValues',
-    label: 'Realistic example values',
+    label: uiText('Realistic example values', '生成逼真的示例值'),
     type: 'boolean',
-    help: 'Generate realistic (Faker-style) example values in stubs instead of fixed placeholders.',
+    help: uiText('Generate realistic (Faker-style) example values in stubs instead of fixed placeholders.', '为 Mock 响应生成逼真的示例值（类似 Faker），替代固定占位符。'),
     group: 'Developer / data',
   },
   {
     key: 'attachMismatchDiagnosticToResponse',
-    label: 'Mismatch diagnostic in response',
+    label: uiText('Mismatch diagnostic in response', '在响应中附带匹配失败详情'),
     type: 'boolean',
-    help: 'Attach detailed mismatch diagnostics to unmatched-request responses.',
+    help: uiText('Attach detailed mismatch diagnostics to unmatched-request responses.', '在未匹配请求的响应中附上详细诊断信息。'),
     group: 'Developer / data',
   },
 
   // Validation proxy
   {
     key: 'validateProxyOpenAPISpec',
-    label: 'OpenAPI spec (URL / path)',
+    label: uiText('OpenAPI spec (URL / path)', 'OpenAPI 规范（网址或路径）'),
     type: 'string',
-    help: 'OpenAPI specification URL, file path, or inline JSON/YAML used to validate proxied traffic.',
+    help: uiText('OpenAPI specification URL, file path, or inline JSON/YAML used to validate proxied traffic.', '用于校验代理流量的 OpenAPI 规范，可填写网址、文件路径或内联 JSON/YAML。'),
     group: 'Validation proxy',
   },
   {
     key: 'validateProxyEnforce',
-    label: 'Enforce validation',
+    label: uiText('Enforce validation', '强制校验'),
     type: 'boolean',
-    help: 'When enabled, proxied requests that violate the OpenAPI spec are rejected.',
+    help: uiText('When enabled, proxied requests that violate the OpenAPI spec are rejected.', '启用后，不符合 OpenAPI 规范的代理请求会被拒绝。'),
     group: 'Validation proxy',
   },
 
   // Chaos auto-halt
   {
     key: 'chaosAutoHaltEnabled',
-    label: 'Auto-halt enabled',
+    label: uiText('Auto-halt enabled', '启用自动停止'),
     type: 'boolean',
-    help: 'Automatically halt chaos injection when the error threshold is exceeded.',
+    help: uiText('Automatically halt chaos injection when the error threshold is exceeded.', '超出错误阈值时自动停止故障注入。'),
     group: 'Chaos auto-halt',
   },
   {
     key: 'chaosAutoHaltErrorThreshold',
-    label: 'Error threshold',
+    label: uiText('Error threshold', '错误阈值'),
     type: 'number',
-    help: 'Maximum number of errors within the window before chaos is halted.',
+    help: uiText('Maximum number of errors within the window before chaos is halted.', '在统计窗口内允许的最大错误数。超出时停止故障注入。'),
     group: 'Chaos auto-halt',
   },
   {
     key: 'chaosAutoHaltWindowMillis',
-    label: 'Window (ms)',
+    label: uiText('Window (ms)', '统计窗口（毫秒）'),
     type: 'number',
-    help: 'Sliding window in milliseconds over which errors are counted for auto-halt.',
+    help: uiText('Sliding window in milliseconds over which errors are counted for auto-halt.', '统计错误数的滑动窗口，单位为毫秒。用于判定是否自动停止故障注入。'),
     group: 'Chaos auto-halt',
   },
 
   // Matching & proxying — read live on every request/match, so safe to change at runtime
   {
     key: 'matchersFailFast',
-    label: 'Matchers fail fast',
+    label: uiText('Matchers fail fast', '遇到首个不匹配字段即停止'),
     type: 'boolean',
-    help: 'Stop evaluating a request matcher at the first non-matching field instead of collecting every mismatch. Read live on each match.',
+    help: uiText('Stop evaluating a request matcher at the first non-matching field instead of collecting every mismatch. Read live on each match.', '遇到首个不匹配字段时停止检查，不再收集其余差异。每次匹配均使用当前设置。'),
     group: 'Matching & proxying',
   },
   {
     key: 'attemptToProxyIfNoMatchingExpectation',
-    label: 'Proxy unmatched requests',
+    label: uiText('Proxy unmatched requests', '代理未匹配的请求'),
     type: 'boolean',
-    help: 'When no expectation matches, forward the request to its Host instead of returning 404. Read live on each request.',
+    help: uiText('When no expectation matches, forward the request to its Host instead of returning 404. Read live on each request.', '没有规则匹配时，按请求的 Host 转发，避免直接返回 404。每次请求均使用当前设置。'),
     group: 'Matching & proxying',
   },
   {
     key: 'maximumNumberOfRequestToReturnInVerificationFailure',
-    label: 'Max requests in verification failure',
+    label: uiText('Max requests in verification failure', '验证失败时显示的请求上限'),
     type: 'number',
-    help: 'Cap on the number of recorded requests included in a verification failure message. Read live when a verification fails.',
+    help: uiText('Cap on the number of recorded requests included in a verification failure message. Read live when a verification fails.', '限制验证失败消息中包含的请求记录数。验证失败时读取当前设置。'),
     group: 'Matching & proxying',
   },
 
   // Logging — read live on every log write, so safe to change at runtime
   {
     key: 'disableLogging',
-    label: 'Disable logging',
+    label: uiText('Disable logging', '禁用日志'),
     type: 'boolean',
-    help: 'Suppress all MockServer log output. Read live on each log write.',
+    help: uiText('Suppress all MockServer log output. Read live on each log write.', '关闭 MockServer 的所有日志输出。每次写日志时读取当前设置。'),
     group: 'Logging',
   },
   {
     key: 'compactLogFormat',
-    label: 'Compact log format',
+    label: uiText('Compact log format', '紧凑日志格式'),
     type: 'boolean',
-    help: 'Render log entries in a single-line compact format. Read live on each log write.',
+    help: uiText('Render log entries in a single-line compact format. Read live on each log write.', '每条日志以紧凑的单行格式输出。每次写日志时读取当前设置。'),
     group: 'Logging',
   },
 
   // CORS — read live when building responses / handling preflight, so safe to change at runtime
   {
     key: 'enableCORSForAPI',
-    label: 'Answer CORS preflights on every path',
+    label: uiText('Answer CORS preflights on every path', '为所有路径响应 CORS 预检'),
     type: 'boolean',
-    help: 'Answer CORS preflights that no expectation matches, for mocked paths, using corsAllowOrigin; the first preflight MockServer answers itself turns this on. MockServer\'s own API answers preflights under controlPlaneCorsAllowOrigin (set at startup) whatever this is. Read live per request.',
+    help: uiText('Answer CORS preflights that no expectation matches, for mocked paths, using corsAllowOrigin; the first preflight MockServer answers itself turns this on. MockServer\'s own API answers preflights under controlPlaneCorsAllowOrigin (set at startup) whatever this is. Read live per request.', '对模拟路径上未命中规则的 CORS 预检请求，按 corsAllowOrigin 响应。MockServer 首次自行响应预检时会开启此项。管理 API 的预检始终使用启动时设置的 controlPlaneCorsAllowOrigin。每次请求均使用当前设置。'),
     group: 'CORS',
   },
   {
     key: 'enableCORSForAllResponses',
-    label: 'CORS for mocked responses',
+    label: uiText('CORS for mocked responses', '为模拟响应添加 CORS 头'),
     type: 'boolean',
-    help: 'Add CORS headers, using corsAllowOrigin, to mocked and proxied responses. Does not change which pages may use MockServer\'s own API. Read live per response.',
+    help: uiText('Add CORS headers, using corsAllowOrigin, to mocked and proxied responses. Does not change which pages may use MockServer\'s own API. Read live per response.', '按 corsAllowOrigin 为模拟和代理响应添加 CORS 响应头。管理 API 的跨域权限不受此项影响。每次生成响应时读取当前设置。'),
     group: 'CORS',
   },
 
   // Analytics — anonymous, cookieless dashboard usage stats
   {
     key: 'dashboardAnalyticsEnabled',
-    label: 'Dashboard usage analytics',
+    label: uiText('Dashboard usage analytics', '运行面板使用统计'),
     type: 'boolean',
-    help: 'Send anonymous, cookieless dashboard usage stats (no request or mock data) to improve the UI.',
+    help: uiText('Send anonymous, cookieless dashboard usage stats (no request or mock data) to improve the UI.', '发送匿名的运行面板使用统计，帮助改进界面。统计无需 Cookie，也不包含请求或 Mock 数据。'),
     group: 'Analytics',
   },
   // NOTE: dashboardAnalyticsEndpoint is intentionally NOT runtime-editable — it decides where
@@ -372,9 +373,9 @@ export const EDITABLE_PROPERTIES: readonly EditablePropertyDescriptor[] = [
   // a PUT of it. It stays in the read-only table.
   {
     key: 'dashboardAnalyticsKey',
-    label: 'Analytics key',
+    label: uiText('Analytics key', '统计密钥'),
     type: 'string',
-    help: 'PostHog write-only project key. Blank disables analytics.',
+    help: uiText('PostHog write-only project key. Blank disables analytics.', 'PostHog 项目的只写密钥。留空可禁用使用统计。'),
     group: 'Analytics',
   },
 

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useMemo, useState, useCallback, useRef, useLayoutEffect, memo } from 'react';
 import { useTransientFlag } from '../hooks/useTransientFlag';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
@@ -802,7 +803,7 @@ function TrafficRowImpl({
           disabled={!compareChecked && compareDisabled}
           onClick={(e) => e.stopPropagation()}
           onChange={handleCompareToggle}
-          slotProps={{ input: { 'aria-label': `Select ${identityLabel} to compare` } }}
+          slotProps={{ input: { 'aria-label': uiText(`Select ${identityLabel} to compare`, `选择 ${identityLabel} 进行对比`) } }}
           sx={{ p: 0.25, flexShrink: 0 }}
         />
       )}
@@ -812,7 +813,7 @@ function TrafficRowImpl({
           checked={!!selectChecked}
           onClick={(e) => e.stopPropagation()}
           onChange={handleSelectToggle}
-          slotProps={{ input: { 'aria-label': `Select ${identityLabel}` } }}
+          slotProps={{ input: { 'aria-label': uiText(`Select ${identityLabel}`, `选择 ${identityLabel}`) } }}
           sx={{ p: 0.25, flexShrink: 0 }}
         />
       )}
@@ -940,7 +941,7 @@ function HostTree({ hosts, pinnedHost, onPin }: HostTreeProps) {
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        aria-label={expanded ? 'Collapse hosts' : 'Expand hosts'}
+        aria-label={expanded ? uiText('Collapse hosts', '收起主机列表') : uiText('Expand hosts', '展开主机列表')}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -962,7 +963,7 @@ function HostTree({ hosts, pinnedHost, onPin }: HostTreeProps) {
           : <ChevronRightIcon sx={{ fontSize: '0.9rem' }} />}
         <DnsIcon sx={{ fontSize: '0.85rem', color: 'text.secondary' }} />
         <Typography variant="caption" sx={{ fontWeight: 600 }}>
-          Hosts
+          {uiText('Hosts', '主机')}
         </Typography>
         {pinnedHost && (
           <Typography
@@ -970,7 +971,7 @@ function HostTree({ hosts, pinnedHost, onPin }: HostTreeProps) {
             variant="caption"
             sx={{ fontFamily: monospaceFontFamily, color: 'primary.main', ml: 0.5, overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
-            pinned: {pinnedHost}
+            {uiText('pinned: ', '已固定：')}{pinnedHost}
           </Typography>
         )}
       </Box>
@@ -988,7 +989,7 @@ function HostTree({ hosts, pinnedHost, onPin }: HostTreeProps) {
                 // at-most-100-row update window, not the host's traffic, so it pins at
                 // the cap under load -- and a wrong number read out to a screen reader is
                 // no better for being invisible on screen.
-                aria-label={`Filter traffic by host ${host}`}
+                aria-label={uiText(`Filter traffic by host ${host}`, `按主机 ${host} 筛选请求`)}
                 onClick={() => onPin(active ? null : host)}
                 sx={{
                   display: 'flex',
@@ -1039,7 +1040,7 @@ function AnthropicMessagesPanel({ parsed }: { parsed: AnthropicParsed }) {
     <Box>
       {parsed.system != null && (
         <Box sx={{ mb: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>System</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('System', '系统')}</Typography>
           <Box sx={{ mt: 0.5 }}>
             {typeof parsed.system === 'string' ? (
               <Typography variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
@@ -1053,7 +1054,7 @@ function AnthropicMessagesPanel({ parsed }: { parsed: AnthropicParsed }) {
       )}
       {parsed.messages.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Messages ({parsed.messages.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Messages (', '消息 (')}{parsed.messages.length})</Typography>
           {parsed.messages.map((msg, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={msg as Record<string, unknown>} collapsed={1} />
@@ -1063,14 +1064,14 @@ function AnthropicMessagesPanel({ parsed }: { parsed: AnthropicParsed }) {
       )}
       {parsed.tools && parsed.tools.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Tools ({parsed.tools.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Tools (', '工具 (')}{parsed.tools.length})</Typography>
           <JsonViewer data={parsed.tools as unknown[]} collapsed={1} />
         </Box>
       )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {parsed.model && <Chip label={`Model: ${parsed.model}`} size="small" variant="outlined" />}
-        {parsed.maxTokens !== null && <Chip label={`Max tokens: ${parsed.maxTokens}`} size="small" variant="outlined" />}
-        {parsed.stream && <Chip label="Streaming" size="small" color="info" variant="outlined" />}
+        {parsed.model && <Chip label={uiText(`Model: ${parsed.model}`, `模型：${parsed.model}`)} size="small" variant="outlined" />}
+        {parsed.maxTokens !== null && <Chip label={uiText(`Max tokens: ${parsed.maxTokens}`, `最大 Token 数：${parsed.maxTokens}`)} size="small" variant="outlined" />}
+        {parsed.stream && <Chip label={uiText('Streaming', '流式传输')} size="small" color="info" variant="outlined" />}
       </Box>
     </Box>
   );
@@ -1085,7 +1086,7 @@ function OpenAiMessagesPanel({ parsed }: { parsed: OpenAiParsed }) {
     <Box>
       {parsed.messages.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Messages ({parsed.messages.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Messages (', '消息 (')}{parsed.messages.length})</Typography>
           {parsed.messages.map((msg, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={msg as Record<string, unknown>} collapsed={1} />
@@ -1095,13 +1096,13 @@ function OpenAiMessagesPanel({ parsed }: { parsed: OpenAiParsed }) {
       )}
       {parsed.tools && parsed.tools.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Tools ({parsed.tools.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Tools (', '工具 (')}{parsed.tools.length})</Typography>
           <JsonViewer data={parsed.tools as unknown[]} collapsed={1} />
         </Box>
       )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {parsed.model && <Chip label={`Model: ${parsed.model}`} size="small" variant="outlined" />}
-        {parsed.stream && <Chip label="Streaming" size="small" color="info" variant="outlined" />}
+        {parsed.model && <Chip label={uiText(`Model: ${parsed.model}`, `模型：${parsed.model}`)} size="small" variant="outlined" />}
+        {parsed.stream && <Chip label={uiText('Streaming', '流式传输')} size="small" color="info" variant="outlined" />}
       </Box>
     </Box>
   );
@@ -1122,11 +1123,11 @@ function McpDetailPanel({ parsed, statusCode }: { parsed: McpParsed; statusCode:
           color={isError ? 'error' : 'info'}
           variant={isError ? 'filled' : 'outlined'}
         />
-        {parsed.method && <Chip label={`Method: ${parsed.method}`} size="small" variant="outlined" />}
-        {parsed.id != null && <Chip label={`ID: ${String(parsed.id)}`} size="small" variant="outlined" />}
+        {parsed.method && <Chip label={uiText(`Method: ${parsed.method}`, `方法：${parsed.method}`)} size="small" variant="outlined" />}
+        {parsed.id != null && <Chip label={uiText(`ID: ${String(parsed.id)}`, `ID：${String(parsed.id)}`)} size="small" variant="outlined" />}
         {isError && (
           <Chip
-            label={code != null ? `Error ${code}` : 'Error'}
+            label={code != null ? uiText(`Error ${code}`, `错误 ${code}`) : uiText('Error', '错误')}
             size="small"
             color="error"
             variant="outlined"
@@ -1135,20 +1136,20 @@ function McpDetailPanel({ parsed, statusCode }: { parsed: McpParsed; statusCode:
       </Box>
       {parsed.params != null && (
         <Box sx={{ mb: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Params</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Params', '参数')}</Typography>
           <JsonViewer data={parsed.params as Record<string, unknown>} collapsed={2} />
         </Box>
       )}
       {parsed.result != null && (
         <Box sx={{ mb: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Result</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Result', '结果')}</Typography>
           <JsonViewer data={parsed.result as Record<string, unknown>} collapsed={2} />
         </Box>
       )}
       {parsed.error != null && (
         <Box sx={{ mb: 1 }}>
           <Typography variant="caption" color="error" sx={{ fontWeight: 600 }}>
-            Error{code != null ? ` (code ${code})` : ''}{message ? `: ${message}` : ''}
+            {uiText('Error', '错误')}{code != null ? uiText(` (code ${code})`, `（错误码 ${code}）`) : ''}{message ? `: ${message}` : ''}
           </Typography>
           <JsonViewer data={parsed.error as Record<string, unknown>} collapsed={2} />
         </Box>
@@ -1166,7 +1167,7 @@ function OpenAiResponsesMessagesPanel({ parsed }: { parsed: OpenAiResponsesParse
     <Box>
       {parsed.input.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Input ({parsed.input.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Input (', '输入 (')}{parsed.input.length})</Typography>
           {parsed.input.map((item, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={item as Record<string, unknown>} collapsed={1} />
@@ -1176,7 +1177,7 @@ function OpenAiResponsesMessagesPanel({ parsed }: { parsed: OpenAiResponsesParse
       )}
       {parsed.output.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Output ({parsed.output.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Output (', '输出 (')}{parsed.output.length})</Typography>
           {parsed.output.map((item, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={item as Record<string, unknown>} collapsed={1} />
@@ -1185,8 +1186,8 @@ function OpenAiResponsesMessagesPanel({ parsed }: { parsed: OpenAiResponsesParse
         </Box>
       )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {parsed.model && <Chip label={`Model: ${parsed.model}`} size="small" variant="outlined" />}
-        {parsed.stream && <Chip label="Streaming" size="small" color="info" variant="outlined" />}
+        {parsed.model && <Chip label={uiText(`Model: ${parsed.model}`, `模型：${parsed.model}`)} size="small" variant="outlined" />}
+        {parsed.stream && <Chip label={uiText('Streaming', '流式传输')} size="small" color="info" variant="outlined" />}
       </Box>
     </Box>
   );
@@ -1201,7 +1202,7 @@ function GeminiMessagesPanel({ parsed }: { parsed: GeminiParsed }) {
     <Box>
       {parsed.contents.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Contents ({parsed.contents.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Contents (', '内容 (')}{parsed.contents.length})</Typography>
           {parsed.contents.map((item, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={item as Record<string, unknown>} collapsed={1} />
@@ -1211,7 +1212,7 @@ function GeminiMessagesPanel({ parsed }: { parsed: GeminiParsed }) {
       )}
       {parsed.candidates.length > 0 && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Candidates ({parsed.candidates.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Candidates (', '候选结果 (')}{parsed.candidates.length})</Typography>
           {parsed.candidates.map((item, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={item as Record<string, unknown>} collapsed={1} />
@@ -1220,7 +1221,7 @@ function GeminiMessagesPanel({ parsed }: { parsed: GeminiParsed }) {
         </Box>
       )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {parsed.model && <Chip label={`Model: ${parsed.model}`} size="small" variant="outlined" />}
+        {parsed.model && <Chip label={uiText(`Model: ${parsed.model}`, `模型：${parsed.model}`)} size="small" variant="outlined" />}
       </Box>
     </Box>
   );
@@ -1235,7 +1236,7 @@ function OllamaMessagesPanel({ parsed }: { parsed: OllamaParsed }) {
     <Box>
       {parsed.messages.length > 0 && (
         <Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Messages ({parsed.messages.length})</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Messages (', '消息 (')}{parsed.messages.length})</Typography>
           {parsed.messages.map((msg, i) => (
             <Box key={i} sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
               <JsonViewer data={msg as Record<string, unknown>} collapsed={1} />
@@ -1245,16 +1246,16 @@ function OllamaMessagesPanel({ parsed }: { parsed: OllamaParsed }) {
       )}
       {parsed.responseMessage != null && (
         <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Response</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Response', '响应')}</Typography>
           <Box sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'divider' }}>
             <JsonViewer data={parsed.responseMessage as Record<string, unknown>} collapsed={1} />
           </Box>
         </Box>
       )}
       <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        {parsed.model && <Chip label={`Model: ${parsed.model}`} size="small" variant="outlined" />}
-        {parsed.stream && <Chip label="Streaming" size="small" color="info" variant="outlined" />}
-        {parsed.done && <Chip label="Done" size="small" color="success" variant="outlined" />}
+        {parsed.model && <Chip label={uiText(`Model: ${parsed.model}`, `模型：${parsed.model}`)} size="small" variant="outlined" />}
+        {parsed.stream && <Chip label={uiText('Streaming', '流式传输')} size="small" color="info" variant="outlined" />}
+        {parsed.done && <Chip label={uiText('Done', '已结束')} size="small" color="success" variant="outlined" />}
       </Box>
     </Box>
   );
@@ -1270,7 +1271,7 @@ function SseTimeline({ events }: { events: SseEvent[] }) {
   return (
     <Box>
       <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5, display: 'block' }}>
-        SSE Events ({events.length})
+        {uiText('SSE Events (', 'SSE 事件 (')}{events.length})
       </Typography>
       {events.map((evt, i) => {
         const parsedData = (() => {
@@ -1371,16 +1372,16 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
 
   const realSegments: WaterfallSegment[] = isProxied
     ? [
-        { key: 'connect', label: 'Connect', ms: connect, color: 'warning.main', injected: false },
-        { key: 'wait', label: 'Wait (TTFB)', ms: waitMs, color: 'info.main', injected: false },
-        { key: 'receive', label: 'Receive', ms: receiveMs, color: 'success.main', injected: false },
+        { key: 'connect', label: uiText('Connect', '建立连接'), ms: connect, color: 'warning.main', injected: false },
+        { key: 'wait', label: uiText('Wait (TTFB)', '等待首字节（TTFB）'), ms: waitMs, color: 'info.main', injected: false },
+        { key: 'receive', label: uiText('Receive', '接收数据'), ms: receiveMs, color: 'success.main', injected: false },
       ]
-    : [{ key: 'processing', label: 'Processing', ms: realProcessing, color: 'success.main', injected: false }];
+    : [{ key: 'processing', label: uiText('Processing', '处理请求'), ms: realProcessing, color: 'success.main', injected: false }];
 
   const injectedSegments: WaterfallSegment[] = [
-    { key: 'injected-delay', label: 'Response delay', ms: injectedDelay, color: INJECTED_DELAY_COLOR, injected: true },
-    { key: 'injected-chaos', label: 'Chaos latency', ms: injectedChaos, color: INJECTED_CHAOS_COLOR, injected: true },
-    { key: 'injected-breakpoint', label: 'Breakpoint hold', ms: injectedBreakpoint, color: INJECTED_BREAKPOINT_COLOR, injected: true },
+    { key: 'injected-delay', label: uiText('Response delay', '响应延迟'), ms: injectedDelay, color: INJECTED_DELAY_COLOR, injected: true },
+    { key: 'injected-chaos', label: uiText('Chaos latency', '混沌测试延迟'), ms: injectedChaos, color: INJECTED_CHAOS_COLOR, injected: true },
+    { key: 'injected-breakpoint', label: uiText('Breakpoint hold', '断点暂停'), ms: injectedBreakpoint, color: INJECTED_BREAKPOINT_COLOR, injected: true },
   ];
 
   // Order: real network/processing first, then the injected latency stacked after it.
@@ -1404,11 +1405,11 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
         <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, color: 'text.primary' }}>
-          Timing
+          {uiText('Timing', '耗时')}
         </Typography>
         {timing.connectionTimeInMillis !== null && (
           <Chip
-            label={`connect ${timing.connectionTimeInMillis}ms`}
+            label={uiText(`connect ${timing.connectionTimeInMillis}ms`, `连接 ${timing.connectionTimeInMillis} ms`)}
             size="small"
             variant="outlined"
             sx={{ height: 18, fontSize: '0.6rem', '& .MuiChip-label': { px: 0.5 } }}
@@ -1416,7 +1417,7 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
         )}
         {timing.timeToFirstByteInMillis !== null && (
           <Chip
-            label={`TTFB ${timing.timeToFirstByteInMillis}ms`}
+            label={uiText(`TTFB ${timing.timeToFirstByteInMillis}ms`, `TTFB ${timing.timeToFirstByteInMillis} ms`)}
             size="small"
             variant="outlined"
             sx={{ height: 18, fontSize: '0.6rem', '& .MuiChip-label': { px: 0.5 } }}
@@ -1425,24 +1426,24 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
         {injectedSum > 0 && (
           <Chip
             data-testid="timing-injected-chip"
-            label={`injected ${injectedSum}ms`}
+            label={uiText(`injected ${injectedSum}ms`, `注入 ${injectedSum} ms`)}
             size="small"
             variant="outlined"
             sx={{ height: 18, fontSize: '0.6rem', color: INJECTED_CHAOS_COLOR, borderColor: INJECTED_CHAOS_COLOR, '& .MuiChip-label': { px: 0.5 } }}
           />
         )}
         <Chip
-          label={`total ${total}ms`}
+          label={uiText(`total ${total}ms`, `合计 ${total} ms`)}
           size="small"
           variant="outlined"
           color="info"
           sx={{ height: 18, fontSize: '0.6rem', '& .MuiChip-label': { px: 0.5 } }}
         />
         {barTotal > total && (
-          <Tooltip title="Injected latency is applied in addition to the recorded upstream total — this is the combined wall time the client experienced" placement="top" arrow>
+          <Tooltip title={uiText('Injected latency is applied in addition to the recorded upstream total — this is the combined wall time the client experienced', '注入的延迟计入上游总耗时之外，这里显示客户端实际经历的总时长')} placement="top" arrow>
             <Chip
               data-testid="timing-wall-chip"
-              label={`wall ${barTotal}ms`}
+              label={uiText(`wall ${barTotal}ms`, `实际耗时 ${barTotal} ms`)}
               size="small"
               variant="outlined"
               sx={{ height: 18, fontSize: '0.6rem', '& .MuiChip-label': { px: 0.5 } }}
@@ -1464,7 +1465,7 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
         {segments.map((segment) => (
           <Tooltip
             key={segment.key}
-            title={`${segment.injected ? 'Injected by MockServer' : 'Real'} — ${segment.label}: ${segment.ms}ms${segment.injected ? ' (configured value; random-distribution delays are approximate)' : ''}`}
+            title={uiText(`${segment.injected ? 'Injected by MockServer' : 'Real'} — ${segment.label}: ${segment.ms}ms${segment.injected ? ' (configured value; random-distribution delays are approximate)' : ''}`, `${segment.injected ? 'MockServer 注入' : '实际耗时'} · ${segment.label}：${segment.ms} ms${segment.injected ? '（配置值，随机分布的延迟为近似值）' : ''}`)}
             placement="top"
             arrow
           >
@@ -1482,7 +1483,7 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
       {/* Legend grouped into Real vs Injected so the differentiator is explicit */}
       <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-start', flexWrap: 'wrap' }}>
         <Box data-testid="timing-legend-real" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <Typography variant="caption" sx={{ fontSize: '0.55rem', fontWeight: 600, color: 'text.secondary' }}>Real:</Typography>
+          <Typography variant="caption" sx={{ fontSize: '0.55rem', fontWeight: 600, color: 'text.secondary' }}>{uiText('Real:', '实际耗时：')}</Typography>
           {realSegments.map((segment) => (
             <Box key={segment.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
               <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: segment.color }} />
@@ -1492,7 +1493,7 @@ function TimingWaterfall({ timing }: { timing: RequestTiming }) {
         </Box>
         {injectedSum > 0 && (
           <Box data-testid="timing-legend-injected" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Typography variant="caption" sx={{ fontSize: '0.55rem', fontWeight: 600, color: 'text.secondary' }}>Injected by MockServer:</Typography>
+            <Typography variant="caption" sx={{ fontSize: '0.55rem', fontWeight: 600, color: 'text.secondary' }}>{uiText('Injected by MockServer:', 'MockServer 注入：')}</Typography>
             {injectedSegments.filter((s) => s.ms > 0).map((segment) => (
               <Box key={segment.key} sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                 <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: segment.color }} />
@@ -1544,7 +1545,7 @@ function ReplayDialog({ open, onClose, item, connectionParams }: ReplayDialogPro
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ fontSize: '0.95rem' }}>Replay Request</DialogTitle>
+      <DialogTitle sx={{ fontSize: '0.95rem' }}>{uiText('Replay Request', '重发请求')}</DialogTitle>
       <DialogContent dividers>
         {!replayResponse && !error && !loading && (() => {
           const httpRequest = (item.value['httpRequest'] as Record<string, unknown> | undefined) ?? {};
@@ -1553,9 +1554,9 @@ function ReplayDialog({ open, onClose, item, connectionParams }: ReplayDialogPro
           return (
             <>
               <Alert severity="warning" sx={{ mb: 1 }}>
-                This will make a real outbound HTTP request to the original upstream target.
-                {isNonGet && ` The method is ${method}, which may mutate state or incur costs (e.g. LLM API charges).`}
-                {!isNonGet && ' It may incur costs if the target is a paid API (e.g. LLM provider).'}
+                {uiText('MockServer will send a real HTTP request. It uses the recorded socketAddress as the target, falling back to the Host header when no socketAddress is set.', 'MockServer 将发送真实的 HTTP 请求。目标优先使用录制请求的 socketAddress，未指定时使用 Host 请求头。')}
+                {isNonGet && uiText(` The method is ${method}, which may mutate state or incur costs (e.g. LLM API charges).`, `请求方法为 ${method}，可能更改上游状态或产生费用（例如 LLM API 费用）。`)}
+                {!isNonGet && uiText(' It may incur costs if the target is a paid API (e.g. LLM provider).', '如果目标是付费 API（例如 LLM 服务），可能产生费用。')}
               </Alert>
             </>
           );
@@ -1563,21 +1564,21 @@ function ReplayDialog({ open, onClose, item, connectionParams }: ReplayDialogPro
         {loading && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 2 }}>
             <CircularProgress size={20} />
-            <Typography variant="body2">Sending request...</Typography>
+            <Typography variant="body2">{uiText('Sending request...', '正在发送请求…')}</Typography>
           </Box>
         )}
         {error && <HumanErrorAlert error={error} sx={{ mb: 1 }} />}
         {replayResponse && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 600 }}>
-              Upstream Response
+              {uiText('Upstream Response', '上游响应')}
             </Typography>
             <JsonViewer data={replayResponse} collapsed={3} />
           </Box>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} size="small">Close</Button>
+        <Button onClick={onClose} size="small">{uiText('Close', '关闭')}</Button>
         <Button
           onClick={handleReplay}
           disabled={loading}
@@ -1585,7 +1586,7 @@ function ReplayDialog({ open, onClose, item, connectionParams }: ReplayDialogPro
           size="small"
           startIcon={<ReplayIcon sx={{ fontSize: '0.875rem' }} />}
         >
-          {replayResponse ? 'Replay Again' : 'Replay'}
+          {replayResponse ? uiText('Replay Again', '再次发送') : uiText('Replay', '重新发送')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -1680,7 +1681,7 @@ function BodyView({ body }: { body: unknown }) {
   if (content == null || content === '') {
     return (
       <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-        No body
+        {uiText('No body', '无内容')}
       </Typography>
     );
   }
@@ -1737,7 +1738,7 @@ function StructuredRequestPanel({ value, truncated, onLoadFull }: {
   if (!req) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No request captured.
+        {uiText('No request captured.', '未捕获到请求。')}
       </Typography>
     );
   }
@@ -1754,11 +1755,11 @@ function StructuredRequestPanel({ value, truncated, onLoadFull }: {
           {path}
         </Typography>
       </Box>
-      <SectionLabel>Query Parameters</SectionLabel>
-      <KeyValueTable pairs={queryPairs} emptyLabel="No query parameters" />
-      <SectionLabel>Headers</SectionLabel>
-      <KeyValueTable pairs={headerPairs(req['headers'])} emptyLabel="No headers" />
-      <SectionLabel>Body</SectionLabel>
+      <SectionLabel>{uiText('Query Parameters', '查询参数')}</SectionLabel>
+      <KeyValueTable pairs={queryPairs} emptyLabel={uiText('No query parameters', '无查询参数')} />
+      <SectionLabel>{uiText('Headers', '请求头')}</SectionLabel>
+      <KeyValueTable pairs={headerPairs(req['headers'])} emptyLabel={uiText('No headers', '无请求头')} />
+      <SectionLabel>{uiText('Body', '请求体')}</SectionLabel>
       {truncated && <TruncatedBodyNotice marker={truncated} onLoad={onLoadFull} />}
       <BodyView body={req['body']} />
     </Box>
@@ -1778,7 +1779,7 @@ function StructuredResponsePanel({ value, truncated, onLoadFull }: {
   if (!res) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No response captured for this request.
+        {uiText('No response captured for this request.', '未捕获到此请求的响应。')}
       </Typography>
     );
   }
@@ -1794,9 +1795,9 @@ function StructuredResponsePanel({ value, truncated, onLoadFull }: {
           </Typography>
         )}
       </Box>
-      <SectionLabel>Headers</SectionLabel>
-      <KeyValueTable pairs={headerPairs(res['headers'])} emptyLabel="No headers" />
-      <SectionLabel>Body</SectionLabel>
+      <SectionLabel>{uiText('Headers', '响应头')}</SectionLabel>
+      <KeyValueTable pairs={headerPairs(res['headers'])} emptyLabel={uiText('No headers', '无响应头')} />
+      <SectionLabel>{uiText('Body', '响应体')}</SectionLabel>
       {truncated && <TruncatedBodyNotice marker={truncated} onLoad={onLoadFull} />}
       <BodyView body={res['body']} />
     </Box>
@@ -1973,7 +1974,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={() => withFullRequest(debugMismatch)}
           sx={detailActionSx}
         >
-          Why Didn't This Match?
+          {uiText('Why Didn\'t This Match?', '诊断未匹配原因')}
         </Button>
       )}
       {unmatched && generateStub && httpRequest && (
@@ -1984,7 +1985,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={() => withFullRequest(generateStub)}
           sx={detailActionSx}
         >
-          Generate Stub
+          {uiText('Generate Stub', '生成 Mock 规则')}
         </Button>
       )}
       {httpRequest && (
@@ -1994,7 +1995,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={() => { void handleCopyCurl(); }}
           sx={detailActionSx}
         >
-          {curlCopied ? 'Copied!' : 'Copy as curl'}
+          {curlCopied ? uiText('Copied!', '已复制') : uiText('Copy as curl', '复制 cURL 命令')}
         </Button>
       )}
       {onReplay && (
@@ -2004,7 +2005,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={onReplay}
           sx={detailActionSx}
         >
-          Replay
+          {uiText('Replay', '重发请求…')}
         </Button>
       )}
       {onRepeat && (
@@ -2014,7 +2015,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={onRepeat}
           sx={detailActionSx}
         >
-          Repeat…
+          {uiText('Repeat…', '重复发送…')}
         </Button>
       )}
       {canCapture && onCaptureAsMock && (
@@ -2024,11 +2025,11 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
           onClick={onCaptureAsMock}
           sx={detailActionSx}
         >
-          Capture as mock
+          {uiText('Capture as mock', '录制为 Mock 规则')}
         </Button>
       )}
       {httpRequest && onAddToDiffPool && (
-        <Tooltip title={inDiffPool ? 'Already in the Diff Pool' : 'Add this request to the Diff Pool to compare it against another later'}>
+        <Tooltip title={inDiffPool ? uiText('Already in the Diff Pool', '已加入对比列表') : uiText('Add this request to the Diff Pool to compare it against another later', '将请求加入对比列表，以便稍后与另一条请求对比')}>
           <span>
             <Button
               size="small"
@@ -2039,7 +2040,7 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
               onClick={onAddToDiffPool}
               sx={detailActionSx}
             >
-              {inDiffPool ? 'In Diff Pool' : 'Add to Diff Pool'}
+              {inDiffPool ? uiText('In Diff Pool', '已加入对比列表') : uiText('Add to Diff Pool', '加入对比列表')}
             </Button>
           </span>
         </Tooltip>
@@ -2050,6 +2051,16 @@ function DetailActions({ item, summary, canCapture, unmatched, onCaptureAsMock, 
     </>
   );
 }
+
+const DETAIL_TAB_LABELS: Readonly<Record<string, string>> = {
+  Messages: '消息',
+  Conversation: '对话',
+  'Scripted Turns': '脚本轮次',
+  'SSE Timeline': 'SSE 时间线',
+  'Raw JSON': '原始 JSON',
+  Request: '请求',
+  Response: '响应',
+};
 
 /** Build the tab list dynamically from the traffic kind. */
 function buildTabs(parsed: ParsedTraffic, hasScriptedTurns: boolean): string[] {
@@ -2101,7 +2112,7 @@ function DetailPane({ item, summary, scriptedTurns, onCaptureAsMock, onReplay, o
         {summary.timing && <TimingWaterfall timing={summary.timing} />}
         <Box sx={{ display: 'flex', alignItems: 'center', px: 1, py: 0.5, flexShrink: 0 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, fontSize: '0.75rem', flexGrow: 1 }}>
-            Raw JSON
+            {uiText('Raw JSON', '原始 JSON')}
           </Typography>
           <DetailActions
             item={item}
@@ -2144,7 +2155,7 @@ function DetailPane({ item, summary, scriptedTurns, onCaptureAsMock, onReplay, o
           sx={{ flex: '1 1 auto', minWidth: 0, minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.5, fontSize: '0.75rem' } }}
         >
           {tabs.map((label) => (
-            <Tab key={label} label={label} />
+            <Tab key={label} label={uiText(label, DETAIL_TAB_LABELS[label] ?? label)} />
           ))}
         </Tabs>
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end', ml: 'auto' }}>
@@ -2297,7 +2308,7 @@ export default function TrafficInspector() {
     max: MASTER_MAX,
     step: 16,
     storageKey: 'mockserver-traffic-master-width',
-    ariaLabel: 'Resize traffic list',
+    ariaLabel: uiText('Resize traffic list', '调整请求列表宽度'),
     computeFromPointer: (event) => {
       const rect = rowRef.current?.getBoundingClientRect();
       if (!rect) return 380;
@@ -2466,7 +2477,7 @@ export default function TrafficInspector() {
       const failed = await forEachLimited(shortenedRows, 4, loadFullRow);
       if (failed > 0) {
         useDashboardStore.getState().setNotification({
-          message: `${failed} of ${shortenedRows.length} full bodies could not be loaded, so those requests are searched only in part`,
+          message: uiText(`${failed} of ${shortenedRows.length} full bodies could not be loaded, so those requests are searched only in part`, `${shortenedRows.length} 条请求中有 ${failed} 条无法加载完整请求体，搜索仅覆盖这些请求已加载的内容`),
           severity: 'warning',
         });
       }
@@ -2708,11 +2719,11 @@ export default function TrafficInspector() {
       });
       const setNotification = useDashboardStore.getState().setNotification;
       if (failures.length === 0) {
-        setNotification({ message: `Cleared ${clearedKeys.size} request${clearedKeys.size === 1 ? '' : 's'}`, severity: 'success' });
+        setNotification({ message: uiText(`Cleared ${clearedKeys.size} request${clearedKeys.size === 1 ? '' : 's'}`, `已清除 ${clearedKeys.size} 条请求`), severity: 'success' });
       } else if (clearedKeys.size === 0) {
-        setNotification({ message: humanizeError(failures[0]?.reason ?? 'Clear failed').message, severity: 'error' });
+        setNotification({ message: humanizeError(failures[0]?.reason ?? uiText('Clear failed', '清除失败')).message, severity: 'error' });
       } else {
-        setNotification({ message: `Cleared ${clearedKeys.size}, ${failures.length} failed`, severity: 'warning' });
+        setNotification({ message: uiText(`Cleared ${clearedKeys.size}, ${failures.length} failed`, `已清除 ${clearedKeys.size} 条请求，${failures.length} 条清除失败`), severity: 'warning' });
       }
     } finally {
       clearingRef.current = false;
@@ -2792,7 +2803,7 @@ export default function TrafficInspector() {
           }}
         >
           <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.79rem' }}>
-            Traffic
+            {uiText('Traffic', '请求记录')}
           </Typography>
           {/* No row count: the list is the server's capped live window, so a count
               pins at the cap however much traffic ran. */}
@@ -2802,7 +2813,7 @@ export default function TrafficInspector() {
               back to the newest rows and resumes following (the tail-pin effect
               runs on the next render). */}
           <Chip
-            label={follow ? 'Following' : 'Follow'}
+            label={follow ? uiText('Following', '自动滚动中') : uiText('Follow', '跳到最新')}
             size="small"
             color={follow ? 'primary' : 'default'}
             variant={follow ? 'filled' : 'outlined'}
@@ -2810,17 +2821,17 @@ export default function TrafficInspector() {
             onClick={() => setFollow((prev) => !prev)}
             title={
               follow
-                ? 'Following the newest requests. Scroll up to stop and read — nothing will move.'
-                : 'Paused while you read. Click to jump to the newest requests and resume following.'
+                ? uiText('Following the newest requests. Scroll up to stop and read — nothing will move.', '向上滚动可暂停自动滚动，查看较早的请求。')
+                : uiText('Paused while you read. Click to jump to the newest requests and resume following.', '自动滚动已暂停。点击可跳到最新请求并恢复自动滚动。')
             }
             sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.75 } }}
           />
           {unmatchedCount > 0 && (
-            <Tooltip title="Show why these requests didn't match any expectation">
+            <Tooltip title={uiText('Show why these requests didn\'t match any expectation', '查看这些请求未匹配 Mock 规则的原因')}>
               <Chip
                 // No number: unmatchedCount is over the capped live window, not over
                 // captured traffic, so it silently becomes the cap rather than a count.
-                label="unmatched"
+                label={uiText('unmatched', '未匹配')}
                 color="warning"
                 size="small"
                 onClick={() => setExplainOpen(true)}
@@ -2834,17 +2845,17 @@ export default function TrafficInspector() {
             onChange={setTrafficSearch}
             maxWidth={200}
           />
-          <Tooltip title="Pick two requests to diff field-by-field">
+          <Tooltip title={uiText('Pick two requests to diff field-by-field', '选择两条请求，逐字段查看差异')}>
             <ToggleButton
               value="compare"
               size="small"
               selected={compareMode}
               onChange={toggleCompareMode}
-              aria-label="Compare requests"
+              aria-label={uiText('Compare requests', '对比请求')}
               sx={{ height: 28, px: 1, fontSize: '0.7rem', textTransform: 'none', flexShrink: 0 }}
             >
               <CompareArrowsIcon sx={{ fontSize: '0.95rem', mr: 0.5 }} />
-              Compare
+              {uiText('Compare', '对比')}
             </ToggleButton>
           </Tooltip>
           {compareMode && (
@@ -2855,45 +2866,45 @@ export default function TrafficInspector() {
               onClick={() => { void openCompareDiff(); }}
               sx={{ height: 28, px: 1, fontSize: '0.7rem', textTransform: 'none', flexShrink: 0 }}
             >
-              Diff ({validCompareKeys.length}/2)
+              {uiText('Diff (', '对比 (')}{validCompareKeys.length}/2)
             </Button>
           )}
           {diffPool.length > 0 && (
-            <Tooltip title="Requests staged for comparison — pick any two to diff">
+            <Tooltip title={uiText('Requests staged for comparison — pick any two to diff', '从对比列表选择任意两条请求查看差异')}>
               <Chip
                 icon={<LibraryAddCheckIcon sx={{ fontSize: '0.9rem' }} />}
-                label={`Diff Pool (${diffPool.length})`}
+                label={uiText(`Diff Pool (${diffPool.length})`, `对比列表 (${diffPool.length})`)}
                 color="secondary"
                 size="small"
                 onClick={(e) => setPoolAnchorEl(e.currentTarget)}
-                aria-label={`Diff Pool (${diffPool.length})`}
+                aria-label={uiText(`Diff Pool (${diffPool.length})`, `对比列表 (${diffPool.length})`)}
                 sx={{ height: 22, fontSize: '0.65rem', cursor: 'pointer', flexShrink: 0, '& .MuiChip-label': { px: 0.75 } }}
               />
             </Tooltip>
           )}
-          <Tooltip title="Select multiple requests to clear at once">
+          <Tooltip title={uiText('Select multiple requests to clear at once', '选择多条请求并一次清除')}>
             <ToggleButton
               value="select"
               size="small"
               selected={selectMode}
               onChange={toggleSelectMode}
-              aria-label="Select requests"
+              aria-label={uiText('Select requests', '选择请求')}
               sx={{ height: 28, px: 1, fontSize: '0.7rem', textTransform: 'none', flexShrink: 0 }}
             >
               <ChecklistIcon sx={{ fontSize: '0.95rem', mr: 0.5 }} />
-              Select
+              {uiText('Select', '选择')}
             </ToggleButton>
           </Tooltip>
           {selectMode && (
             <>
-              <Tooltip title="Select all / none">
+              <Tooltip title={uiText('Select all / none', '全选或取消全选')}>
                 <Checkbox
                   size="small"
                   checked={allSelected}
                   indeterminate={someSelected}
                   disabled={filteredKeys.length === 0}
                   onChange={toggleSelectAll}
-                  slotProps={{ input: { 'aria-label': 'Select all requests' } }}
+                  slotProps={{ input: { 'aria-label': uiText('Select all requests', '选择全部请求') } }}
                   sx={{ p: 0.25, flexShrink: 0 }}
                 />
               </Tooltip>
@@ -2906,7 +2917,7 @@ export default function TrafficInspector() {
                 onClick={() => setBulkClearConfirm(true)}
                 sx={{ height: 28, px: 1, fontSize: '0.7rem', textTransform: 'none', flexShrink: 0 }}
               >
-                Clear ({validSelectedKeys.length})
+                {uiText('Clear (', '清除 (')}{validSelectedKeys.length})
               </Button>
             </>
           )}
@@ -2914,8 +2925,8 @@ export default function TrafficInspector() {
           <Tooltip
             title={
               promotableCount > 0
-                ? 'Turn recorded (proxied) traffic into active mock expectations'
-                : 'Proxy some traffic through MockServer first — recorded requests can then be promoted to mocks'
+                ? uiText('Turn recorded (proxied) traffic into active mock expectations', '将录制的代理请求转换为生效的 Mock 规则')
+                : uiText('Proxy some traffic through MockServer first — recorded requests can then be promoted to mocks', '先通过 MockServer 代理流量，再将录制的请求转换为 Mock 规则')
             }
           >
             <span>
@@ -2930,8 +2941,8 @@ export default function TrafficInspector() {
                 {/* The full label wraps to two lines when the master/detail split squeezes
                     the list pane, so collapse to a short label below the container breakpoint
                     (the header Box has containerType: 'inline-size'). */}
-                <Box component="span" sx={{ display: 'inline', '@container (max-width: 720px)': { display: 'none' } }}>Promote to Mocks</Box>
-                <Box component="span" sx={{ display: 'none', '@container (max-width: 720px)': { display: 'inline' } }}>Mocks</Box>
+                <Box component="span" sx={{ display: 'inline', '@container (max-width: 720px)': { display: 'none' } }}>{uiText('Promote to Mocks', '转为 Mock 规则')}</Box>
+                <Box component="span" sx={{ display: 'none', '@container (max-width: 720px)': { display: 'inline' } }}>{uiText('Mocks', 'Mock 规则')}</Box>
               </Button>
             </span>
           </Tooltip>
@@ -2943,9 +2954,7 @@ export default function TrafficInspector() {
             onClose={() => setLogLevelHintDismissed(true)}
             sx={{ mx: 1, my: 0.5, py: 0, fontSize: '0.75rem' }}
           >
-            MockServer is logging at {String(logLevel)}, so it does not record the response to a request
-            that matches no expectation. Those requests show no status here, and the unmatched badge, Why
-            Didn&apos;t This Match? and Generate Stub need the log level INFO (set it in Configuration).
+            {uiText('MockServer is logging at ', 'MockServer 当前的日志级别为 ')}{String(logLevel)}{uiText(', so it does not record the response to a request that matches no expectation. Those requests show no status here, and the unmatched badge, Why Didn\'t This Match? and Generate Stub need the log level INFO (set it in Configuration).', '，因此未匹配规则的请求没有响应记录，状态不会在这里显示。要查看未匹配标记、诊断未匹配原因或生成 Mock 规则，请在设置中将日志级别设为 INFO。')}
           </Alert>
         )}
         {trafficSearch && shortenedRows.length > 0 && (
@@ -2954,12 +2963,11 @@ export default function TrafficInspector() {
             sx={{ mx: 1, my: 0.5, py: 0, fontSize: '0.75rem' }}
             action={(
               <Button size="small" color="inherit" disabled={searchingFull} onClick={() => { void searchFullBodies(); }}>
-                {searchingFull ? 'Loading…' : 'Search Full Bodies'}
+                {searchingFull ? uiText('Loading…', '正在加载…') : uiText('Search Full Bodies', '搜索完整请求体')}
               </Button>
             )}
           >
-            {shortenedRows.length === 1 ? '1 request has' : `${shortenedRows.length} requests have`} a body
-            longer than shown; the search covers only the part shown.
+            {shortenedRows.length === 1 ? uiText('1 request has', '有 1 条请求') : uiText(`${shortenedRows.length} requests have`, `有 ${shortenedRows.length} 条请求`)}{uiText(' a body longer than shown; the search covers only the part shown.', '的请求体显示不全，搜索仅覆盖已显示的部分。')}
           </Alert>
         )}
         {/* Only worth the vertical space once the traffic actually spans more
@@ -2979,9 +2987,9 @@ export default function TrafficInspector() {
           {filtered.length === 0 ? (
             allRequests.length === 0 ? (
               <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                <Typography variant="body2" sx={{ mb: 1 }}>No traffic captured yet.</Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>{uiText('No traffic captured yet.', '暂无请求记录。')}</Typography>
                 <Typography variant="caption" component="div" sx={{ mb: 1 }}>
-                  Send a request through MockServer — as a proxy or to a mock — and it appears here. For example:
+                  {uiText('Send a request through MockServer — as a proxy or to a mock — and it appears here. For example:', '通过 MockServer 代理或向 Mock 接口发送请求，记录就会出现在这里。例如：')}
                 </Typography>
                 <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, maxWidth: '100%' }}>
                   <Box
@@ -3003,12 +3011,12 @@ export default function TrafficInspector() {
                   <CopyButton text={`curl -x http://${connectionParams.host}:${connectionParams.port} http://example.com`} />
                 </Box>
                 <Typography variant="caption" component="div" sx={{ mt: 1 }}>
-                  New to proxying? See the Get Started tab for proxy setup.
+                  {uiText('New to proxying? See the Get Started tab for proxy setup.', '如果初次使用代理，请到「快速入门」查看配置方法。')}
                 </Typography>
               </Box>
             ) : (
               <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                No matching requests
+                {uiText('No matching requests', '没有符合条件的请求')}
               </Typography>
             )
           ) : (
@@ -3100,7 +3108,7 @@ export default function TrafficInspector() {
             minWidth: 0,
           }}
         >
-          <ErrorBoundary key={selectedEntry.item.key} label="detail pane">
+          <ErrorBoundary key={selectedEntry.item.key} label={uiText('detail pane', '请求详情')}>
             <DetailPane
               item={selectedEntry.item}
               summary={selectedEntry.summary}
@@ -3180,7 +3188,7 @@ export default function TrafficInspector() {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700, flexGrow: 1 }}>
-            Diff Pool ({diffPool.length})
+            {uiText('Diff Pool (', '对比列表 (')}{diffPool.length})
           </Typography>
           <Button
             size="small"
@@ -3189,13 +3197,13 @@ export default function TrafficInspector() {
             disabled={diffPool.length === 0}
             sx={{ fontSize: '0.7rem', textTransform: 'none' }}
           >
-            Clear All
+            {uiText('Clear All', '清空列表')}
           </Button>
         </Box>
         <Box sx={{ maxHeight: 320, overflowY: 'auto' }}>
           {diffPool.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-              No requests staged. Use “Add to Diff Pool” in the detail pane.
+              {uiText('No requests staged. Use “Add to Diff Pool” in the detail pane.', '对比列表为空。可在请求详情中选择「加入对比列表」。')}
             </Typography>
           ) : (
             diffPool.map((entry) => {
@@ -3210,7 +3218,7 @@ export default function TrafficInspector() {
                     checked={picked}
                     disabled={!picked && poolPicks.length >= 2}
                     onChange={() => togglePoolPick(entry.key)}
-                    slotProps={{ input: { 'aria-label': `Pick ${entry.method ?? ''} ${entry.path ?? entry.key}` } }}
+                    slotProps={{ input: { 'aria-label': uiText(`Pick ${entry.method ?? ''} ${entry.path ?? entry.key}`, `选择 ${entry.method ?? ''} ${entry.path ?? entry.key}`) } }}
                     sx={{ p: 0.25, flexShrink: 0 }}
                   />
                   <Typography variant="caption" sx={{ fontWeight: 700, flexShrink: 0, minWidth: 40 }}>
@@ -3231,11 +3239,11 @@ export default function TrafficInspector() {
                       sx={{ height: 18, fontSize: '0.6rem', flexShrink: 0, '& .MuiChip-label': { px: 0.6 } }}
                     />
                   )}
-                  <Tooltip title="Remove from Diff Pool">
+                  <Tooltip title={uiText('Remove from Diff Pool', '从对比列表移除')}>
                     <IconButton
                       size="small"
                       onClick={() => removeFromDiffPool(entry.key)}
-                      aria-label={`Remove ${entry.method ?? ''} ${entry.path ?? entry.key} from Diff Pool`}
+                      aria-label={uiText(`Remove ${entry.method ?? ''} ${entry.path ?? entry.key} from Diff Pool`, `从对比列表移除 ${entry.method ?? ''} ${entry.path ?? entry.key}`)}
                       sx={{ p: 0.25, flexShrink: 0 }}
                     >
                       <CloseIcon sx={{ fontSize: '0.9rem' }} />
@@ -3248,7 +3256,7 @@ export default function TrafficInspector() {
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1, borderTop: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" sx={{ flexGrow: 1 }}>
-            {poolPicks.length}/2 picked
+            {poolPicks.length}{uiText('/2 picked', '/2 条已选')}
           </Typography>
           <Button
             size="small"
@@ -3257,7 +3265,7 @@ export default function TrafficInspector() {
             onClick={openPoolDiff}
             sx={{ fontSize: '0.7rem', textTransform: 'none' }}
           >
-            Diff Selected
+            {uiText('Diff Selected', '对比所选请求')}
           </Button>
         </Box>
       </Popover>
@@ -3299,9 +3307,9 @@ export default function TrafficInspector() {
 
       <ConfirmDialog
         open={bulkClearConfirm}
-        title={`Clear ${validSelectedKeys.length} request${validSelectedKeys.length === 1 ? '' : 's'}?`}
-        message={`Remove the ${validSelectedKeys.length} selected request${validSelectedKeys.length === 1 ? '' : 's'} from the log. Identical requests captured alongside them may also be cleared. Expectations are kept. This cannot be undone.`}
-        confirmLabel="Clear selected"
+        title={uiText(`Clear ${validSelectedKeys.length} request${validSelectedKeys.length === 1 ? '' : 's'}?`, `清除 ${validSelectedKeys.length} 条请求？`)}
+        message={uiText(`Remove the ${validSelectedKeys.length} selected request${validSelectedKeys.length === 1 ? '' : 's'} from the log. Identical requests captured alongside them may also be cleared. Expectations are kept. This cannot be undone.`, `从日志中移除所选的 ${validSelectedKeys.length} 条请求。同批捕获的相同请求也可能被清除。Mock 规则将保留。此操作无法撤销。`)}
+        confirmLabel={uiText('Clear selected', '清除所选请求')}
         onConfirm={() => { void handleBulkClear(); }}
         onClose={() => setBulkClearConfirm(false)}
       />

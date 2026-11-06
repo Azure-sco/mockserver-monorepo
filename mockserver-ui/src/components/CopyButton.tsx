@@ -3,6 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import { uiText } from '../lib/dashboardLocale';
 
 interface CopyButtonProps {
   text: string;
@@ -21,7 +22,7 @@ export default function CopyButton({ text, size = 'small' }: CopyButtonProps) {
     }
   };
 
-  const tooltipTitle = status === 'copied' ? 'Copied!' : status === 'failed' ? 'Copy failed' : 'Copy';
+  const tooltipTitle = status === 'copied' ? uiText('Copied!', '已复制') : status === 'failed' ? uiText('Copy failed', '复制失败') : uiText('Copy', '复制');
 
   return (
     <Tooltip title={tooltipTitle}>

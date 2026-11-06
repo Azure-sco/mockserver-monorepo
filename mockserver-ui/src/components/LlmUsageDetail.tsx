@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
@@ -137,7 +138,7 @@ export default function LlmUsageDetail({ parsed }: LlmUsageDetailProps) {
       )}
       {tokens && (
         <Chip
-          label={`${tokens.inputTokens} in / ${tokens.outputTokens} out`}
+          label={uiText(`${tokens.inputTokens} in / ${tokens.outputTokens} out`, `输入 ${tokens.inputTokens} / 输出 ${tokens.outputTokens} Token`)}
           size="small"
           variant="outlined"
           sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.75 } }}
@@ -152,7 +153,7 @@ export default function LlmUsageDetail({ parsed }: LlmUsageDetailProps) {
       />
       {stopReason && (
         <Chip
-          label={`stop: ${stopReason}`}
+          label={uiText(`stop: ${stopReason}`, `停止原因：${stopReason}`)}
           size="small"
           variant="outlined"
           sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.75 } }}
@@ -160,7 +161,7 @@ export default function LlmUsageDetail({ parsed }: LlmUsageDetailProps) {
       )}
       {tokens === null && (
         <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', ml: 0.5 }}>
-          (no usage data on this request)
+          {uiText('(no usage data on this request)', '此请求无用量数据')}
         </Typography>
       )}
     </Box>

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -69,15 +70,15 @@ interface CaptureAsMockDialogProps {
 // ---------------------------------------------------------------------------
 
 const PRECISION_LABELS: Record<MatcherPrecision, string> = {
-  exact: 'Exact',
-  moderate: 'Moderate',
-  loose: 'Loose',
+  exact: uiText('Exact', '精确'),
+  moderate: uiText('Moderate', '适中'),
+  loose: uiText('Loose', '宽松'),
 };
 
 const PRECISION_DESCRIPTIONS: Record<MatcherPrecision, string> = {
-  exact: 'Method + Path + Query + Headers + Body',
-  moderate: 'Method + Path + Query + Body',
-  loose: 'Method + Path only',
+  exact: uiText('Method + Path + Query + Headers + Body', '方法 + 路径 + 查询参数 + 请求头 + 请求体'),
+  moderate: uiText('Method + Path + Query + Body', '方法 + 路径 + 查询参数 + 请求体'),
+  loose: uiText('Method + Path only', '仅匹配方法和路径'),
 };
 
 // ---------------------------------------------------------------------------
@@ -207,7 +208,7 @@ export default function CaptureAsMockDialog({
         const args = expectationToMcpArgs(draft);
         const result = await callMcpTool(baseUrl, 'mock_llm_completion', args);
         if (result.ok) {
-          setNotification({ message: 'Mock expectation registered successfully', severity: 'success' });
+          setNotification({ message: uiText('Mock expectation registered successfully', 'Mock 规则注册成功'), severity: 'success' });
           onClose();
         } else {
           const raw =
@@ -229,7 +230,7 @@ export default function CaptureAsMockDialog({
           if (lintWarnings > 0) {
             setRegisteredLintWarnings(lintWarnings);
           } else {
-            setNotification({ message: 'Mock expectation registered successfully', severity: 'success' });
+            setNotification({ message: uiText('Mock expectation registered successfully', 'Mock 规则注册成功'), severity: 'success' });
             onClose();
           }
         } else {
@@ -263,7 +264,12 @@ export default function CaptureAsMockDialog({
     return !draft.path;
   }, [registering, registered, draft]);
 
-  const tabLabels = ['Edit', 'Preview Diff', 'Copy as JSON', 'Copy as Java'];
+  const tabLabels = [
+    ['Edit', '编辑'],
+    ['Preview Diff', '预览差异'],
+    ['Copy as JSON', '复制为 JSON'],
+    ['Copy as Java', '复制为 Java'],
+  ] as const;
 
   return (
     <>
@@ -275,11 +281,11 @@ export default function CaptureAsMockDialog({
         fullScreen={fullScreen}
         aria-labelledby="capture-as-mock-title"
       >
-        <DialogTitle id="capture-as-mock-title">Capture as Mock</DialogTitle>
+        <DialogTitle id="capture-as-mock-title">{uiText('Capture as Mock', '录制为 Mock 规则')}</DialogTitle>
         <DialogContent dividers>
           {registered && (
             <Alert severity="success" sx={{ mb: 2 }} data-testid="capture-registered">
-              Mock expectation registered successfully.
+              {uiText('Mock expectation registered successfully.', 'Mock 规则注册成功。')}
               <Box sx={{ mt: 1 }}>
                 <LintWarningsBadge count={registeredLintWarnings} connectionParams={connectionParams} />
               </Box>
@@ -290,8 +296,8 @@ export default function CaptureAsMockDialog({
             onChange={(_, v: number) => setTab(v)}
             sx={{ mb: 2, minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.5, typography: 'body2' } }}
           >
-            {tabLabels.map((label) => (
-              <Tab key={label} label={label} />
+            {tabLabels.map(([id, chineseLabel]) => (
+              <Tab key={id} label={uiText(id, chineseLabel)} />
             ))}
           </Tabs>
 
@@ -299,14 +305,14 @@ export default function CaptureAsMockDialog({
           {tab === 0 && draft.kind === 'llm' && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
-                label="Path"
+                label={uiText('Path', '路径')}
                 size="small"
                 fullWidth
                 value={draft.path}
                 onChange={(e) => updateLlmDraft({ path: e.target.value })}
               />
               <TextField
-                label="Provider"
+                label={uiText('Provider', '提供方')}
                 size="small"
                 select
                 fullWidth
@@ -320,14 +326,14 @@ export default function CaptureAsMockDialog({
                 ))}
               </TextField>
               <TextField
-                label="Model"
+                label={uiText('Model', '模型')}
                 size="small"
                 fullWidth
                 value={draft.model}
                 onChange={(e) => updateLlmDraft({ model: e.target.value })}
               />
               <TextField
-                label="Text"
+                label={uiText('Text', '文本')}
                 size="small"
                 fullWidth
                 multiline
@@ -340,22 +346,22 @@ export default function CaptureAsMockDialog({
               {/* Tool calls */}
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <Typography variant="subtitle2">Tool Calls</Typography>
-                  <IconButton size="small" onClick={addToolCall} aria-label="Add tool call">
+                  <Typography variant="subtitle2">{uiText('Tool Calls', '工具调用')}</Typography>
+                  <IconButton size="small" onClick={addToolCall} aria-label={uiText('Add tool call', '添加工具调用')}>
                     <AddIcon fontSize="small" />
                   </IconButton>
                 </Box>
                 {draft.toolCalls.map((tc, i) => (
                   <Box key={i} sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'flex-start' }}>
                     <TextField
-                      label="Name"
+                      label={uiText('Name', '名称')}
                       size="small"
                       value={tc.name}
                       onChange={(e) => updateToolCall(i, { name: e.target.value })}
                       sx={{ flex: 1 }}
                     />
                     <TextField
-                      label="Arguments"
+                      label={uiText('Arguments', '参数')}
                       size="small"
                       value={tc.arguments ?? ''}
                       onChange={(e) => updateToolCall(i, { arguments: e.target.value })}
@@ -364,7 +370,7 @@ export default function CaptureAsMockDialog({
                     <IconButton
                       size="small"
                       onClick={() => removeToolCall(i)}
-                      aria-label="Remove tool call"
+                      aria-label={uiText('Remove tool call', '移除工具调用')}
                     >
                       <DeleteOutlineIcon fontSize="small" />
                     </IconButton>
@@ -373,7 +379,7 @@ export default function CaptureAsMockDialog({
               </Box>
 
               <TextField
-                label="Stop Reason"
+                label={uiText('Stop Reason', '停止原因')}
                 size="small"
                 fullWidth
                 value={draft.stopReason}
@@ -386,7 +392,7 @@ export default function CaptureAsMockDialog({
                     onChange={(e) => updateLlmDraft({ streaming: e.target.checked })}
                   />
                 }
-                label="Streaming"
+                label={uiText('Streaming', '流式传输')}
               />
             </Box>
           )}
@@ -397,7 +403,7 @@ export default function CaptureAsMockDialog({
               {/* Matcher precision toggle */}
               <Box>
                 <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                  Matcher Precision
+                  {uiText('Matcher Precision', '匹配精度')}
                 </Typography>
                 <ToggleButtonGroup
                   value={draft.matcherPrecision}
@@ -406,12 +412,12 @@ export default function CaptureAsMockDialog({
                     if (v !== null) updateGenericDraft({ matcherPrecision: v });
                   }}
                   size="small"
-                  aria-label="Matcher precision"
+                  aria-label={uiText('Matcher precision', '匹配精度')}
                   disabled={registered}
                 >
                   {MATCHER_PRECISIONS.map((p) => (
                     <Tooltip key={p} title={PRECISION_DESCRIPTIONS[p]} arrow>
-                      <ToggleButton value={p} aria-label={`${PRECISION_LABELS[p]} precision`}>
+                      <ToggleButton value={p} aria-label={uiText(`${PRECISION_LABELS[p]} precision`, `匹配精度：${PRECISION_LABELS[p]}`)}>
                         {PRECISION_LABELS[p]}
                       </ToggleButton>
                     </Tooltip>
@@ -423,10 +429,10 @@ export default function CaptureAsMockDialog({
               </Box>
 
               {/* Request fields */}
-              <Typography variant="subtitle2" sx={{ mt: 1, mb: -1 }}>Request Matcher</Typography>
+              <Typography variant="subtitle2" sx={{ mt: 1, mb: -1 }}>{uiText('Request Matcher', '请求匹配条件')}</Typography>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <TextField
-                  label="Method"
+                  label={uiText('Method', '方法')}
                   size="small"
                   value={draft.method}
                   onChange={(e) => updateGenericDraft({ method: e.target.value })}
@@ -434,7 +440,7 @@ export default function CaptureAsMockDialog({
                   sx={{ width: 120 }}
                 />
                 <TextField
-                  label="Path"
+                  label={uiText('Path', '路径')}
                   size="small"
                   fullWidth
                   value={draft.path}
@@ -444,7 +450,7 @@ export default function CaptureAsMockDialog({
               </Box>
               {draft.matcherPrecision !== 'loose' && (
                 <TextField
-                  label="Request Body"
+                  label={uiText('Request Body', '请求体')}
                   size="small"
                   fullWidth
                   multiline
@@ -455,16 +461,16 @@ export default function CaptureAsMockDialog({
                   slotProps={{ input: { readOnly: registered } }}
                   helperText={
                     !draft.body
-                      ? 'No body was captured — add one to match on the request body.'
+                      ? uiText('No body was captured — add one to match on the request body.', '未捕获到请求体。如需匹配请求体，可在此填写。')
                       : undefined
                   }
                 />
               )}
 
               {/* Response fields */}
-              <Typography variant="subtitle2" sx={{ mt: 1, mb: -1 }}>Response</Typography>
+              <Typography variant="subtitle2" sx={{ mt: 1, mb: -1 }}>{uiText('Response', '响应')}</Typography>
               <TextField
-                label="Status Code"
+                label={uiText('Status Code', '状态码')}
                 size="small"
                 type="number"
                 value={draft.responseStatusCode}
@@ -473,7 +479,7 @@ export default function CaptureAsMockDialog({
                 sx={{ width: 120 }}
               />
               <TextField
-                label="Response Body"
+                label={uiText('Response Body', '响应体')}
                 size="small"
                 fullWidth
                 multiline
@@ -492,11 +498,10 @@ export default function CaptureAsMockDialog({
           {tab === 1 && (
             <Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                The mock below will be created from this captured request. Lines added on
-                the right are the expectation that will be registered.
+                {uiText('The mock below will be created from this captured request. Lines added on the right are the expectation that will be registered.', '将根据捕获的请求创建下方的 Mock 规则。右侧新增内容是将要注册的规则。')}
               </Typography>
               <JsonDiffViewer
-                ariaLabel="Mock to be created"
+                ariaLabel={uiText('Mock to be created', '待创建的 Mock 规则')}
                 original="{}"
                 modified={jsonOutput}
                 height={400}
@@ -561,14 +566,14 @@ export default function CaptureAsMockDialog({
           )}
         </DialogContent>
         <DialogActions>
-          <Button ref={closeButtonRef} onClick={onClose}>{registered ? 'Close' : 'Cancel'}</Button>
+          <Button ref={closeButtonRef} onClick={onClose}>{registered ? uiText('Close', '关闭') : uiText('Cancel', '取消')}</Button>
           {draft.kind === 'generic' && (
             <Button
               onClick={handleRefineInComposer}
               startIcon={<EditOutlinedIcon sx={{ fontSize: '0.875rem' }} />}
               disabled={registering || registered || !draft.path}
             >
-              Refine in Composer
+              {uiText('Refine in Composer', '在规则编辑器中完善')}
             </Button>
           )}
           <Button
@@ -576,7 +581,7 @@ export default function CaptureAsMockDialog({
             onClick={() => void handleRegister()}
             disabled={registerDisabled}
           >
-            {registering ? 'Registering...' : registered ? 'Registered' : 'Register'}
+            {registering ? uiText('Registering...', '正在注册…') : registered ? uiText('Registered', '已注册') : uiText('Register', '注册')}
           </Button>
         </DialogActions>
       </Dialog>

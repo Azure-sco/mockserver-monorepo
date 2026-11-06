@@ -1,3 +1,5 @@
+import { uiText } from './dashboardLocale';
+
 /**
  * Curated template snippets for the Composer's snippet palette.
  *
@@ -44,8 +46,8 @@ export interface SnippetCategory {
 const REQUEST_ECHOES: TemplateSnippet[] = [
   {
     id: 'req-method',
-    label: 'Request method',
-    description: 'Echo the HTTP method of the incoming request.',
+    label: uiText('Request method', "请求方法"),
+    description: uiText('Echo the HTTP method of the incoming request.', "返回传入请求的 HTTP 方法。"),
     syntax: {
       VELOCITY: '$request.method',
       MUSTACHE: '{{ request.method }}',
@@ -55,8 +57,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-path',
-    label: 'Request path',
-    description: 'Echo the path of the incoming request.',
+    label: uiText('Request path', "请求路径"),
+    description: uiText('Echo the path of the incoming request.', "返回传入请求的路径。"),
     syntax: {
       VELOCITY: '$request.path',
       MUSTACHE: '{{ request.path }}',
@@ -66,8 +68,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-body',
-    label: 'Request body',
-    description: 'Echo the full request body as a string.',
+    label: uiText('Request body', "请求体"),
+    description: uiText('Echo the full request body as a string.', "以字符串形式返回完整请求体。"),
     syntax: {
       VELOCITY: '$!request.body',
       MUSTACHE: '{{ request.body }}',
@@ -77,8 +79,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-header',
-    label: 'Request header',
-    description: 'Echo a specific request header (first value). Replace "host" with the header name.',
+    label: uiText('Request header', "请求头"),
+    description: uiText('Echo a specific request header (first value). Replace "host" with the header name.', "返回指定请求头的第一个值。将 host 替换为实际请求头名称。"),
     syntax: {
       VELOCITY: '$request.headers.host[0]',
       MUSTACHE: '{{ request.headers.host.0 }}',
@@ -88,8 +90,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-query',
-    label: 'Query parameter',
-    description: 'Echo a specific query string parameter. Replace "id" with the param name.',
+    label: uiText('Query parameter', "查询参数"),
+    description: uiText('Echo a specific query string parameter. Replace "id" with the param name.', "返回指定查询参数的值。将 id 替换为实际参数名称。"),
     syntax: {
       VELOCITY: '$request.queryStringParameters.id[0]',
       MUSTACHE: '{{ request.queryStringParameters.id.0 }}',
@@ -99,8 +101,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-path-param',
-    label: 'Path parameter',
-    description: 'Echo a path parameter (e.g. for /users/{userId}). Replace "userId" with the param name.',
+    label: uiText('Path parameter', "路径参数"),
+    description: uiText('Echo a path parameter (e.g. for /users/{userId}). Replace "userId" with the param name.', "返回路径参数，例如 /users/{userId} 中的参数。将 userId 替换为实际参数名称。"),
     syntax: {
       VELOCITY: '$request.pathParameters.userId[0]',
       MUSTACHE: '{{ request.pathParameters.userId.0 }}',
@@ -110,8 +112,8 @@ const REQUEST_ECHOES: TemplateSnippet[] = [
   },
   {
     id: 'req-cookie',
-    label: 'Request cookie',
-    description: 'Echo a specific cookie value. Replace "session" with the cookie name.',
+    label: uiText('Request cookie', "请求 Cookie"),
+    description: uiText('Echo a specific cookie value. Replace "session" with the cookie name.', "返回指定 Cookie 的值。将 session 替换为实际 Cookie 名称。"),
     syntax: {
       VELOCITY: '$request.cookies.session',
       MUSTACHE: '{{ request.cookies.session }}',
@@ -125,7 +127,7 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   {
     id: 'uuid',
     label: 'UUID',
-    description: 'Generate a random UUID (v4).',
+    description: uiText('Generate a random UUID (v4).', "生成随机 UUID（v4）。"),
     syntax: {
       VELOCITY: '$uuid',
       MUSTACHE: '{{ uuid }}',
@@ -135,8 +137,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'now-iso',
-    label: 'Timestamp (ISO 8601)',
-    description: 'Current date-time in ISO 8601 format.',
+    label: uiText('Timestamp (ISO 8601)', "时间戳（ISO 8601）"),
+    description: uiText('Current date-time in ISO 8601 format.', "以 ISO 8601 格式返回当前日期和时间。"),
     syntax: {
       VELOCITY: '$now_iso_8601',
       MUSTACHE: '{{ now_iso_8601 }}',
@@ -146,8 +148,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'now-epoch',
-    label: 'Timestamp (epoch seconds)',
-    description: 'Current time as Unix epoch seconds.',
+    label: uiText('Timestamp (epoch seconds)', "时间戳（Unix 秒）"),
+    description: uiText('Current time as Unix epoch seconds.', "以 Unix 时间戳的秒数返回当前时间。"),
     syntax: {
       VELOCITY: '$now_epoch',
       MUSTACHE: '{{ now_epoch }}',
@@ -157,8 +159,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'now-rfc1123',
-    label: 'Timestamp (RFC 1123)',
-    description: 'Current date-time in RFC 1123 format (HTTP Date header style).',
+    label: uiText('Timestamp (RFC 1123)', "时间戳（RFC 1123）"),
+    description: uiText('Current date-time in RFC 1123 format (HTTP Date header style).', "以 RFC 1123 格式返回当前日期和时间，适用于 HTTP Date 请求头。"),
     syntax: {
       VELOCITY: '$now_rfc_1123',
       MUSTACHE: '{{ now_rfc_1123 }}',
@@ -168,8 +170,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'rand-int',
-    label: 'Random integer (0-9)',
-    description: 'A random integer between 0 and 9.',
+    label: uiText('Random integer (0-9)', "随机整数（0–9）"),
+    description: uiText('A random integer between 0 and 9.', "生成 0 至 9 之间的随机整数。"),
     syntax: {
       VELOCITY: '$rand_int_10',
       MUSTACHE: '{{ rand_int_10 }}',
@@ -179,8 +181,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'rand-int-100',
-    label: 'Random integer (0-99)',
-    description: 'A random integer between 0 and 99.',
+    label: uiText('Random integer (0-99)', "随机整数（0–99）"),
+    description: uiText('A random integer between 0 and 99.', "生成 0 至 99 之间的随机整数。"),
     syntax: {
       VELOCITY: '$rand_int_100',
       MUSTACHE: '{{ rand_int_100 }}',
@@ -190,8 +192,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'faker-name',
-    label: 'Fake name',
-    description: 'A random first name via Datafaker.',
+    label: uiText('Fake name', "测试姓名"),
+    description: uiText('A random first name via Datafaker.', "通过 Datafaker 生成随机名字。"),
     syntax: {
       VELOCITY: '$faker.name().firstName()',
       MUSTACHE: '{{ faker.name.firstName }}',
@@ -201,8 +203,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
   },
   {
     id: 'faker-email',
-    label: 'Fake email',
-    description: 'A random email address via Datafaker.',
+    label: uiText('Fake email', "测试邮箱"),
+    description: uiText('A random email address via Datafaker.', "通过 Datafaker 生成随机电子邮件地址。"),
     syntax: {
       VELOCITY: '$faker.internet().emailAddress()',
       MUSTACHE: '{{ faker.internet.emailAddress }}',
@@ -215,8 +217,8 @@ const DYNAMIC_DATA: TemplateSnippet[] = [
 const STRUCTURE: TemplateSnippet[] = [
   {
     id: 'json-skeleton',
-    label: 'JSON response skeleton',
-    description: 'A complete JSON response template echoing method, path, and body.',
+    label: uiText('JSON response skeleton', "JSON 响应模板"),
+    description: uiText('A complete JSON response template echoing method, path, and body.', "完整的 JSON 响应模板，返回请求方法、路径和请求体。"),
     syntax: {
       VELOCITY: [
         '{',
@@ -244,8 +246,8 @@ const STRUCTURE: TemplateSnippet[] = [
   },
   {
     id: 'conditional',
-    label: 'Conditional (if / else)',
-    description: 'Return different responses based on the request method.',
+    label: uiText('Conditional (if / else)', "条件分支（if / else）"),
+    description: uiText('Return different responses based on the request method.', "根据请求方法返回不同响应。"),
     syntax: {
       VELOCITY: [
         "#if ( $request.method == 'POST' )",
@@ -286,8 +288,8 @@ const STRUCTURE: TemplateSnippet[] = [
   },
   {
     id: 'loop-headers',
-    label: 'Iterate over headers',
-    description: 'Loop through all request headers and include them in the response.',
+    label: uiText('Iterate over headers', "遍历请求头"),
+    description: uiText('Loop through all request headers and include them in the response.', "遍历全部请求头并将其包含在响应中。"),
     syntax: {
       VELOCITY: [
         '{',
@@ -323,17 +325,17 @@ const STRUCTURE: TemplateSnippet[] = [
 export const SNIPPET_CATEGORIES: SnippetCategory[] = [
   {
     id: 'request-echoes',
-    label: 'Request Echoes',
+    label: uiText('Request Echoes', "请求回显"),
     snippets: REQUEST_ECHOES,
   },
   {
     id: 'dynamic-data',
-    label: 'Dynamic Data',
+    label: uiText('Dynamic Data', "动态数据"),
     snippets: DYNAMIC_DATA,
   },
   {
     id: 'structure',
-    label: 'Structure',
+    label: uiText('Structure', "模板结构"),
     snippets: STRUCTURE,
   },
 ];

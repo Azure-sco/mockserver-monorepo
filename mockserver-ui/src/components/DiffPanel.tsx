@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -40,8 +41,8 @@ export default function DiffPanel({
   result,
   loading,
   error,
-  title = 'Request Diff',
-  identicalMessage = 'The two requests are identical.',
+  title = uiText('Request Diff', '请求差异'),
+  identicalMessage = uiText('The two requests are identical.', '两条请求相同。'),
 }: DiffPanelProps) {
   return (
     <Paper variant="outlined" sx={{ p: 1.25, mt: 1 }}>
@@ -52,7 +53,7 @@ export default function DiffPanel({
         {result && (
           <Chip
             size="small"
-            label={result.identical ? 'Identical' : `${result.diffCount} differences`}
+            label={result.identical ? uiText('Identical', '相同') : uiText(`${result.diffCount} differences`, `${result.diffCount} 处差异`)}
             color={result.identical ? 'success' : 'warning'}
             variant="outlined"
           />
@@ -76,10 +77,10 @@ export default function DiffPanel({
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Field</TableCell>
-                <TableCell>Expected</TableCell>
-                <TableCell>Actual</TableCell>
-                <TableCell>Type</TableCell>
+                <TableCell>{uiText('Field', '字段')}</TableCell>
+                <TableCell>{uiText('Expected', '预期')}</TableCell>
+                <TableCell>{uiText('Actual', '实际')}</TableCell>
+                <TableCell>{uiText('Type', '类型')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -118,7 +119,7 @@ export default function DiffPanel({
 
       {result && !result.identical && result.diffs.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 1 }}>
-          Requests differ but no field-level diffs were produced by the server.
+          {uiText('Requests differ but no field-level diffs were produced by the server.', '请求不同，但服务端未提供字段级差异。')}
         </Typography>
       )}
 

@@ -6,6 +6,7 @@ import {
   type EventLogLoss,
 } from '../lib/eventLogLoss';
 import { monospaceFontFamily } from '../theme';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Shown inside a failed-verification log entry when the verification could not
@@ -21,7 +22,7 @@ export default function EventLogLossDetails({ loss }: EventLogLossDetailsProps) 
   return (
     <Box
       role="note"
-      aria-label="What the event log lost and how to fix it"
+      aria-label={uiText('What the event log lost and how to fix it', '事件日志丢失详情和处理方法')}
       data-testid="event-log-loss"
       sx={{
         // a log row does not wrap; this is prose, so it must

@@ -52,6 +52,7 @@ import {
   graphqlOperationLabel,
   type GraphqlOperation,
 } from '../lib/graphqlOperation';
+import { uiText } from '../lib/dashboardLocale';
 
 // ---------------------------------------------------------------------------
 // GraphQL operation pill — shared by the log row and the Traffic inspector (as
@@ -67,7 +68,7 @@ import {
  */
 export function GraphqlOperationPill({ operation }: { operation: GraphqlOperation }) {
   const label = graphqlOperationLabel(operation);
-  const tooltip = `GraphQL ${operation.operationType ?? 'operation'}: ${operation.operationName ?? '(anonymous)'}`;
+  const tooltip = uiText(`GraphQL ${operation.operationType ?? 'operation'}: ${operation.operationName ?? '(anonymous)'}`, `GraphQL ${operation.operationType ?? '操作'} ${operation.operationName ?? '（匿名）'}`);
   return (
     <Tooltip title={tooltip}>
       <Chip
@@ -114,7 +115,7 @@ export interface CreateFromMenuAction {
  */
 export function CreateFromMenu({
   actions,
-  tooltip = 'Create from this request…',
+  tooltip = uiText('Create from this request…', '基于此请求创建…'),
   iconColor = 'primary.main',
   iconFontSize = '0.9rem',
   buttonSx,
@@ -281,7 +282,7 @@ function TraceparentPill({ info }: { info: TraceparentInfo }) {
     `traceparent: ${info.raw}`,
     `traceId: ${info.traceId}`,
     `parentId: ${info.parentId}`,
-    `flags: ${info.flags} (${info.flags === '01' ? 'sampled' : 'not sampled'})`,
+    uiText(`flags: ${info.flags} (${info.flags === '01' ? 'sampled' : 'not sampled'})`, `flags: ${info.flags}（${info.flags === '01' ? '已采样' : '未采样'}）`),
   ].join('\n');
 
   return (
@@ -317,7 +318,7 @@ function LogTime({ timestamp }: { timestamp: string }) {
     <Tooltip title={absolute}>
       <Box
         component="time"
-        aria-label={`Logged at ${absolute}`}
+        aria-label={uiText(`Logged at ${absolute}`, `记录于 ${absolute}`)}
         {...(parsed.date ? { dateTime: parsed.date.toISOString() } : {})}
         sx={{
           fontFamily: monospaceFontFamily,
@@ -516,7 +517,7 @@ async function loadRequestFromEntry(entry: LogEntryValue, params: ConnectionPara
   if (!part) return null;
   const marker = part.truncatedBody;
   if (!marker) return part.value as Record<string, unknown>;
-  if (!isLoadable(marker)) throw new Error('its body was shortened and cannot be loaded from this log entry');
+  if (!isLoadable(marker)) throw new Error(uiText('its body was shortened and cannot be loaded from this log entry', '该请求的正文已截断，无法从这条日志加载完整内容'));
   return fetchFullMessage(params, marker);
 }
 
@@ -654,7 +655,7 @@ export function buildLaunchpadActions(
   return [
     {
       key: 'mock',
-      label: 'Create Mock',
+      label: uiText('Create Mock', '创建 Mock 规则'),
       icon: <AddCircleOutlineIcon fontSize="small" color="primary" />,
       onClick: itemValue
         ? () => {
@@ -665,34 +666,34 @@ export function buildLaunchpadActions(
             loadItemValue().then(createMock, notifyFullBodyLoadFailed);
           }
         : undefined,
-      disabledTooltip: 'No request captured to build a mock from',
+      disabledTooltip: uiText('No request captured to build a mock from', '没有可用于创建 Mock 规则的请求记录'),
     },
     {
       key: 'breakpoint',
-      label: 'Set Breakpoint',
+      label: uiText('Set Breakpoint', '设置断点'),
       icon: <PauseCircleIcon fontSize="small" color="secondary" />,
       onClick: setBreakpoint && (method || path)
         ? () => setBreakpoint({ method, path })
         : undefined,
-      disabledTooltip: 'No method or path to break on',
+      disabledTooltip: uiText('No method or path to break on', '缺少设置断点所需的方法或路径'),
     },
     {
       key: 'verify',
-      label: 'Verify This Request',
+      label: uiText('Verify This Request', '验证此请求'),
       icon: <FactCheckOutlinedIcon fontSize="small" color="info" />,
       onClick: method || path
         ? () => useDashboardStore.getState().setVerificationDraft({ method, path })
         : undefined,
-      disabledTooltip: 'No method or path to verify',
+      disabledTooltip: uiText('No method or path to verify', '缺少验证所需的方法或路径'),
     },
     {
       key: 'chaos',
-      label: 'Add Chaos For This Host/Path',
+      label: uiText('Add Chaos For This Host/Path', '为此主机或路径添加故障注入'),
       icon: <BoltIcon fontSize="small" color="warning" />,
       onClick: host || path
         ? () => useDashboardStore.getState().setChaosDraft({ host, path })
         : undefined,
-      disabledTooltip: 'No host or path for a chaos scope',
+      disabledTooltip: uiText('No host or path for a chaos scope', '缺少限定故障注入范围的主机或路径'),
     },
   ];
 }
@@ -779,7 +780,7 @@ function LogEntry({ entry, indent = false, divider = false, collapsible = false,
                 would nest the action buttons below inside a button (invalid ARIA). */}
             <IconButton
               size="small"
-              aria-label={expanded ? 'Collapse' : 'Expand'}
+              aria-label={expanded ? uiText('Collapse', '折叠') : uiText('Expand', '展开')}
               aria-expanded={expanded}
               onClick={(e) => { e.stopPropagation(); handleToggle(); }}
               sx={{ p: 0, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
@@ -791,12 +792,12 @@ function LogEntry({ entry, indent = false, divider = false, collapsible = false,
               component="span"
               sx={{ whiteSpace: 'pre', fontFamily: monospaceFontFamily }}
             >
-              {descriptionText(entry) || 'SYSTEM_MESSAGE'}
+              {descriptionText(entry) || uiText('SYSTEM_MESSAGE', '系统消息')}
             </Box>
             {graphql && <GraphqlOperationPill operation={graphql} />}
             {traceparent && <TraceparentPill info={traceparent} />}
             {showWhyButton && (
-              <Tooltip title="Analyze why this request didn't match">
+              <Tooltip title={uiText('Analyze why this request didn\'t match', '分析此请求未匹配的原因')}>
                 <IconButton
                   size="small"
                   sx={{ p: 0, ml: 0.5, '& .MuiSvgIcon-root': { fontSize: '0.9rem' } }}
@@ -810,7 +811,7 @@ function LogEntry({ entry, indent = false, divider = false, collapsible = false,
               </Tooltip>
             )}
             {showGenerateStubButton && (
-              <Tooltip title="Generate an expectation for this unmatched request">
+              <Tooltip title={uiText('Generate an expectation for this unmatched request', '为此未匹配的请求生成 Mock 规则')}>
                 <IconButton
                   size="small"
                   sx={{ p: 0, ml: 0.5, '& .MuiSvgIcon-root': { fontSize: '0.9rem' } }}
@@ -824,10 +825,10 @@ function LogEntry({ entry, indent = false, divider = false, collapsible = false,
               </Tooltip>
             )}
             {showSetBreakpointButton && (
-              <Tooltip title="Set a breakpoint on this request (method + path)">
+              <Tooltip title={uiText('Set a breakpoint on this request (method + path)', '为此请求设置断点（方法和路径）')}>
                 <IconButton
                   size="small"
-                  aria-label="Set breakpoint on this request"
+                  aria-label={uiText('Set breakpoint on this request', '为此请求设置断点')}
                   sx={{ p: 0, ml: 0.5, '& .MuiSvgIcon-root': { fontSize: '0.9rem' } }}
                   onClick={(e) => {
                     e.stopPropagation();

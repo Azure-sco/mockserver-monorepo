@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useMemo, useEffect, type ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -112,8 +113,8 @@ function linesError(text: string, separator: ':' | '='): string | undefined {
   const bad = ignoredKeyValueLines(text, separator);
   if (bad.length === 0) return undefined;
   const format = separator === ':' ? 'Name: value' : 'key=value';
-  const more = bad.length > 1 ? ` (and ${bad.length - 1} more)` : '';
-  return `"${bad[0]}" is not ${format}${more}`;
+  const more = bad.length > 1 ? uiText(` (and ${bad.length - 1} more)`, `（另有 ${bad.length - 1} 项）`) : '';
+  return uiText(`"${bad[0]}" is not ${format}${more}`, `“${bad[0]}”不符合 ${format} 格式${more}`);
 }
 
 interface RequestErrors { headers?: string; queryString?: string }
@@ -128,7 +129,7 @@ function responseErrors(form: ResponseForm): ResponseErrors {
   const both = form.statusCode.trim() !== '' && form.statusCodeRange.trim() !== '';
   return {
     headers: linesError(form.headers, ':'),
-    statusCodeRange: both ? 'Fill the status code or the status range, not both.' : statusRangeProblem(form.statusCodeRange) ?? undefined,
+    statusCodeRange: both ? uiText('Fill the status code or the status range, not both.', '状态码与状态码范围只能填写其中一项。') : statusRangeProblem(form.statusCodeRange) ?? undefined,
   };
 }
 
@@ -153,7 +154,7 @@ function ScopeField({ id, ariaLabel, form, onChange, onStatus, busy }: { id: str
   // `unsupportedFields` already has its own helper text inside the input, so only
   // the other refusals get a message here — never two messages for one mistake.
   const message = methodUnknown
-    ? `method:${parsed.scope.method} is not one of ${METHODS.filter(Boolean).join(', ')}.`
+    ? uiText(`method:${parsed.scope.method} is not one of ${METHODS.filter(Boolean).join(', ')}.`, `不支持 method:${parsed.scope.method}。可用方法：${METHODS.filter(Boolean).join(', ')}。`)
     : parsed.error ?? statusError;
 
   const apply = () => {
@@ -180,7 +181,7 @@ function ScopeField({ id, ariaLabel, form, onChange, onStatus, busy }: { id: str
           sx={{ ml: 0, flex: 1, minWidth: 240 }}
         />
         <Button size="small" variant="outlined" disabled={!applicable || busy} onClick={apply}>
-          Apply scope
+          {uiText('Apply scope', '应用筛选条件')}
         </Button>
       </Box>
       {message && (
@@ -203,24 +204,24 @@ function RequestFields({ scopeId, scopeLabel, form, onChange, onStatus, busy }: 
           displayEmpty
           value={form.method}
           onChange={(e) => onChange({ ...form, method: e.target.value })}
-          inputProps={{ 'aria-label': 'Method' }}
+          inputProps={{ 'aria-label': uiText('Method', '方法') }}
           sx={{ width: { xs: '100%', sm: 195 } }}
-          renderValue={(v) => (v ? String(v) : 'Any method')}
+          renderValue={(v) => (v ? String(v) : uiText('Any method', '任意方法'))}
         >
-          {METHODS.map((m) => <MenuItem key={m || 'any'} value={m}>{m || 'Any method'}</MenuItem>)}
+          {METHODS.map((m) => <MenuItem key={m || 'any'} value={m}>{m || uiText('Any method', '任意方法')}</MenuItem>)}
         </Select>
-        <TextField size="small" label="Path" placeholder="/api/orders" value={form.path}
+        <TextField size="small" label={uiText('Path', '路径')} placeholder="/api/orders" value={form.path}
           onChange={(e) => onChange({ ...form, path: e.target.value })} sx={{ flex: 1, minWidth: 160 }} />
       </Box>
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <TextField size="small" label="Headers (Name: value per line)" multiline minRows={1} maxRows={4}
+        <TextField size="small" label={uiText('Headers (Name: value per line)', '请求头（每行一项，格式为 Name: value）')} multiline minRows={1} maxRows={4}
           error={!!errors.headers} helperText={errors.headers}
           value={form.headers} onChange={(e) => onChange({ ...form, headers: e.target.value })} sx={{ flex: 1 }} />
-        <TextField size="small" label="Query (key=value per line)" multiline minRows={1} maxRows={4}
+        <TextField size="small" label={uiText('Query (key=value per line)', '查询参数（每行一项，格式为 key=value）')} multiline minRows={1} maxRows={4}
           error={!!errors.queryString} helperText={errors.queryString}
           value={form.queryString} onChange={(e) => onChange({ ...form, queryString: e.target.value })} sx={{ flex: 1 }} />
       </Box>
-      <TextField size="small" label="Body (substring/JSON match)" multiline minRows={1} maxRows={6}
+      <TextField size="small" label={uiText('Body (substring/JSON match)', '请求体（按子串或 JSON 匹配）')} multiline minRows={1} maxRows={6}
         value={form.body} onChange={(e) => onChange({ ...form, body: e.target.value })}
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: (theme) => theme.typography.body2.fontSize } } }} />
     </Box>
@@ -232,16 +233,16 @@ function ResponseFields({ form, onChange }: { form: ResponseForm; onChange: (f: 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-        <TextField size="small" label="Status code" placeholder="200" value={form.statusCode}
+        <TextField size="small" label={uiText('Status code', '状态码')} placeholder="200" value={form.statusCode}
           onChange={(e) => onChange({ ...form, statusCode: e.target.value })} sx={{ width: { xs: '100%', sm: 150 } }} />
-        <TextField size="small" label="Status range" placeholder="4XX or >= 400" value={form.statusCodeRange}
+        <TextField size="small" label={uiText('Status range', '状态码范围')} placeholder={uiText('4XX or >= 400', '4XX 或 >= 400')} value={form.statusCodeRange}
           error={!!errors.statusCodeRange} helperText={errors.statusCodeRange}
           onChange={(e) => onChange({ ...form, statusCodeRange: e.target.value })} sx={{ width: { xs: '100%', sm: 220 } }} />
       </Box>
-      <TextField size="small" label="Response headers (Name: value per line)" multiline minRows={1} maxRows={4}
+      <TextField size="small" label={uiText('Response headers (Name: value per line)', '响应头（每行一项，格式为 Name: value）')} multiline minRows={1} maxRows={4}
         error={!!errors.headers} helperText={errors.headers}
         value={form.headers} onChange={(e) => onChange({ ...form, headers: e.target.value })} sx={{ flex: 1 }} />
-      <TextField size="small" label="Response body (substring/JSON match)" multiline minRows={1} maxRows={6}
+      <TextField size="small" label={uiText('Response body (substring/JSON match)', '响应体（按子串或 JSON 匹配）')} multiline minRows={1} maxRows={6}
         value={form.body} onChange={(e) => onChange({ ...form, body: e.target.value })}
         slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: (theme) => theme.typography.body2.fontSize } } }} />
     </Box>
@@ -276,7 +277,7 @@ function MatcherSection({
         focusRipple
         sx={{ display: 'flex', alignItems: 'center', gap: 0.5, p: 0.5, borderRadius: 1, userSelect: 'none' }}
         aria-expanded={expanded}
-        aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
+        aria-label={expanded ? uiText(`Collapse ${title}`, `收起${title}`) : uiText(`Expand ${title}`, `展开${title}`)}
       >
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
@@ -301,7 +302,7 @@ function MatcherSection({
 function InvalidFormHint() {
   return (
     <Typography variant="caption" color="error" sx={{ ml: 'auto' }}>
-      Fix the fields marked in red to verify.
+      {uiText('Fix the fields marked in red to verify.', '请修正标红的字段后再验证。')}
     </Typography>
   );
 }
@@ -311,13 +312,13 @@ function ResultAlert({ result }: { result: VerifyResult | null }) {
   if (result.verified) {
     return (
       <Alert severity="success" icon={<CheckCircleIcon fontSize="inherit" />} sx={{ mt: 1.5 }}>
-        Verified — MockServer saw matching traffic the expected number of times.
+        {uiText('Verified — MockServer saw matching traffic the expected number of times.', '验证通过，符合条件的请求或响应达到了预期次数。')}
       </Alert>
     );
   }
   return (
     <Alert severity="error" sx={{ mt: 1.5 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Verification failed</Typography>
+      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{uiText('Verification failed', '验证失败')}</Typography>
       <Box component="pre" sx={{ whiteSpace: 'pre-wrap', fontFamily: monospaceFontFamily, fontSize: (theme) => theme.typography.subtitle2.fontSize, m: 0, mt: 0.5 }}>
         {result.failureMessage}
       </Box>
@@ -437,35 +438,31 @@ export default function VerificationView({ connectionParams }: { connectionParam
   return (
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>Verification</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{uiText('Verification', '请求与响应验证')}</Typography>
         <ToggleButtonGroup
           size="small" exclusive value={mode}
           onChange={(_, v: 'single' | 'sequence' | null) => { if (v) { setMode(v); setResult(null); } }}
           sx={{ ml: 1 }}
         >
-          <ToggleButton value="single">Single request</ToggleButton>
-          <ToggleButton value="sequence">Ordered sequence</ToggleButton>
+          <ToggleButton value="single">{uiText('Single request', '单项验证')}</ToggleButton>
+          <ToggleButton value="sequence">{uiText('Ordered sequence', '按顺序验证')}</ToggleButton>
         </ToggleButtonGroup>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        Assert against what MockServer has already seen. Both matchers are optional — fill the
-        request, the response, or both: a request matcher alone checks received requests; a
-        response matcher alone checks recorded responses for proxied/forwarded traffic (any
-        request); when both are given they must match on the same exchange. Pass means it happened
-        the expected number of times; fail shows the closest matches and the actual count.
+        {uiText('Assert against what MockServer has already seen. Both matchers are optional — fill the request, the response, or both: a request matcher alone checks received requests; a response matcher alone checks recorded responses for proxied/forwarded traffic (any request); when both are given they must match on the same exchange. Pass means it happened the expected number of times; fail shows the closest matches and the actual count.', '根据 MockServer 已记录的流量进行验证。请求和响应的匹配条件均为选填。只填请求条件时检查接收的请求，只填响应条件时检查代理或转发所记录的响应，同时填写则要求同一次交互满足两组条件。匹配次数符合预期即通过，失败时会显示最接近的匹配项及实际次数。')}
       </Typography>
 
       {mode === 'single' ? (
         <Paper variant="outlined" sx={{ p: 2 }}>
           <MatcherSection
-            title="Request matcher (optional)"
+            title={uiText('Request matcher (optional)', '请求匹配条件（选填）')}
             expanded={singleRequestExpanded}
             invalid={hasError(requestErrors(single))}
             onToggle={() => setSingleRequestExpanded(!singleRequestExpanded)}
           >
             <RequestFields
               scopeId="verify-scope-single"
-              scopeLabel="Quick scope"
+              scopeLabel={uiText('Quick scope', '快速筛选条件')}
               form={single}
               onChange={setSingle}
               onStatus={(status) => {
@@ -476,8 +473,8 @@ export default function VerificationView({ connectionParams }: { connectionParam
             />
           </MatcherSection>
           <MatcherSection
-            title="Response matcher (optional)"
-            caption="Match against responses recorded from proxied/forwarded traffic."
+            title={uiText('Response matcher (optional)', '响应匹配条件（选填）')}
+            caption={uiText('Match against responses recorded from proxied/forwarded traffic.', '匹配代理或转发流量中记录的响应。')}
             expanded={singleResponseExpanded}
             invalid={hasError(responseErrors(singleResponse))}
             onToggle={() => setSingleResponseExpanded(!singleResponseExpanded)}
@@ -485,50 +482,50 @@ export default function VerificationView({ connectionParams }: { connectionParam
             <ResponseFields form={singleResponse} onChange={setSingleResponse} />
           </MatcherSection>
           <Box sx={{ display: 'flex', gap: 1, mt: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-            <Typography variant="body2" color="text.secondary">Received</Typography>
+            <Typography variant="body2" color="text.secondary">{uiText('Received', '接收次数')}</Typography>
             <Select size="small" value={timesMode} onChange={(e) => setTimesMode(e.target.value as VerificationTimesMode)}
-              inputProps={{ 'aria-label': 'Times mode' }} sx={{ width: { xs: '100%', sm: 150 } }}>
-              <MenuItem value="atLeast">at least</MenuItem>
-              <MenuItem value="atMost">at most</MenuItem>
-              <MenuItem value="exactly">exactly</MenuItem>
-              <MenuItem value="between">between</MenuItem>
+              inputProps={{ 'aria-label': uiText('Times mode', '次数条件') }} sx={{ width: { xs: '100%', sm: 150 } }}>
+              <MenuItem value="atLeast">{uiText('at least', '至少')}</MenuItem>
+              <MenuItem value="atMost">{uiText('at most', '至多')}</MenuItem>
+              <MenuItem value="exactly">{uiText('exactly', '恰好')}</MenuItem>
+              <MenuItem value="between">{uiText('between', '介于')}</MenuItem>
             </Select>
-            <TextField size="small" type="number" label={timesMode === 'between' ? 'min' : 'times'} value={count}
+            <TextField size="small" type="number" label={timesMode === 'between' ? uiText('min', '最少') : uiText('times', '次数')} value={count}
               error={timesProblem?.field === 'count'} helperText={timesProblem?.field === 'count' ? timesProblem.message : undefined}
               onChange={(e) => setCount(Math.max(0, Number(e.target.value) || 0))} sx={{ width: timesProblem?.field === 'count' ? 150 : 90 }} />
             {timesMode === 'between' && (
               <>
-                <Typography variant="body2" color="text.secondary">and</Typography>
-                <TextField size="small" type="number" label="max" value={atMost}
+                <Typography variant="body2" color="text.secondary">{uiText('and', '至')}</Typography>
+                <TextField size="small" type="number" label={uiText('max', '最多')} value={atMost}
                   error={timesProblem?.field === 'atMost'} helperText={timesProblem?.field === 'atMost' ? timesProblem.message : undefined}
                   onChange={(e) => setAtMost(Math.max(0, Number(e.target.value) || 0))} sx={{ width: timesProblem?.field === 'atMost' ? 150 : 90 }} />
               </>
             )}
-            <Typography variant="body2" color="text.secondary">time(s)</Typography>
+            <Typography variant="body2" color="text.secondary">{uiText('time(s)', '次')}</Typography>
             {singleInvalid && <InvalidFormHint />}
             <Button variant="contained" size="small" disabled={busy || singleInvalid} onClick={verifySingle} sx={{ ml: singleInvalid ? 0 : 'auto' }}>
-              Verify
+              {uiText('Verify', '验证')}
             </Button>
           </Box>
         </Paper>
       ) : (
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            The requests must have been received in this order (other requests may occur in between).
+            {uiText('The requests must have been received in this order (other requests may occur in between).', 'MockServer 必须按此顺序收到请求，期间可以穿插其他请求。')}
           </Typography>
           {sequence.map((row, i) => (
             <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="caption" sx={{ mt: 1, width: 20 }}>{i + 1}.</Typography>
               <Box sx={{ flex: 1 }}>
                 <MatcherSection
-                  title="Request matcher (optional)"
+                  title={uiText('Request matcher (optional)', '请求匹配条件（选填）')}
                   expanded={seqRequestExpanded[i] ?? true}
                   invalid={hasError(requestErrors(row))}
                   onToggle={() => setSeqRequestExpanded(seqRequestExpanded.map((v, j) => j === i ? !v : v))}
                 >
                   <RequestFields
                     scopeId={`verify-scope-step-${i}`}
-                    scopeLabel={`Scope for step ${i + 1}`}
+                    scopeLabel={uiText(`Scope for step ${i + 1}`, `第 ${i + 1} 步的筛选条件`)}
                     form={row}
                     onChange={(f) => setSequence(sequence.map((r, j) => j === i ? f : r))}
                     onStatus={(status) => {
@@ -539,8 +536,8 @@ export default function VerificationView({ connectionParams }: { connectionParam
                   />
                 </MatcherSection>
                 <MatcherSection
-                  title="Response matcher (optional)"
-                  caption="Match against responses recorded from proxied/forwarded traffic."
+                  title={uiText('Response matcher (optional)', '响应匹配条件（选填）')}
+                  caption={uiText('Match against responses recorded from proxied/forwarded traffic.', '匹配代理或转发流量中记录的响应。')}
                   expanded={seqResponseExpanded[i] ?? false}
                   invalid={hasError(responseErrors(seqResponses[i] ?? emptyResponse()))}
                   onToggle={() => setSeqResponseExpanded(seqResponseExpanded.map((v, j) => j === i ? !v : v))}
@@ -548,7 +545,7 @@ export default function VerificationView({ connectionParams }: { connectionParam
                   <ResponseFields form={seqResponses[i] ?? emptyResponse()} onChange={(f) => setSeqResponses(seqResponses.map((r, j) => j === i ? f : r))} />
                 </MatcherSection>
               </Box>
-              <IconButton size="small" aria-label="Remove step" disabled={sequence.length <= 1}
+              <IconButton size="small" aria-label={uiText('Remove step', '移除步骤')} disabled={sequence.length <= 1}
                 onClick={() => removeSequenceStep(i)}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -556,11 +553,11 @@ export default function VerificationView({ connectionParams }: { connectionParam
           ))}
           <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
             <Button size="small" startIcon={<AddIcon />} onClick={addSequenceStep}>
-              Add step
+              {uiText('Add step', '添加步骤')}
             </Button>
             {sequenceInvalid && <InvalidFormHint />}
             <Button variant="contained" size="small" disabled={busy || sequenceInvalid} onClick={verifySeq} sx={{ ml: sequenceInvalid ? 0 : 'auto' }}>
-              Verify sequence
+              {uiText('Verify sequence', '验证顺序')}
             </Button>
           </Box>
         </Paper>

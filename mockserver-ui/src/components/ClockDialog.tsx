@@ -17,6 +17,7 @@ import { getClock, freezeClock, advanceClock, resetClock, type ClockStatus } fro
 import { humanizeError, type HumanError } from '../lib/errorMessage';
 import { monospaceFontFamily } from '../theme';
 import HumanErrorAlert from './HumanErrorAlert';
+import { uiText } from '../lib/dashboardLocale';
 
 const UNIT_MS: Record<string, number> = { ms: 1, s: 1000, m: 60000, h: 3600000 };
 
@@ -80,50 +81,49 @@ export default function ClockDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth fullScreen={fullScreen} aria-labelledby="clock-dialog-title">
-      <DialogTitle id="clock-dialog-title">Server Clock</DialogTitle>
+      <DialogTitle id="clock-dialog-title">{uiText('Server Clock', '服务器时钟')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Freeze or advance the server clock to drive time-to-live expiry and scenario timers
-          deterministically. Affects the whole server.
+          {uiText('Freeze or advance the server clock to drive time-to-live expiry and scenario timers deterministically. Affects the whole server.', '冻结或推进服务器时钟，以可预测的方式触发有效期到期和场景计时。此操作会影响整个服务器。')}
         </Typography>
         {error && <HumanErrorAlert error={error} sx={{ mb: 1.5 }} />}
         {status && (
           <Box sx={{ mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="body2" sx={{ fontFamily: monospaceFontFamily }}>{status.currentInstant || '—'}</Typography>
-              <Chip size="small" label={status.frozen ? 'frozen' : 'live'} color={status.frozen ? 'warning' : 'success'} variant="outlined" />
+              <Chip size="small" label={status.frozen ? uiText('frozen', '已冻结') : uiText('live', '实时')} color={status.frozen ? 'warning' : 'success'} variant="outlined" />
             </Box>
           </Box>
         )}
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
           <Button size="small" variant="outlined" disabled={busy} onClick={() => void run(() => freezeClock(connectionParams))}>
-            Freeze now
+            {uiText('Freeze now', '立即冻结')}
           </Button>
           <Button size="small" variant="outlined" disabled={busy} onClick={() => void run(() => resetClock(connectionParams))}>
-            Reset to live
+            {uiText('Reset to live', '恢复实时时钟')}
           </Button>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mt: 1.5 }}>
-          <Typography variant="body2" color="text.secondary">Advance by</Typography>
+          <Typography variant="body2" color="text.secondary">{uiText('Advance by', '推进时长')}</Typography>
           <TextField size="small" type="number" value={amount}
             onChange={(e) => setAmount(Math.max(1, Number(e.target.value) || 1))} sx={{ width: 90 }} />
           <Select size="small" value={unit} onChange={(e) => setUnit(e.target.value as 'ms' | 's' | 'm' | 'h')} sx={{ width: 80 }}>
-            <MenuItem value="ms">ms</MenuItem>
-            <MenuItem value="s">sec</MenuItem>
-            <MenuItem value="m">min</MenuItem>
-            <MenuItem value="h">hr</MenuItem>
+            <MenuItem value="ms">{uiText('ms', '毫秒')}</MenuItem>
+            <MenuItem value="s">{uiText('sec', '秒')}</MenuItem>
+            <MenuItem value="m">{uiText('min', '分钟')}</MenuItem>
+            <MenuItem value="h">{uiText('hr', '小时')}</MenuItem>
           </Select>
           <Button size="small" variant="contained" disabled={busy}
             onClick={() => void run(() => advanceClock(connectionParams, amount * UNIT_MS[unit]!))}>
-            Advance
+            {uiText('Advance', '推进')}
           </Button>
         </Box>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
-          Advancing only takes effect while the clock is frozen — Freeze first, then Advance.
+          {uiText('Advancing only takes effect while the clock is frozen — Freeze first, then Advance.', '只有在时钟冻结时才能推进时间。请先冻结，再推进。')}
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{uiText('Close', '关闭')}</Button>
       </DialogActions>
     </Dialog>
   );

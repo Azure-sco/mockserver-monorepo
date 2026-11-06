@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -46,8 +47,21 @@ const EVENT_LOG_RING_CAPACITY_METRIC = 'mock_server_event_log_ring_capacity';
 // silently drops a future fault type.
 const CHAOS_FAULT_ORDER = ['drop', 'error', 'latency', 'truncate', 'malformed', 'slow', 'quota'];
 
+const CHAOS_FAULT_LABELS = new Map<string, string>([
+  ['drop', '断开连接'],
+  ['error', '错误'],
+  ['latency', '延迟'],
+  ['truncate', '截断'],
+  ['malformed', '畸形响应'],
+  ['slow', '慢速响应'],
+  ['quota', '配额限制'],
+]);
+
+const METRICS_STATUS_LABELS = { loading: '正在加载', disabled: '已关闭', error: '异常' };
+
 function chaosFaultLabel(faultType: string): string {
-  return faultType.charAt(0).toUpperCase() + faultType.slice(1);
+  const english = faultType.charAt(0).toUpperCase() + faultType.slice(1);
+  return uiText(english, CHAOS_FAULT_LABELS.get(faultType) ?? english);
 }
 
 /** Converts e.g. "RESPONSE_TEMPLATE" to "Response template". */
@@ -72,10 +86,10 @@ interface MetricsViewProps {
 // The server's received counter counts every request, including control-plane
 // calls such as this view's own 3 s scrape, so the label says so.
 const SUMMARY: { name: string; label: string }[] = [
-  { name: 'requests_received_count', label: 'All requests received' },
-  { name: 'response_expectations_matched_count', label: 'Matched' },
-  { name: 'expectations_not_matched_count', label: 'Not matched' },
-  { name: 'forward_expectations_matched_count', label: 'Forwarded' },
+  { name: 'requests_received_count', label: uiText('All requests received', '接收请求总数') },
+  { name: 'response_expectations_matched_count', label: uiText('Matched', '已匹配') },
+  { name: 'expectations_not_matched_count', label: uiText('Not matched', '未匹配') },
+  { name: 'forward_expectations_matched_count', label: uiText('Forwarded', '已转发') },
 ];
 
 function prettyActionName(metric: string): string {
@@ -126,7 +140,7 @@ function CapacityChart({
   return (
     <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
       <Typography variant="caption" color="text.secondary">
-        {`${title}${bounded ? '' : ' (no limit set)'}`}
+        {`${title}${bounded ? '' : uiText(' (no limit set)', '（未设上限）')}`}
       </Typography>
       <MetricsLineChart
         timestamps={timestamps}
@@ -135,10 +149,10 @@ function CapacityChart({
         series={
           bounded
             ? [
-                { data: gaugeSeries(history, valueMetric), label: 'used' },
+                { data: gaugeSeries(history, valueMetric), label: uiText('used', '已使用') },
                 { data: gaugeSeries(history, budgetMetric), label: budgetLabel },
               ]
-            : [{ data: gaugeSeries(history, valueMetric), label: 'used' }]
+            : [{ data: gaugeSeries(history, valueMetric), label: uiText('used', '已使用') }]
         }
       />
     </Paper>
@@ -270,11 +284,11 @@ export default function MetricsView({ connectionParams }: MetricsViewProps) {
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Metrics
+          {uiText('Metrics', '运行指标')}
         </Typography>
         <Chip
           size="small"
-          label={status === 'ok' ? 'live' : status}
+          label={status === 'ok' ? uiText('live', '实时') : uiText(status, METRICS_STATUS_LABELS[status])}
           color={status === 'ok' ? 'success' : status === 'disabled' ? 'default' : status === 'error' ? 'error' : 'warning'}
           variant="outlined"
         />
@@ -282,11 +296,11 @@ export default function MetricsView({ connectionParams }: MetricsViewProps) {
         <Box sx={{ flex: 1 }} />
         {latest && (
           <Typography variant="caption" color="text.secondary">
-            updated {new Date(latest.at).toLocaleTimeString()} · every {Math.round(intervalMs / 1000)}s
+            {uiText('updated ', '更新于 ')}{new Date(latest.at).toLocaleTimeString()}{uiText(' · every ', '· 每 ')}{Math.round(intervalMs / 1000)}{uiText('s', '秒刷新')}
           </Typography>
         )}
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh metrics">
+        <Tooltip title={uiText('Refresh now', '立即刷新')}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText('Refresh metrics', '刷新指标')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -294,21 +308,23 @@ export default function MetricsView({ connectionParams }: MetricsViewProps) {
 
       {status === 'disabled' && (
         <Alert severity="info" sx={{ mb: 1.5 }}>
-          <AlertTitle>Metrics are disabled</AlertTitle>
-          Start MockServer with metrics enabled to view live metrics here:
+          <AlertTitle>{uiText('Metrics are disabled', '指标采集已关闭')}</AlertTitle>
+          {uiText('Start MockServer with metrics enabled to view live metrics here:', '启动 MockServer 时启用指标采集，即可在此查看实时指标：')}
           <Box component="pre" sx={{ mt: 1, mb: 0, p: 1, bgcolor: 'action.hover', borderRadius: 1, typography: 'subtitle2', fontWeight: 400, fontFamily: monospaceFontFamily, overflow: 'auto' }}>
-{`-Dmockserver.metricsEnabled=true
+{uiText(`-Dmockserver.metricsEnabled=true
 # or environment variable:
-MOCKSERVER_METRICS_ENABLED=true`}
+MOCKSERVER_METRICS_ENABLED=true`, `-Dmockserver.metricsEnabled=true
+# 或设置环境变量：
+MOCKSERVER_METRICS_ENABLED=true`)}
           </Box>
         </Alert>
       )}
 
       {status === 'error' && (
         <Alert severity="error" sx={{ mb: 1.5 }} action={
-          <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry"><RefreshIcon fontSize="small" /></IconButton>
+          <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText('Retry', '重试')}><RefreshIcon fontSize="small" /></IconButton>
         }>
-          <AlertTitle>Could not load metrics</AlertTitle>
+          <AlertTitle>{uiText('Could not load metrics', '无法加载指标')}</AlertTitle>
           {error}
         </Alert>
       )}
@@ -382,7 +398,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                 }}
               >
                 <Typography variant="caption" color="text.secondary">
-                  latency {label}
+                  {uiText('latency ', '延迟 ')}{label}
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2, mt: 0.25 }}>
                   {text}
@@ -394,14 +410,14 @@ MOCKSERVER_METRICS_ENABLED=true`}
           {/* Throughput */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-              <Typography variant="caption" color="text.secondary">Throughput (derived, all requests)</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>{rps.toFixed(1)} req/s</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Throughput (derived, all requests)', '吞吐量（根据全部请求推算）')}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{rps.toFixed(1)}{uiText(' req/s', '请求/秒')}</Typography>
             </Box>
             <MetricsLineChart
               // One rate per interval between scrapes, stamped at the interval's end.
               timestamps={timestamps.slice(1)}
               height={180}
-              series={[{ data: ratePerSecond(history, 'requests_received_count'), label: 'req/s' }]}
+              series={[{ data: ratePerSecond(history, 'requests_received_count'), label: uiText('req/s', '请求/秒') }]}
               valueFormatter={(v) => `${v.toFixed(1)}/s`}
             />
           </Paper>
@@ -409,7 +425,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
           {/* Request latency (only when the server exposes the duration histogram) */}
           {latencyEnabled && latest && (
             <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-              <Typography variant="caption" color="text.secondary">Request latency — cumulative since server start</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Request latency — cumulative since server start', '请求延迟（服务启动以来累计）')}</Typography>
               <Box sx={{ mt: 1 }}>
                 <MetricsLineChart
                   timestamps={timestamps}
@@ -420,7 +436,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                       const seconds = histogramQuantile(snapshot.samples, LATENCY_METRIC, 0.95);
                       return seconds == null ? 0 : seconds * 1000;
                     }),
-                    label: 'p95 ms (cumulative)',
+                    label: uiText('p95 ms (cumulative)', 'p95 毫秒（累计）'),
                   }]}
                 />
               </Box>
@@ -430,7 +446,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
           {/* HTTP Chaos Faults (only when a chaos metric is present and has non-zero data) */}
           {chaosEnabled && chaosHasData && (
             <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-              <Typography variant="caption" color="text.secondary">HTTP Chaos Faults</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('HTTP Chaos Faults', 'HTTP 混沌故障')}</Typography>
               {chaosFaultTotals.length > 0 && (
                 <Box sx={{ display: 'flex', gap: 3, mt: 0.5, flexWrap: 'wrap' }}>
                   {chaosFaultTotals.map(({ faultType, value }) => (
@@ -438,14 +454,14 @@ MOCKSERVER_METRICS_ENABLED=true`}
                       <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                         {value.toLocaleString()}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">{faultType} faults</Typography>
+                      <Typography variant="caption" color="text.secondary">{uiText(faultType, CHAOS_FAULT_LABELS.get(faultType) ?? faultType)}{uiText(' faults', '故障')}</Typography>
                     </Box>
                   ))}
                 </Box>
               )}
               {chaosFaultTypes.length > 0 && (
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="text.secondary">Faults injected by type (cumulative)</Typography>
+                  <Typography variant="caption" color="text.secondary">{uiText('Faults injected by type (cumulative)', '按类型统计注入的故障（累计）')}</Typography>
                   <MetricsLineChart
                     timestamps={timestamps}
                     height={180}
@@ -459,7 +475,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
               )}
               {activeServiceChaosEnabled && (
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="text.secondary">Active service-scoped chaos by type</Typography>
+                  <Typography variant="caption" color="text.secondary">{uiText('Active service-scoped chaos by type', '按类型统计生效的服务级混沌规则')}</Typography>
                   <MetricsLineChart
                     timestamps={timestamps}
                     height={180}
@@ -473,14 +489,14 @@ MOCKSERVER_METRICS_ENABLED=true`}
               )}
               {(autoHaltEnabled || llmCostBudgetEnabled) && (
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Circuit Breakers</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{uiText('Circuit Breakers', '熔断保护')}</Typography>
                   {autoHaltEnabled && (
                     <Box sx={{ mt: 0.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary">Chaos auto-halt</Typography>
+                        <Typography variant="caption" color="text.secondary">{uiText('Chaos auto-halt', '混沌测试自动停止')}</Typography>
                         <Chip
                           size="small"
-                          label={autoHaltTotal > 0 ? `${autoHaltTotal} halt${autoHaltTotal === 1 ? '' : 's'}` : 'no halts'}
+                          label={autoHaltTotal > 0 ? uiText(`${autoHaltTotal} halt${autoHaltTotal === 1 ? '' : 's'}`, `已自动停止 ${autoHaltTotal} 次`) : uiText('no halts', '未自动停止')}
                           color={autoHaltTotal > 0 ? 'error' : 'success'}
                           variant="outlined"
                         />
@@ -491,7 +507,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                         valueFormatter={(v) => Math.round(v).toLocaleString()}
                         series={[{
                           data: gaugeSeries(history, AUTO_HALT_METRIC),
-                          label: 'auto-halt count',
+                          label: uiText('auto-halt count', '自动停止次数'),
                         }]}
                       />
                     </Box>
@@ -499,16 +515,16 @@ MOCKSERVER_METRICS_ENABLED=true`}
                   {llmCostBudgetEnabled && (
                     <Box sx={{ mt: 0.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-                        <Typography variant="caption" color="text.secondary">LLM cost-budget</Typography>
+                        <Typography variant="caption" color="text.secondary">{uiText('LLM cost-budget', 'LLM 费用预算')}</Typography>
                         <Chip
                           size="small"
-                          label={llmCostBudgetTrippedTotal > 0 ? `${llmCostBudgetTrippedTotal} trip${llmCostBudgetTrippedTotal === 1 ? '' : 's'}` : 'within budget'}
+                          label={llmCostBudgetTrippedTotal > 0 ? uiText(`${llmCostBudgetTrippedTotal} trip${llmCostBudgetTrippedTotal === 1 ? '' : 's'}`, `已触发 ${llmCostBudgetTrippedTotal} 次`) : uiText('within budget', '预算内')}
                           color={llmCostBudgetTrippedTotal > 0 ? 'error' : 'success'}
                           variant="outlined"
                         />
                         {llmCostUsdTotal > 0 && (
                           <Typography variant="caption" color="text.secondary">
-                            ${llmCostUsdTotal.toFixed(4)} spent
+                            ${llmCostUsdTotal.toFixed(4)}{uiText(' spent', '已花费')}
                           </Typography>
                         )}
                       </Box>
@@ -518,7 +534,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                         valueFormatter={(v) => Math.round(v).toLocaleString()}
                         series={[{
                           data: gaugeSeries(history, LLM_COST_BUDGET_TRIPPED_METRIC),
-                          label: 'budget trips',
+                          label: uiText('budget trips', '超预算次数'),
                         }]}
                       />
                     </Box>
@@ -530,7 +546,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
 
           {/* HTTP request activity over time — the four request counters as separate lines */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">HTTP request activity (cumulative)</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText('HTTP request activity (cumulative)', 'HTTP 请求活动（累计）')}</Typography>
             <MetricsLineChart
               timestamps={timestamps}
               height={200}
@@ -543,19 +559,19 @@ MOCKSERVER_METRICS_ENABLED=true`}
               request counts (different semantics/units). Only shown when async metrics have data. */}
           {asyncEnabled && asyncHasData && (
             <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-              <Typography variant="caption" color="text.secondary">Async message activity (cumulative)</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Async message activity (cumulative)', '异步消息活动（累计）')}</Typography>
               <Box sx={{ display: 'flex', gap: 3, mt: 0.5, flexWrap: 'wrap' }}>
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                     {asyncPublishedTotal.toLocaleString()}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">published</Typography>
+                  <Typography variant="caption" color="text.secondary">{uiText('published', '已发布')}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                     {asyncConsumedTotal.toLocaleString()}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">consumed</Typography>
+                  <Typography variant="caption" color="text.secondary">{uiText('consumed', '已消费')}</Typography>
                 </Box>
               </Box>
               <Box sx={{ mt: 1 }}>
@@ -564,8 +580,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
                   height={200}
                   valueFormatter={(v) => Math.round(v).toLocaleString()}
                   series={[
-                    { data: gaugeSeriesSum(history, ASYNC_PUBLISHED_METRIC), label: 'Published' },
-                    { data: gaugeSeriesSum(history, ASYNC_CONSUMED_METRIC), label: 'Consumed' },
+                    { data: gaugeSeriesSum(history, ASYNC_PUBLISHED_METRIC), label: uiText('Published', '已发布') },
+                    { data: gaugeSeriesSum(history, ASYNC_CONSUMED_METRIC), label: uiText('Consumed', '已消费') },
                   ]}
                 />
               </Box>
@@ -574,10 +590,10 @@ MOCKSERVER_METRICS_ENABLED=true`}
 
           {/* Actions executed over time — one line per action type */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">Actions executed</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText('Actions executed', '已执行的动作')}</Typography>
             {maxAction === 0 ? (
               <Typography variant="body2" sx={{ mt: 0.5 }} color="text.secondary">
-                No actions executed yet.
+                {uiText('No actions executed yet.', '尚未执行任何动作。')}
               </Typography>
             ) : (
               <MetricsLineChart
@@ -596,10 +612,10 @@ MOCKSERVER_METRICS_ENABLED=true`}
 
           {/* Expectations by type — one line per action_type label (gauge) */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">Expectations by type</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText('Expectations by type', '按类型统计 Mock 规则')}</Typography>
             {!expectationsByTypeEnabled ? (
               <Typography variant="body2" sx={{ mt: 0.5 }} color="text.secondary">
-                No expectations configured.
+                {uiText('No expectations configured.', '尚未配置 Mock 规则。')}
               </Typography>
             ) : (
               <MetricsLineChart
@@ -616,10 +632,10 @@ MOCKSERVER_METRICS_ENABLED=true`}
 
           {/* MCP tool calls — one line per tool label (counter, shown cumulative) */}
           <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">MCP tool calls</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText('MCP tool calls', 'MCP 工具调用')}</Typography>
             {!mcpToolCallsEnabled ? (
               <Typography variant="body2" sx={{ mt: 0.5 }} color="text.secondary">
-                No MCP tool calls recorded.
+                {uiText('No MCP tool calls recorded.', '暂无 MCP 工具调用记录。')}
               </Typography>
             ) : (
               <MetricsLineChart
@@ -640,8 +656,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
           {eventLogEnabled && (
             <>
               <CapacityChart
-                title="Event log — retained memory"
-                budgetLabel="budget"
+                title={uiText('Event log — retained memory', '事件日志保留内存')}
+                budgetLabel={uiText('budget', '预算')}
                 history={history}
                 timestamps={timestamps}
                 valueMetric={EVENT_LOG_RETAINED_BYTES_METRIC}
@@ -650,8 +666,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
                 valueFormatter={formatBytes}
               />
               <CapacityChart
-                title="Event log — retained entries"
-                budgetLabel="limit"
+                title={uiText('Event log — retained entries', '事件日志保留条目')}
+                budgetLabel={uiText('limit', '上限')}
                 history={history}
                 timestamps={timestamps}
                 valueMetric={EVENT_LOG_RETAINED_ENTRIES_METRIC}
@@ -660,8 +676,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
                 valueFormatter={countFormatter}
               />
               <CapacityChart
-                title="Event log — in-flight memory"
-                budgetLabel="budget"
+                title={uiText('Event log — in-flight memory', '事件日志处理中内存')}
+                budgetLabel={uiText('budget', '预算')}
                 history={history}
                 timestamps={timestamps}
                 valueMetric={EVENT_LOG_IN_FLIGHT_BYTES_METRIC}
@@ -670,8 +686,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
                 valueFormatter={formatBytes}
               />
               <CapacityChart
-                title="Event log — ring buffer"
-                budgetLabel="capacity"
+                title={uiText('Event log — ring buffer', '事件日志环形缓冲区')}
+                budgetLabel={uiText('capacity', '容量')}
                 history={history}
                 timestamps={timestamps}
                 valueMetric={EVENT_LOG_RING_OCCUPANCY_METRIC}
@@ -683,8 +699,8 @@ MOCKSERVER_METRICS_ENABLED=true`}
           )}
           {expectationBytesEnabled && (
             <CapacityChart
-              title="Expectation store memory"
-              budgetLabel="budget"
+              title={uiText('Expectation store memory', 'Mock 规则存储内存')}
+              budgetLabel={uiText('budget', '预算')}
               history={history}
               timestamps={timestamps}
               valueMetric={EXPECTATIONS_BYTES_METRIC}
@@ -696,20 +712,20 @@ MOCKSERVER_METRICS_ENABLED=true`}
 
           {acceptQueueEnabled && (
             <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
-              <Typography variant="caption" color="text.secondary">Accept queue backlog</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Accept queue backlog', '等待接入的连接队列')}</Typography>
               <Box sx={{ display: 'flex', gap: 3, mt: 0.5, flexWrap: 'wrap' }}>
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                     {acceptQueueConfigured.toLocaleString()}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">configured (soBacklog)</Typography>
+                  <Typography variant="caption" color="text.secondary">{uiText('configured (soBacklog)', '配置值（soBacklog）')}</Typography>
                 </Box>
                 {acceptQueueEffectiveEnabled && (
                   <Box>
                     <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                       {acceptQueueEffective.toLocaleString()}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">effective (kernel-capped)</Typography>
+                    <Typography variant="caption" color="text.secondary">{uiText('effective (kernel-capped)', '生效值（受内核上限约束）')}</Typography>
                   </Box>
                 )}
               </Box>
@@ -720,26 +736,26 @@ MOCKSERVER_METRICS_ENABLED=true`}
           {jvmEnabled && latest && (
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 1 }}>
               <Paper variant="outlined" sx={{ p: 1.25 }}>
-                <Typography variant="caption" color="text.secondary">JVM heap memory</Typography>
+                <Typography variant="caption" color="text.secondary">{uiText('JVM heap memory', 'JVM 堆内存')}</Typography>
                 <MetricsLineChart
                   timestamps={timestamps}
                   height={200}
                   valueFormatter={formatBytes}
                   series={[
-                    { data: gaugeSeriesByLabel(history, 'jvm_memory_used_bytes', 'area', 'heap'), label: 'used' },
-                    { data: gaugeSeriesByLabel(history, 'jvm_memory_committed_bytes', 'area', 'heap'), label: 'committed' },
+                    { data: gaugeSeriesByLabel(history, 'jvm_memory_used_bytes', 'area', 'heap'), label: uiText('used', '已使用') },
+                    { data: gaugeSeriesByLabel(history, 'jvm_memory_committed_bytes', 'area', 'heap'), label: uiText('committed', '已提交') },
                   ]}
                 />
               </Paper>
               <Paper variant="outlined" sx={{ p: 1.25 }}>
-                <Typography variant="caption" color="text.secondary">Threads &amp; GC</Typography>
+                <Typography variant="caption" color="text.secondary">{uiText('Threads & GC', '线程和垃圾回收')}</Typography>
                 <Box sx={{ display: 'flex', gap: 3, mt: 0.5, flexWrap: 'wrap' }}>
                   <Box>
                     <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                       {metricValue(latest.samples, 'jvm_threads_current').toLocaleString()}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      threads ({metricValue(latest.samples, 'jvm_threads_daemon')} daemon)
+                      {uiText('threads (', '线程（')}{metricValue(latest.samples, 'jvm_threads_daemon')}{uiText(' daemon)', '个守护线程）')}
                     </Typography>
                   </Box>
                   <Box>
@@ -747,7 +763,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                       {metricValue(latest.samples, 'jvm_gc_collection_count').toLocaleString()}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      GC collections ({metricValue(latest.samples, 'jvm_gc_collection_seconds_sum').toFixed(1)}s)
+                      {uiText('GC collections (', '垃圾回收次数（')}{metricValue(latest.samples, 'jvm_gc_collection_seconds_sum').toFixed(1)}{uiText('s)', '秒）')}
                     </Typography>
                   </Box>
                 </Box>
@@ -755,7 +771,7 @@ MOCKSERVER_METRICS_ENABLED=true`}
                   <MetricsLineChart
                     timestamps={timestamps}
                     height={110}
-                    series={[{ data: gaugeSeries(history, 'jvm_threads_current'), label: 'threads' }]}
+                    series={[{ data: gaugeSeries(history, 'jvm_threads_current'), label: uiText('threads', '线程数') }]}
                   />
                 </Box>
               </Paper>

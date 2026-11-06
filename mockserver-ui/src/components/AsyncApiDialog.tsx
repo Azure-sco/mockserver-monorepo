@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useEffect, useCallback } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -63,7 +64,7 @@ export default function AsyncApiDialog({
   }, [open, connectionParams, refreshTick]);
 
   const submit = useCallback(async () => {
-    if (!spec.trim()) { setError('Paste an AsyncAPI spec (JSON or YAML).'); return; }
+    if (!spec.trim()) { setError(uiText('Paste an AsyncAPI spec (JSON or YAML).', "请粘贴 AsyncAPI 规范（JSON 或 YAML）。")); return; }
     setBusy(true);
     setError(null);
     setResult(null);
@@ -84,7 +85,7 @@ export default function AsyncApiDialog({
   }, [connectionParams, spec, httpMode]);
 
   const verify = useCallback(async () => {
-    if (!verifyBody.trim()) { setError('Paste a verification request (JSON).'); return; }
+    if (!verifyBody.trim()) { setError(uiText('Paste a verification request (JSON).', "请粘贴验证请求（JSON）。")); return; }
     setVerifyBusy(true);
     setError(null);
     setVerifyResult(null);
@@ -110,24 +111,23 @@ export default function AsyncApiDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="asyncapi-dialog-title">
-      <DialogTitle id="asyncapi-dialog-title">AsyncAPI Broker Mock</DialogTitle>
+      <DialogTitle id="asyncapi-dialog-title">{uiText("AsyncAPI Broker Mock", "AsyncAPI 消息代理 Mock")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Register an AsyncAPI spec to mock a message broker — paste the spec (JSON or YAML), or a
-          {' '}<code>{'{ spec, brokerConfig }'}</code> JSON object. Tick
-          {' '}<strong>Generate HTTP expectations</strong> to instead register HTTP expectations
-          derived from the spec's channels.
+          {uiText("Register an AsyncAPI spec to mock a message broker — paste the spec (JSON or YAML), or a", "注册 AsyncAPI 规范以模拟消息代理。可粘贴 JSON 或 YAML 规范，也可以填写")}
+          {' '}<code>{'{ spec, brokerConfig }'}</code>{uiText(" JSON object. Tick", " 格式的 JSON 对象。勾选")}
+          {' '}<strong>{uiText("Generate HTTP expectations", "生成 HTTP 规则")}</strong>{uiText(" to instead register HTTP expectations derived from the spec's channels.", " 可根据规范中的通道注册 HTTP Mock 规则。")}
         </Typography>
         {unavailable && (
           <Alert severity="warning" sx={{ mb: 1.5 }}>
             {/* the server's message says how to enable the module; fall back only if it sent none */}
-            {error ?? "The AsyncAPI module (mockserver-async) is not on this server's classpath, so broker mocking is unavailable."}
+            {error ?? uiText("The AsyncAPI module (mockserver-async) is not on this server's classpath, so broker mocking is unavailable.", "此服务器的类路径中没有 AsyncAPI 模块，因此无法模拟消息代理。")}
           </Alert>
         )}
         {error && !unavailable && <Alert severity="error" sx={{ mb: 1.5 }}>{error}</Alert>}
         {result && (
           <Alert severity="success" sx={{ mb: 1.5 }}>
-            AsyncAPI spec loaded.
+            {uiText("AsyncAPI spec loaded.", "已加载 AsyncAPI 规范。")}
             <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5 }}>
               {JSON.stringify(result, null, 2)}
             </Box>
@@ -136,15 +136,15 @@ export default function AsyncApiDialog({
         {httpResult && (
           <Alert severity="success" sx={{ mb: 1.5 }}>
             {httpResult.length > 0
-              ? `Generated ${httpResult.length} HTTP expectation${httpResult.length === 1 ? '' : 's'}.`
-              : 'Generated HTTP expectations.'}
+              ? uiText(`Generated ${httpResult.length} HTTP expectation${httpResult.length === 1 ? '' : 's'}.`, `已生成 ${httpResult.length} 条 HTTP 规则。`)
+              : uiText('Generated HTTP expectations.', "已生成 HTTP 规则。")}
             <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5, maxHeight: 220, overflow: 'auto' }}>
               {JSON.stringify(httpResult, null, 2)}
             </Box>
           </Alert>
         )}
         <TextField
-          label="AsyncAPI spec (JSON / YAML)"
+          label={uiText("AsyncAPI spec (JSON / YAML)", "AsyncAPI 规范（JSON / YAML）")}
           multiline minRows={10} maxRows={24} fullWidth disabled={unavailable}
           value={spec} onChange={(e) => setSpec(e.target.value)}
           placeholder={'asyncapi: 3.0.0\ninfo:\n  title: Orders\n  version: 1.0.0\nchannels:\n  orders:\n    address: orders'}
@@ -152,7 +152,7 @@ export default function AsyncApiDialog({
         />
         {status && Object.keys(status).length > 0 && (
           <Box sx={{ mt: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">Current status</Typography>
+            <Typography variant="caption" color="text.secondary">{uiText("Current status", "当前状态")}</Typography>
             <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5, maxHeight: 180, overflow: 'auto' }}>
               {JSON.stringify(status, null, 2)}
             </Box>
@@ -160,26 +160,26 @@ export default function AsyncApiDialog({
         )}
 
         <Divider sx={{ my: 2 }} />
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Verify Messages</Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{uiText("Verify Messages", "验证消息")}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Check observed broker messages against a verification request.
+          {uiText("Check observed broker messages against a verification request.", "检查接收到的消息是否符合验证请求。")}
         </Typography>
         <TextField
-          label="Verification request (JSON)"
+          label={uiText("Verification request (JSON)", "验证请求（JSON）")}
           multiline minRows={5} maxRows={16} fullWidth disabled={unavailable}
           value={verifyBody} onChange={(e) => setVerifyBody(e.target.value)}
           placeholder={'{\n  "channel": "orders",\n  "count": { "atLeast": 1 }\n}'}
-          helperText='Count constraints go under "count": atLeast, atMost or exactly. Optional filters: payloadSubstring, or payloadJsonPath with expectedValue.'
+          helperText={uiText("Count constraints go under \"count\": atLeast, atMost or exactly. Optional filters: payloadSubstring, or payloadJsonPath with expectedValue.", "在 \"count\" 中填写数量条件，可用 atLeast、atMost 或 exactly。可选筛选条件为 payloadSubstring，或搭配 expectedValue 的 payloadJsonPath。")}
           slotProps={{ input: { sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
         />
         {verifyResult && (
           <Alert severity={verifyResult.verified ? 'success' : 'warning'} sx={{ mt: 1 }}>
-            {verifyResult.verified ? 'Verified — the observed messages satisfy the request.' : (verifyResult.message || 'Not verified.')}
+            {verifyResult.verified ? uiText('Verified — the observed messages satisfy the request.', "验证通过，接收到的消息符合要求。") : (verifyResult.message || uiText('Not verified.', "验证未通过。"))}
           </Alert>
         )}
         <Box sx={{ mt: 1 }}>
           <Button variant="outlined" size="small" disabled={verifyBusy || unavailable || !verifyBody.trim()} onClick={() => void verify()}>
-            {verifyBusy ? 'Verifying…' : 'Verify messages'}
+            {verifyBusy ? uiText('Verifying…', "正在验证…") : uiText('Verify messages', "验证消息")}
           </Button>
         </Box>
       </DialogContent>
@@ -194,12 +194,12 @@ export default function AsyncApiDialog({
               onChange={(e) => setHttpMode(e.target.checked)}
             />
           }
-          label={<Typography variant="body2">Generate HTTP expectations</Typography>}
+          label={<Typography variant="body2">{uiText("Generate HTTP expectations", "生成 HTTP 规则")}</Typography>}
         />
         <Box>
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>{uiText("Close", "关闭")}</Button>
           <Button variant="contained" disabled={busy || unavailable} onClick={() => void submit()}>
-            {httpMode ? 'Generate expectations' : 'Load spec'}
+            {httpMode ? uiText('Generate expectations', "生成规则") : uiText('Load spec', "加载规范")}
           </Button>
         </Box>
       </DialogActions>

@@ -91,7 +91,27 @@ import StorageIcon from '@mui/icons-material/Storage';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import Divider from '@mui/material/Divider';
 import BaselineCompareDialog from './BaselineCompareDialog';
-import { CLEAR_LOGS_CONFIRM_MESSAGE, CLEAR_LOGS_CONFIRM_TITLE } from '../lib/clearServerText';
+import { CLEAR_LOGS_CONFIRM_LABEL, CLEAR_LOGS_CONFIRM_MESSAGE, CLEAR_LOGS_CONFIRM_TITLE, CLEAR_LOGS_MENU_LABEL } from '../lib/clearServerText';
+import { uiText } from '../lib/dashboardLocale';
+
+const STATUS_LABELS: Record<ConnectionStatus, string> = {
+  connected: uiText('connected', '已连接'),
+  connecting: uiText('connecting', '连接中'),
+  disconnected: uiText('disconnected', '未连接'),
+  error: uiText('error', '连接错误'),
+};
+
+const MODE_LABELS: Record<MockServerMode, string> = {
+  SIMULATE: uiText('SIMULATE', 'SIMULATE · 规则模拟'),
+  SPY: uiText('SPY', 'SPY · 未命中时转发'),
+  CAPTURE: uiText('CAPTURE', 'CAPTURE · 代理录制'),
+};
+
+const MODE_TOOLTIPS: Record<MockServerMode, string> = {
+  SIMULATE: uiText(MODE_DESCRIPTIONS.SIMULATE, '按规则匹配请求，未匹配时返回 404'),
+  SPY: uiText(MODE_DESCRIPTIONS.SPY, '按规则匹配请求，转发并记录未匹配的请求'),
+  CAPTURE: uiText(MODE_DESCRIPTIONS.CAPTURE, '命中规则时按规则处理，未命中时转发并记录。无规则时，可录制所有可代理的请求。'),
+};
 
 function statusColor(status: ConnectionStatus): 'success' | 'warning' | 'error' | 'default' {
   switch (status) {
@@ -170,71 +190,71 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'mock',
     label: 'Mock',
-    ariaLabel: 'Mock views',
+    ariaLabel: uiText('Mock views', 'Mock 功能'),
     icon: <PostAddIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'get-started', label: 'Get Started', ariaLabel: 'Get started view', icon: <RocketLaunchIcon sx={tabIconSx} /> },
-      { value: 'composer', label: 'Mocks', ariaLabel: 'Mocks view', description: 'Create, edit, and manage mock expectations — quick mode for common cases, advanced mode for full control.', icon: <PostAddIcon sx={tabIconSx} /> },
-      { value: 'scenarios', label: 'Scenarios', ariaLabel: 'Scenarios view', description: 'Manage scenario states and transitions — drive stateful, multi-step mock flows through a state machine.', icon: <SchemaIcon sx={tabIconSx} /> },
-      { value: 'grpc', label: 'gRPC', ariaLabel: 'gRPC services view', description: 'Mock gRPC services and inspect gRPC calls.', icon: <RpcIcon sx={tabIconSx} /> },
-      { value: 'async', label: 'Async', ariaLabel: 'AsyncAPI broker mock view', description: 'Mock event-driven APIs from an AsyncAPI spec — publish test messages to Kafka, MQTT, and AMQP (RabbitMQ) brokers.', icon: <HubIcon sx={tabIconSx} /> },
+      { value: 'get-started', label: uiText('Get Started', '快速入门'), ariaLabel: uiText('Get started view', '快速入门页面'), icon: <RocketLaunchIcon sx={tabIconSx} /> },
+      { value: 'composer', label: uiText('Mocks', 'Mock 规则'), ariaLabel: uiText('Mocks view', 'Mock 规则页面'), description: uiText('Create, edit, and manage mock expectations — quick mode for common cases, advanced mode for full control.', '创建、编辑和管理 Mock 规则。常见场景可用快速模式，复杂规则可用高级模式。'), icon: <PostAddIcon sx={tabIconSx} /> },
+      { value: 'scenarios', label: uiText('Scenarios', '场景'), ariaLabel: uiText('Scenarios view', '场景页面'), description: uiText('Manage scenario states and transitions — drive stateful, multi-step mock flows through a state machine.', '管理场景状态和状态转换，用状态机模拟有状态的多步骤流程。'), icon: <SchemaIcon sx={tabIconSx} /> },
+      { value: 'grpc', label: 'gRPC', ariaLabel: uiText('gRPC services view', 'gRPC 服务页面'), description: uiText('Mock gRPC services and inspect gRPC calls.', '模拟 gRPC 服务并查看 gRPC 调用。'), icon: <RpcIcon sx={tabIconSx} /> },
+      { value: 'async', label: uiText('Async', '异步消息'), ariaLabel: uiText('AsyncAPI broker mock view', 'AsyncAPI 消息代理模拟页面'), description: uiText('Mock event-driven APIs from an AsyncAPI spec — publish test messages to Kafka, MQTT, and AMQP (RabbitMQ) brokers.', '根据 AsyncAPI 规范模拟事件驱动的 API，向 Kafka、MQTT 和 AMQP（RabbitMQ）消息代理发布测试消息。'), icon: <HubIcon sx={tabIconSx} /> },
     ],
   },
   {
     id: 'observe',
-    label: 'Observe',
-    ariaLabel: 'Observe views',
+    label: uiText('Observe', '观测'),
+    ariaLabel: uiText('Observe views', '观测功能'),
     icon: <DashboardIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'dashboard', label: 'Dashboard', ariaLabel: 'Dashboard view', description: 'Live view of incoming requests, active expectations, and what matched.', icon: <DashboardIcon sx={tabIconSx} /> },
-      { value: 'traffic', label: 'Traffic', ariaLabel: 'Traffic inspector view', description: 'Browse recorded request and response traffic — select an item to open its full details.', icon: <TrafficIcon sx={tabIconSx} /> },
-      { value: 'sessions', label: 'Trace', ariaLabel: 'Trace inspector view', description: 'Trace related requests grouped together — including LLM agent runs — to debug multi-step flows end to end.', icon: <AccountTreeIcon sx={tabIconSx} /> },
-      { value: 'metrics', label: 'Metrics', ariaLabel: 'Metrics view', description: 'Prometheus metrics plus memory and performance monitoring.', icon: <SpeedIcon sx={tabIconSx} /> },
+      { value: 'dashboard', label: uiText('Dashboard', '运行面板'), ariaLabel: uiText('Dashboard view', '运行面板页面'), description: uiText('Live view of incoming requests, active expectations, and what matched.', '实时查看接收的请求、生效规则和请求匹配结果。'), icon: <DashboardIcon sx={tabIconSx} /> },
+      { value: 'traffic', label: uiText('Traffic', '请求记录'), ariaLabel: uiText('Traffic inspector view', '请求记录页面'), description: uiText('Browse recorded request and response traffic — select an item to open its full details.', '浏览已记录的请求和响应，点击任意一项查看完整详情。'), icon: <TrafficIcon sx={tabIconSx} /> },
+      { value: 'sessions', label: uiText('Trace', '调用链'), ariaLabel: uiText('Trace inspector view', '调用链页面'), description: uiText('Trace related requests grouped together — including LLM agent runs — to debug multi-step flows end to end.', '按关联请求查看完整调用链，包括 LLM 智能体的运行过程，便于排查多步骤流程。'), icon: <AccountTreeIcon sx={tabIconSx} /> },
+      { value: 'metrics', label: uiText('Metrics', '指标'), ariaLabel: uiText('Metrics view', '指标页面'), description: uiText('Prometheus metrics plus memory and performance monitoring.', '查看 Prometheus 指标，监控内存和性能。'), icon: <SpeedIcon sx={tabIconSx} /> },
     ],
   },
   {
     id: 'verify',
-    label: 'Verify',
-    ariaLabel: 'Verify views',
+    label: uiText('Verify', '验证'),
+    ariaLabel: uiText('Verify views', '验证功能'),
     icon: <FactCheckIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'verification', label: 'Verify', ariaLabel: 'Verification view', description: 'Assert which requests were — or were not — received.', icon: <PlaylistAddCheckIcon sx={tabIconSx} /> },
-      { value: 'contract', label: 'Contract', ariaLabel: 'Contract test view', description: 'Validate mocks and traffic against an OpenAPI contract.', icon: <FactCheckIcon sx={tabIconSx} /> },
-      { value: 'slo', label: 'SLO', ariaLabel: 'SLO verification view', description: 'Assert service-level objectives — latency percentiles and error rate — against recorded traffic.', icon: <VerifiedIcon sx={tabIconSx} /> },
-      { value: 'drift', label: 'Drift', ariaLabel: 'Drift detection view', description: 'Detect when your mocks drift away from the real API they stand in for.', icon: <CompareArrowsIcon sx={tabIconSx} /> },
+      { value: 'verification', label: uiText('Verify', '请求与响应验证'), ariaLabel: uiText('Verification view', '请求与响应验证页面'), description: uiText('Assert which requests were — or were not — received.', '检查已记录的请求或响应是否符合预期的次数或顺序。'), icon: <PlaylistAddCheckIcon sx={tabIconSx} /> },
+      { value: 'contract', label: uiText('Contract', '契约测试'), ariaLabel: uiText('Contract test view', '契约测试页面'), description: uiText('Validate mocks and traffic against an OpenAPI contract.', '按 OpenAPI 契约校验 Mock 规则和请求流量。'), icon: <FactCheckIcon sx={tabIconSx} /> },
+      { value: 'slo', label: 'SLO', ariaLabel: uiText('SLO verification view', 'SLO 验证页面'), description: uiText('Assert service-level objectives — latency percentiles and error rate — against recorded traffic.', '根据已记录的流量，验证延迟分位数和错误率是否达到服务等级目标。'), icon: <VerifiedIcon sx={tabIconSx} /> },
+      { value: 'drift', label: uiText('Drift', '差异检测'), ariaLabel: uiText('Drift detection view', '差异检测页面'), description: uiText('Detect when your mocks drift away from the real API they stand in for.', '检测 Mock 规则与所模拟的真实 API 之间的差异。'), icon: <CompareArrowsIcon sx={tabIconSx} /> },
     ],
   },
   {
     id: 'resilience',
-    label: 'Resilience',
-    ariaLabel: 'Resilience views',
+    label: uiText('Resilience', '可靠性测试'),
+    ariaLabel: uiText('Resilience views', '可靠性测试功能'),
     icon: <BoltIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'chaos', label: 'Chaos', ariaLabel: 'Service chaos view', description: 'Inject latency, errors, and faults to test how your system handles failure.', icon: <BoltIcon sx={tabIconSx} /> },
-      { value: 'performance', label: 'Performance', ariaLabel: 'Performance testing view', description: 'Create, run, and monitor load scenarios — drive traffic at a target and watch live throughput and latency.', icon: <TrendingUpIcon sx={tabIconSx} /> },
+      { value: 'chaos', label: uiText('Chaos', '故障注入'), ariaLabel: uiText('Service chaos view', '故障注入页面'), description: uiText('Inject latency, errors, and faults to test how your system handles failure.', '注入延迟、错误和故障，测试系统的故障处理能力。'), icon: <BoltIcon sx={tabIconSx} /> },
+      { value: 'performance', label: uiText('Performance', '性能测试'), ariaLabel: uiText('Performance testing view', '性能测试页面'), description: uiText('Create, run, and monitor load scenarios — drive traffic at a target and watch live throughput and latency.', '创建、运行和监控负载场景，向目标发送流量并实时查看吞吐量和延迟。'), icon: <TrendingUpIcon sx={tabIconSx} /> },
     ],
   },
   {
     id: 'ai',
     label: 'AI',
-    ariaLabel: 'AI views',
+    ariaLabel: uiText('AI views', 'AI 功能'),
     icon: <AutoAwesomeIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'optimise', label: 'LLM Optimise', ariaLabel: 'LLM Optimise view', description: 'Analyse captured LLM traffic to optimise prompts, inference cost, safety, and speed.', icon: <AutoAwesomeIcon sx={tabIconSx} /> },
-      { value: 'mcp-health', label: 'MCP Health', ariaLabel: 'MCP server health view', description: 'See which MCP servers your proxied tools call are slow or erroring — the MCP server is often the real bottleneck behind a slow coding assistant.', icon: <MonitorHeartIcon sx={tabIconSx} /> },
-      { value: 'sessions', label: 'Trace', ariaLabel: 'Trace inspector view', description: 'Trace related requests grouped together — including LLM agent runs — to debug multi-step flows end to end.', icon: <AccountTreeIcon sx={tabIconSx} /> },
+      { value: 'optimise', label: uiText('LLM Optimise', 'LLM 优化'), ariaLabel: uiText('LLM Optimise view', 'LLM 优化页面'), description: uiText('Analyse captured LLM traffic to optimise prompts, inference cost, safety, and speed.', '分析捕获的 LLM 流量，优化提示词、推理成本、安全性和速度。'), icon: <AutoAwesomeIcon sx={tabIconSx} /> },
+      { value: 'mcp-health', label: uiText('MCP Health', 'MCP 健康状态'), ariaLabel: uiText('MCP server health view', 'MCP 服务健康状态页面'), description: uiText('See which MCP servers your proxied tools call are slow or erroring — the MCP server is often the real bottleneck behind a slow coding assistant.', '查看代理工具调用的 MCP 服务中有哪些响应缓慢或出错，帮助定位编程助手的性能瓶颈。'), icon: <MonitorHeartIcon sx={tabIconSx} /> },
+      { value: 'sessions', label: uiText('Trace', '调用链'), ariaLabel: uiText('Trace inspector view', '调用链页面'), description: uiText('Trace related requests grouped together — including LLM agent runs — to debug multi-step flows end to end.', '按关联请求查看完整调用链，包括 LLM 智能体的运行过程，便于排查多步骤流程。'), icon: <AccountTreeIcon sx={tabIconSx} /> },
     ],
   },
   {
     id: 'inspect',
-    label: 'Inspect',
-    ariaLabel: 'Inspect views',
+    label: uiText('Inspect', '诊断'),
+    ariaLabel: uiText('Inspect views', '诊断功能'),
     icon: <PanToolIcon sx={tabIconSx} />,
     tabs: [
-      { value: 'breakpoints', label: 'Breakpoints', ariaLabel: 'Breakpoints view', description: 'Pause matching requests or responses mid-flight to inspect and edit them.', icon: <PanToolIcon sx={tabIconSx} /> },
-      { value: 'audit', label: 'Audit', ariaLabel: 'Audit trail view', description: 'Review recent control-plane changes — a chronological trail of mutations to expectations, configuration, and server state.', icon: <HistoryIcon sx={tabIconSx} /> },
-      { value: 'library', label: 'Library', ariaLabel: 'Library of captured content', description: 'Browse and reuse captured requests, responses, and content.', icon: <Inventory2Icon sx={tabIconSx} /> },
-      { value: 'cluster', label: 'Cluster', ariaLabel: 'Cluster status view', description: 'Monitor MockServer cluster nodes and shared state.', icon: <HubOutlinedIcon sx={tabIconSx} /> },
+      { value: 'breakpoints', label: uiText('Breakpoints', '断点'), ariaLabel: uiText('Breakpoints view', '断点页面'), description: uiText('Pause matching requests or responses mid-flight to inspect and edit them.', '暂停符合条件的请求或响应，查看和修改其内容。'), icon: <PanToolIcon sx={tabIconSx} /> },
+      { value: 'audit', label: uiText('Audit', '审计日志'), ariaLabel: uiText('Audit trail view', '审计日志页面'), description: uiText('Review recent control-plane changes — a chronological trail of mutations to expectations, configuration, and server state.', '按时间顺序查看最近的管理操作，包括规则、配置和服务器状态的变更。'), icon: <HistoryIcon sx={tabIconSx} /> },
+      { value: 'library', label: uiText('Library', '资源库'), ariaLabel: uiText('Library of captured content', '已捕获内容的资源库'), description: uiText('Browse and reuse captured requests, responses, and content.', '浏览并复用捕获的请求、响应和其他内容。'), icon: <Inventory2Icon sx={tabIconSx} /> },
+      { value: 'cluster', label: uiText('Cluster', '集群'), ariaLabel: uiText('Cluster status view', '集群状态页面'), description: uiText('Monitor MockServer cluster nodes and shared state.', '监控 MockServer 集群节点和共享状态。'), icon: <HubOutlinedIcon sx={tabIconSx} /> },
     ],
   },
 ];
@@ -307,6 +327,9 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
   const toggleTheme = useDashboardStore((s) => s.toggleThemeMode);
   const autoScroll = useDashboardStore((s) => s.autoScroll);
   const toggleAutoScroll = useDashboardStore((s) => s.toggleAutoScroll);
+  const autoScrollAction = autoScroll
+    ? uiText('Stop following new entries', '暂停所有列表的自动滚动')
+    : uiText('Follow new entries', '恢复所有列表的自动滚动');
   const view = useDashboardStore((s) => s.view);
   const setView = useDashboardStore((s) => s.setView);
   const addWorkspace = useDashboardStore((s) => s.addWorkspace);
@@ -385,7 +408,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
     void setServerMode(connectionParams, next)
       .then((r) => {
         setModeState(r.mode);
-        setNotification({ message: `Operating mode set to ${r.mode}`, severity: 'success' });
+        setNotification({ message: uiText(`Operating mode set to ${r.mode}`, `运行模式已切换为${MODE_LABELS[r.mode]}`), severity: 'success' });
       })
       .catch((e) => {
         setModeState(previous); // revert on failure
@@ -449,9 +472,9 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
           MockServer
         </Typography>
-        <Tooltip title={`MockServer at ${serverUrl}`}>
+        <Tooltip title={uiText(`MockServer at ${serverUrl}`, `MockServer 地址 ${serverUrl}`)}>
           <Chip
-            label={connectionStatus}
+            label={STATUS_LABELS[connectionStatus]}
             size="small"
             color={statusColor(connectionStatus)}
             variant="outlined"
@@ -462,7 +485,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
           />
         </Tooltip>
         {http3Status?.enabled && (
-          <Tooltip title={`HTTP/3 (QUIC) on UDP port ${http3Status.port} -- ${http3Status.activeConnections} active connection${http3Status.activeConnections === 1 ? '' : 's'}`}>
+          <Tooltip title={uiText(`HTTP/3 (QUIC) on UDP port ${http3Status.port} -- ${http3Status.activeConnections} active connection${http3Status.activeConnections === 1 ? '' : 's'}`, `HTTP/3（QUIC）使用 UDP 端口 ${http3Status.port}，当前有 ${http3Status.activeConnections} 个活跃连接`)}>
             <Chip
               label={`H3 :${http3Status.port} (${http3Status.activeConnections})`}
               size="small"
@@ -481,11 +504,11 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
         )}
         {compactNav ? (
           <>
-            <Tooltip title="Navigate">
+            <Tooltip title={uiText('Navigate', '导航')}>
               <IconButton
                 size="small"
                 color="inherit"
-                aria-label="Open navigation menu"
+                aria-label={uiText('Open navigation menu', '打开导航菜单')}
                 onClick={(e) => setNavAnchorEl(e.currentTarget)}
                 sx={{ ml: 1 }}
               >
@@ -580,38 +603,38 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             other workspace affordance — switching, closing, renaming — lives in
             the WorkspaceTabBar row below, which only appears once a second
             workspace exists. */}
-        <Tooltip title="New workspace — an independent view and set of search filters">
+        <Tooltip title={uiText('New workspace — an independent view and set of search filters', '新建工作区，单独保存当前视图和筛选条件')}>
           <IconButton
             size="small"
             color="inherit"
             onClick={addWorkspace}
-            aria-label="New workspace"
+            aria-label={uiText('New workspace', '新建工作区')}
           >
             <TabIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Keyboard shortcuts">
-          <IconButton size="small" color="inherit" onClick={onShowShortcuts} aria-label="Keyboard shortcuts">
+        <Tooltip title={uiText('Keyboard shortcuts', '键盘快捷键')}>
+          <IconButton size="small" color="inherit" onClick={onShowShortcuts} aria-label={uiText('Keyboard shortcuts', '键盘快捷键')}>
             <KeyboardIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Server clock (freeze / advance time)">
-          <IconButton size="small" color="inherit" onClick={() => setClockOpen(true)} aria-label="Server clock">
+        <Tooltip title={uiText('Server clock (freeze / advance time)', '服务器时钟（冻结或推进时间）')}>
+          <IconButton size="small" color="inherit" onClick={() => setClockOpen(true)} aria-label={uiText('Server clock', '服务器时钟')}>
             <AccessTimeIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Explain unmatched requests">
-          <IconButton size="small" color="inherit" onClick={() => setExplainOpen(true)} aria-label="Explain unmatched requests">
+        <Tooltip title={uiText('Explain unmatched requests', '分析未匹配的请求')}>
+          <IconButton size="small" color="inherit" onClick={() => setExplainOpen(true)} aria-label={uiText('Explain unmatched requests', '分析未匹配的请求')}>
             <TroubleshootIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Matcher test playground — try a request against a candidate expectation">
-          <IconButton size="small" color="inherit" onClick={() => setPlaygroundOpen(true)} aria-label="Matcher test playground">
+        <Tooltip title={uiText('Matcher test playground — try a request against a candidate expectation', '预览规则匹配，检查示例请求能否命中指定规则')}>
+          <IconButton size="small" color="inherit" onClick={() => setPlaygroundOpen(true)} aria-label={uiText('Matcher test playground', '预览规则匹配')}>
             <RuleIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Server configuration">
-          <IconButton size="small" color="inherit" onClick={() => setConfigOpen(true)} aria-label="Server configuration">
+        <Tooltip title={uiText('Server configuration', '服务器配置')}>
+          <IconButton size="small" color="inherit" onClick={() => setConfigOpen(true)} aria-label={uiText('Server configuration', '服务器配置')}>
             <SettingsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -619,19 +642,19 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             console order and each owns whether it follows the newest entry, but
             "stop everything moving" should not be four separate clicks. Toggling
             this re-syncs them all; a panel may diverge again afterwards. */}
-        <Tooltip title={autoScroll ? 'Stop following new entries' : 'Follow new entries'}>
-          <IconButton size="small" color="inherit" onClick={toggleAutoScroll} aria-label={autoScroll ? 'Stop following new entries' : 'Follow new entries'}>
+        <Tooltip title={autoScrollAction}>
+          <IconButton size="small" color="inherit" onClick={toggleAutoScroll} aria-label={autoScrollAction}>
             {autoScroll ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
           </IconButton>
         </Tooltip>
-        <Tooltip title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}>
-          <IconButton size="small" color="inherit" onClick={toggleTheme} aria-label={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}>
+        <Tooltip title={uiText(`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`, `切换到${themeMode === 'dark' ? '浅色' : '深色'}模式`)}>
+          <IconButton size="small" color="inherit" onClick={toggleTheme} aria-label={uiText(`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`, `切换到${themeMode === 'dark' ? '浅色' : '深色'}模式`)}>
             {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
           </IconButton>
         </Tooltip>
         {mode !== null && (
           <Tooltip
-            title={MODE_DESCRIPTIONS[mode]}
+            title={MODE_TOOLTIPS[mode]}
             open={modeTooltipOpen && !modeMenuOpen}
             onOpen={() => setModeTooltipOpen(true)}
             onClose={() => setModeTooltipOpen(false)}
@@ -643,7 +666,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
               onOpen={() => setModeMenuOpen(true)}
               onClose={() => setModeMenuOpen(false)}
               size="small"
-              aria-label="Operating mode"
+              aria-label={uiText('Operating mode', '运行模式')}
               sx={{
                 color: 'inherit',
                 fontSize: '0.7rem',
@@ -654,27 +677,27 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             >
               {MOCK_SERVER_MODES.map((m) => (
                 <MenuItem key={m} value={m} sx={{ fontSize: '0.8rem' }}>
-                  {m}
+                  {MODE_LABELS[m]}
                 </MenuItem>
               ))}
             </Select>
           </Tooltip>
         )}
-        <Tooltip title="Import / export">
+        <Tooltip title={uiText('Import / export', '导入和导出')}>
           <IconButton
             size="small"
             color="inherit"
-            aria-label="Import / export tools"
+            aria-label={uiText('Import / export tools', '导入和导出工具')}
             onClick={(e) => setToolsAnchorEl(e.currentTarget)}
           >
             <BuildIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Clear">
+        <Tooltip title={uiText('Clear', '清空')}>
           <IconButton
             size="small"
             color="inherit"
-            aria-label="Clear logs, expectations, or reset server"
+            aria-label={uiText('Clear logs, expectations, or reset server', '清空请求记录及相关日志、清空 Mock 规则或重置服务器')}
             onClick={(e) => setAnchorEl(e.currentTarget)}
           >
             <DeleteSweepIcon fontSize="small" />
@@ -691,43 +714,43 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
               setConfirm({
                 title: CLEAR_LOGS_CONFIRM_TITLE,
                 message: CLEAR_LOGS_CONFIRM_MESSAGE,
-                confirmLabel: 'Clear logs',
+                confirmLabel: CLEAR_LOGS_CONFIRM_LABEL,
                 onConfirm: () => { void onClearLogs(); },
               });
             }}
           >
             <ListItemIcon><LayersClearIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Clear Server Logs</ListItemText>
+            <ListItemText>{CLEAR_LOGS_MENU_LABEL}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
               setAnchorEl(null);
               setConfirm({
-                title: 'Clear all expectations?',
-                message: 'This removes every registered expectation from the server. Recorded requests and logs are kept. This cannot be undone.',
-                confirmLabel: 'Clear expectations',
+                title: uiText('Clear all expectations?', '清空所有 Mock 规则？'),
+                message: uiText('This removes every registered expectation from the server. Recorded requests and logs are kept. This cannot be undone.', '此操作会删除服务器中已注册的全部 Mock 规则，保留请求记录和日志。删除后无法撤销。'),
+                confirmLabel: uiText('Clear expectations', '清空 Mock 规则'),
                 onConfirm: () => { void onClearExpectations(); },
               });
             }}
           >
             <ListItemIcon><LayersClearIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Clear Server Expectations</ListItemText>
+            <ListItemText>{uiText('Clear Server Expectations', '清空服务器的 Mock 规则')}</ListItemText>
           </MenuItem>
           <Divider />
           <MenuItem
             onClick={() => {
               setAnchorEl(null);
               setConfirm({
-                title: 'Reset the entire server?',
-                message: 'This clears ALL expectations, recorded requests and logs, and resets server state. This cannot be undone.',
-                confirmLabel: 'Reset server',
+                title: uiText('Reset the entire server?', '重置整个服务器？'),
+                message: uiText('This clears ALL expectations, recorded requests and logs, and resets server state. This cannot be undone.', '此操作会清空所有 Mock 规则、请求记录和日志，并重置服务器状态。操作无法撤销。'),
+                confirmLabel: uiText('Reset server', '重置服务器'),
                 onConfirm: () => { void onClearServer(); },
               });
             }}
             sx={{ color: 'error.main' }}
           >
             <ListItemIcon><RestartAltIcon fontSize="small" color="error" /></ListItemIcon>
-            <ListItemText>Reset Server (all)</ListItemText>
+            <ListItemText>{uiText('Reset Server (all)', '重置服务器')}</ListItemText>
           </MenuItem>
         </Menu>
         <Menu
@@ -742,7 +765,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Import OpenAPI…</ListItemText>
+            <ListItemText>{uiText('Import OpenAPI…', '导入 OpenAPI…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -751,7 +774,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Import WSDL…</ListItemText>
+            <ListItemText>{uiText('Import WSDL…', '导入 WSDL…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -760,7 +783,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><UploadFileIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Import GraphQL Schema…</ListItemText>
+            <ListItemText>{uiText('Import GraphQL Schema…', '导入 GraphQL 模式…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -769,7 +792,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><DownloadIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Pact Contract (export / verify)…</ListItemText>
+            <ListItemText>{uiText('Pact Contract (export / verify)…', 'Pact 契约（导出或验证）…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -778,7 +801,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><VpnKeyIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Mock OIDC Provider…</ListItemText>
+            <ListItemText>{uiText('Mock OIDC Provider…', '模拟 OIDC 提供方…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -787,7 +810,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><VpnKeyIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Mock SAML Provider…</ListItemText>
+            <ListItemText>{uiText('Mock SAML Provider…', '模拟 SAML 提供方…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -796,7 +819,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><VpnKeyIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Mock SCIM Provider…</ListItemText>
+            <ListItemText>{uiText('Mock SCIM Provider…', '模拟 SCIM 提供方…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -805,7 +828,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><HubIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>AsyncAPI Broker Mock…</ListItemText>
+            <ListItemText>{uiText('AsyncAPI Broker Mock…', '模拟 AsyncAPI 消息代理…')}</ListItemText>
           </MenuItem>
           <Divider />
           <MenuItem
@@ -815,7 +838,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><StorageIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Register CRUD Resource…</ListItemText>
+            <ListItemText>{uiText('Register CRUD Resource…', '注册 CRUD 资源…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -824,7 +847,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><FolderOpenIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Mock File Store…</ListItemText>
+            <ListItemText>{uiText('Mock File Store…', '模拟文件存储…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -833,7 +856,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><CompareArrowsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Diff Two Requests…</ListItemText>
+            <ListItemText>{uiText('Diff Two Requests…', '比较两个请求…')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -842,7 +865,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
             }}
           >
             <ListItemIcon><CompareArrowsIcon fontSize="small" /></ListItemIcon>
-            <ListItemText>Compare Against Baseline…</ListItemText>
+            <ListItemText>{uiText('Compare Against Baseline…', '与基线比较…')}</ListItemText>
           </MenuItem>
         </Menu>
         <OpenApiImportDialog
@@ -883,7 +906,7 @@ export default function AppBar({ onClearServer, onClearLogs, onClearExpectations
         open={confirm !== null}
         title={confirm?.title ?? ''}
         message={confirm?.message ?? ''}
-        confirmLabel={confirm?.confirmLabel ?? 'Confirm'}
+        confirmLabel={confirm?.confirmLabel ?? uiText('Confirm', '确认')}
         onConfirm={() => confirm?.onConfirm()}
         onClose={() => setConfirm(null)}
       />

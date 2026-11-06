@@ -18,6 +18,7 @@ import {
   validateConnection,
   type WorkspaceConnection,
 } from '../lib/connectionTarget';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Edit which MockServer one workspace targets. Saving checks the target answers the
@@ -83,17 +84,15 @@ export default function WorkspaceTargetDialog({
 
   return (
     <Dialog open onClose={close} maxWidth="sm" fullWidth aria-labelledby="workspace-target-title">
-      <DialogTitle id="workspace-target-title">MockServer for {workspaceName}</DialogTitle>
+      <DialogTitle id="workspace-target-title">{uiText(`MockServer for ${workspaceName}`, `工作区 ${workspaceName} 的 MockServer`)}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Every view, action and live update in this workspace goes to this server. Changing it
-          clears what the workspace showed from the previous one. The other workspaces keep their
-          own targets, and breakpoints set on a server stay active while any workspace targets it.
+          {uiText('Every view, action and live update in this workspace goes to this server. Changing it clears what the workspace showed from the previous one. The other workspaces keep their own targets, and breakpoints set on a server stay active while any workspace targets it.', '此工作区的所有页面、操作和实时更新都使用这个服务器。切换服务器会清除当前工作区显示的旧数据。其他工作区仍使用各自的服务器。只要还有工作区连接到某台服务器，其断点就会继续生效。')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
           <TextField
             size="small"
-            label="Host"
+            label={uiText('Host', '主机')}
             value={host}
             onChange={(e) => edit(() => setHost(e.target.value))}
             error={!!fieldError('host')}
@@ -103,7 +102,7 @@ export default function WorkspaceTargetDialog({
           />
           <TextField
             size="small"
-            label="Port"
+            label={uiText('Port', '端口')}
             value={port}
             onChange={(e) => edit(() => setPort(e.target.value))}
             error={!!fieldError('port')}
@@ -114,7 +113,7 @@ export default function WorkspaceTargetDialog({
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mt: 1.5 }}>
           <TextField
             size="small"
-            label="Base path (optional)"
+            label={uiText('Base path (optional)', '基础路径（选填）')}
             placeholder="/mock"
             value={basePath}
             onChange={(e) => edit(() => setBasePath(e.target.value))}
@@ -124,14 +123,15 @@ export default function WorkspaceTargetDialog({
           />
           <FormControlLabel
             control={<Switch checked={secure} onChange={(e) => edit(() => setSecure(e.target.checked))} />}
-            label="Use https"
+            label={uiText('Use https', '使用 HTTPS')}
           />
         </Box>
         {crossOrigin && probeFailure === null && (
           <Alert severity="info" sx={{ mt: 2 }}>
-            This is a different origin from the dashboard, so the browser applies CORS to every call.
-            By default MockServer answers CORS for its control plane when this dashboard is on localhost;
-            otherwise list this dashboard&apos;s origin in the target&apos;s <code>controlPlaneCorsAllowOrigin</code>.
+            {uiText(
+              'This is a different origin from the dashboard, so the browser applies CORS to every call. By default MockServer answers CORS for its control plane when this dashboard is on localhost; otherwise list this dashboard\'s origin in the target\'s ',
+              '服务器与运行面板不同源，浏览器会对所有请求执行 CORS 检查。当运行面板位于 localhost 时，MockServer 默认允许跨域访问管理 API。否则，请在目标服务器的 ',
+            )}<code>controlPlaneCorsAllowOrigin</code>{uiText('.', ' 中添加当前运行面板的来源。')}
           </Alert>
         )}
         {probeFailure !== null && (
@@ -140,18 +140,18 @@ export default function WorkspaceTargetDialog({
           </Alert>
         )}
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-          The dashboard URL targets {describeTarget(urlTarget)}.
+          {uiText(`The dashboard URL targets ${describeTarget(urlTarget)}.`, `当前页面的网址指向 ${describeTarget(urlTarget)}。`)}
         </Typography>
       </DialogContent>
       <DialogActions>
         {connection !== null && (
           <Button onClick={() => onSave(null)} sx={{ mr: 'auto' }}>
-            Use the dashboard URL&apos;s server
+            {uiText('Use the dashboard URL\'s server', '使用页面网址指定的服务器')}
           </Button>
         )}
-        <Button onClick={close}>Cancel</Button>
+        <Button onClick={close}>{uiText('Cancel', '取消')}</Button>
         <Button variant="contained" onClick={() => { void save(); }} disabled={!validation.ok || checking}>
-          {checking ? 'Checking…' : probeFailure !== null ? 'Save anyway' : 'Save'}
+          {checking ? uiText('Checking…', '正在检查…') : probeFailure !== null ? uiText('Save anyway', '仍然保存') : uiText('Save', '保存')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -21,18 +22,18 @@ import { useDashboardStore } from '../store';
 import { monospaceFontFamily } from '../theme';
 import HumanErrorAlert from './HumanErrorAlert';
 
-const SEVERITY_LABELS: Record<LintSeverity, string> = { ERROR: 'Error', WARNING: 'Warning', INFO: 'Info' };
+const SEVERITY_LABELS: Record<LintSeverity, string> = { ERROR: uiText('Error', "错误"), WARNING: uiText('Warning', "警告"), INFO: uiText('Info', "提示") };
 const SEVERITY_COLORS: Record<LintSeverity, 'error' | 'warning' | 'info'> = { ERROR: 'error', WARNING: 'warning', INFO: 'info' };
 
 function ExpectationLink({ id, onOpen, disabled }: { id: string; onOpen: (id: string) => void; disabled: boolean }) {
   return (
-    <Tooltip title="Open in the Mocks composer">
+    <Tooltip title={uiText("Open in the Mocks composer", "在规则编辑器中打开")}>
       <Link
         component="button"
         type="button"
         disabled={disabled}
         onClick={() => onOpen(id)}
-        aria-label={`Open expectation ${id}`}
+        aria-label={uiText(`Open expectation ${id}`, `打开规则 ${id}`)}
         sx={{ fontFamily: monospaceFontFamily, fontSize: '0.75rem', verticalAlign: 'baseline' }}
       >
         {id}
@@ -62,7 +63,7 @@ function IssueRow({ issue, onOpen, opening }: { issue: LintIssue; onOpen: (id: s
       {(issue.relatedExpectationId || issue.relatedSummary) && (
         <Box data-testid="lint-related" sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.25 }}>
           <Typography variant="caption" color="text.secondary">
-            {issue.rule === 'SHADOWED' ? 'Shadowed by' : 'Related to'}
+            {issue.rule === 'SHADOWED' ? uiText('Shadowed by', "被以下规则覆盖") : uiText('Related to', "关联规则")}
             {issue.relatedPosition !== undefined && ` #${issue.relatedPosition}`}
           </Typography>
           {issue.relatedSummary && (
@@ -144,11 +145,10 @@ export default function LintDialog({
 
   return (
     <Dialog open={open} onClose={close} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="lint-dialog-title">
-      <DialogTitle id="lint-dialog-title">Lint Expectations</DialogTitle>
+      <DialogTitle id="lint-dialog-title">{uiText("Lint Expectations", "检查规则")}</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Finds active expectations that can never match, or will not match the way they read. Lint is
-          advisory: it never changes an expectation.
+          {uiText("Finds active expectations that can never match, or will not match the way they read. Lint is advisory: it never changes an expectation.", "找出无法匹配任何请求或匹配行为与配置看起来不一致的生效规则。检查仅提供建议，不会修改规则。")}
         </Typography>
         {error && <HumanErrorAlert error={error} sx={{ mb: 1.5 }} />}
         {openError && <HumanErrorAlert error={openError} sx={{ mb: 1.5 }} onClose={() => setOpenError(null)} />}
@@ -156,26 +156,26 @@ export default function LintDialog({
         {report && (
           <>
             <Box data-testid="lint-summary" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
-              <Chip size="small" variant="outlined" label={`${report.expectationsChecked} Checked`} />
-              <Chip size="small" variant="outlined" color={report.errorCount > 0 ? 'error' : 'default'} label={`${report.errorCount} ${report.errorCount === 1 ? 'Error' : 'Errors'}`} />
-              <Chip size="small" variant="outlined" color={report.warningCount > 0 ? 'warning' : 'default'} label={`${report.warningCount} ${report.warningCount === 1 ? 'Warning' : 'Warnings'}`} />
-              <Chip size="small" variant="outlined" label={`${report.infoCount} Info`} />
+              <Chip size="small" variant="outlined" label={uiText(`${report.expectationsChecked} Checked`, `已检查 ${report.expectationsChecked} 条`)} />
+              <Chip size="small" variant="outlined" color={report.errorCount > 0 ? 'error' : 'default'} label={`${report.errorCount} ${report.errorCount === 1 ? uiText('Error', "错误") : uiText('Errors', "条错误")}`} />
+              <Chip size="small" variant="outlined" color={report.warningCount > 0 ? 'warning' : 'default'} label={`${report.warningCount} ${report.warningCount === 1 ? uiText('Warning', "警告") : uiText('Warnings', "条警告")}`} />
+              <Chip size="small" variant="outlined" label={uiText(`${report.infoCount} Info`, `${report.infoCount} 条提示`)} />
               {report.inactiveExpectationsSkipped > 0 && (
-                <Chip size="small" variant="outlined" label={`${report.inactiveExpectationsSkipped} Inactive Skipped`} />
+                <Chip size="small" variant="outlined" label={uiText(`${report.inactiveExpectationsSkipped} Inactive Skipped`, `已跳过 ${report.inactiveExpectationsSkipped} 条未生效规则`)} />
               )}
             </Box>
             {report.shadowCheckTruncated && (
               <Alert severity="info" sx={{ mb: 1 }}>
-                The shadowing check stopped at its comparison budget, so some shadowed expectations may not be listed.
+                {uiText("The shadowing check stopped at its comparison budget, so some shadowed expectations may not be listed.", "规则覆盖检查已达到比较次数上限，可能还有被覆盖的规则未列出。")}
               </Alert>
             )}
             {report.issuesTruncated && (
               <Alert severity="info" sx={{ mb: 1 }}>
-                Only the first {report.issues.length} findings are listed.
+                {uiText("Only the first ", "仅显示前 ")}{report.issues.length}{uiText(" findings are listed.", " 项检查结果。")}
               </Alert>
             )}
             {report.issues.length === 0
-              ? <Typography variant="body2" data-testid="lint-clean">No problems found.</Typography>
+              ? <Typography variant="body2" data-testid="lint-clean">{uiText("No problems found.", "未发现问题。")}</Typography>
               : report.issues.map((issue, i) => (
                 <IssueRow key={`${issue.rule}-${issue.expectationId ?? ''}-${i}`} issue={issue} onOpen={(id) => { void openExpectation(id); }} opening={opening} />
               ))}
@@ -183,8 +183,8 @@ export default function LintDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={refresh} disabled={loading}>Refresh</Button>
-        <Button onClick={close}>Close</Button>
+        <Button onClick={refresh} disabled={loading}>{uiText("Refresh", "刷新")}</Button>
+        <Button onClick={close}>{uiText("Close", "关闭")}</Button>
       </DialogActions>
     </Dialog>
   );

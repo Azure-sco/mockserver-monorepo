@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Alert, { type AlertProps } from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -68,7 +69,7 @@ export default function HumanErrorAlert({
             onClick={() => setDetailsOpen((o) => !o)}
             sx={{ color: 'inherit' }}
           >
-            {detailsOpen ? 'Hide details' : 'Details'}
+            {detailsOpen ? uiText('Hide details', '隐藏详情') : uiText('Details', '详情')}
           </Link>
           <Collapse in={detailsOpen} unmountOnExit>
             <Box

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useState, type ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -159,7 +160,7 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          SLO Verification
+          {uiText('SLO Verification', '服务级别目标验证（SLO）')}
         </Typography>
         {verdict && (
           <Chip
@@ -172,17 +173,14 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        Assert service-level objectives against recorded forward/proxy traffic. Each objective compares
-        an observed indicator (latency percentile or error rate) over a trailing window against a
-        threshold; every objective must hold for the criteria to PASS. SLO tracking must be enabled on
-        the server (<code>sloTrackingEnabled=true</code>).
+        {uiText('Assert service-level objectives against recorded forward/proxy traffic. Each objective compares an observed indicator (latency percentile or error rate) over a trailing window against a threshold; every objective must hold for the criteria to PASS. SLO tracking must be enabled on the server (', '使用已记录的转发或代理流量验证服务级别目标。每项目标都会将最近一段时间内的延迟分位数或错误率与阈值对比，全部达标才算通过。需要在服务器上启用 SLO 跟踪（')}<code>sloTrackingEnabled=true</code>).
       </Typography>
 
       <Paper variant="outlined" sx={{ p: 1.5, mb: 1.5 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 1.5 }}>
           <TextField
             size="small"
-            label="Name"
+            label={uiText('Name', '名称')}
             value={name}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             sx={{ width: 200 }}
@@ -190,7 +188,7 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
           <TextField
             size="small"
             type="number"
-            label="Lookback (seconds)"
+            label={uiText('Lookback (seconds)', '回溯时长（秒）')}
             value={lookbackSeconds}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setLookbackSeconds(e.target.value)}
             sx={{ width: 160 }}
@@ -199,7 +197,7 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
           <TextField
             size="small"
             type="number"
-            label="Min samples"
+            label={uiText('Min samples', '最少样本数')}
             value={minimumSampleCount}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setMinimumSampleCount(e.target.value)}
             sx={{ width: 140 }}
@@ -207,7 +205,7 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
           />
           <TextField
             size="small"
-            label="Upstream hosts (optional)"
+            label={uiText('Upstream hosts (optional)', '上游主机（可选）')}
             placeholder="payments.svc, orders.svc"
             value={upstreamHosts}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setUpstreamHosts(e.target.value)}
@@ -216,15 +214,15 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
         </Box>
 
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-          Objectives
+          {uiText('Objectives', '目标')}
         </Typography>
         <TableContainer>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Indicator</TableCell>
-                <TableCell>Comparator</TableCell>
-                <TableCell>Threshold</TableCell>
+                <TableCell>{uiText('Indicator', '指标')}</TableCell>
+                <TableCell>{uiText('Comparator', '比较方式')}</TableCell>
+                <TableCell>{uiText('Threshold', '阈值')}</TableCell>
                 <TableCell align="right" />
               </TableRow>
             </TableHead>
@@ -270,11 +268,11 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Remove objective">
+                    <Tooltip title={uiText('Remove objective', '移除目标')}>
                       <span>
                         <IconButton
                           size="small"
-                          aria-label={`Remove objective ${index + 1}`}
+                          aria-label={uiText(`Remove objective ${index + 1}`, `移除第 ${index + 1} 项目标`)}
                           disabled={objectives.length <= 1}
                           onClick={() => removeObjective(index)}
                         >
@@ -291,7 +289,7 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
           <Button size="small" startIcon={<AddIcon fontSize="small" />} onClick={addObjective}>
-            Add objective
+            {uiText('Add objective', '添加目标')}
           </Button>
           <Box sx={{ flex: 1 }} />
           <Button
@@ -301,14 +299,14 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
             disabled={!canVerify}
             onClick={handleVerify}
           >
-            {busy ? 'Verifying…' : 'Verify SLO'}
+            {busy ? uiText('Verifying…', '正在验证…') : uiText('Verify SLO', '验证 SLO')}
           </Button>
         </Box>
       </Paper>
 
       {error && (
         <Alert severity="error" sx={{ mb: 1.5 }} onClose={() => setError(null)}>
-          <AlertTitle>Could not verify SLO</AlertTitle>
+          <AlertTitle>{uiText('Could not verify SLO', '无法验证 SLO')}</AlertTitle>
           {error}
         </Alert>
       )}
@@ -319,23 +317,23 @@ export default function SloPanel({ connectionParams }: SloPanelProps) {
             <AlertTitle>
               {verdict.name ? `${verdict.name}: ` : ''}{verdict.result}
             </AlertTitle>
-            Evaluated {verdict.sampleCount} sample{verdict.sampleCount === 1 ? '' : 's'} over the window.
-            {verdict.result === 'INCONCLUSIVE' && ' Not enough samples to draw a verdict — generate traffic and try again.'}
+            {uiText(`Evaluated ${verdict.sampleCount} sample${verdict.sampleCount === 1 ? '' : 's'} over the window.`, `在指定时间范围内评估了 ${verdict.sampleCount} 个样本。`)}
+            {verdict.result === 'INCONCLUSIVE' && uiText(' Not enough samples to draw a verdict — generate traffic and try again.', ' 样本不足，无法得出结论。请生成一些流量后重试。')}
           </Alert>
 
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-            Evaluated window: {formatInstant(verdict.windowFromEpochMillis)} – {formatInstant(verdict.windowToEpochMillis)}
+            {uiText('Evaluated window:', '评估时间范围')} {formatInstant(verdict.windowFromEpochMillis)} – {formatInstant(verdict.windowToEpochMillis)}
           </Typography>
 
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Indicator</TableCell>
-                  <TableCell>Objective</TableCell>
-                  <TableCell align="right">Observed</TableCell>
-                  <TableCell>Result</TableCell>
-                  <TableCell>Detail</TableCell>
+                  <TableCell>{uiText('Indicator', '指标')}</TableCell>
+                  <TableCell>{uiText('Objective', '目标')}</TableCell>
+                  <TableCell align="right">{uiText('Observed', '观测值')}</TableCell>
+                  <TableCell>{uiText('Result', '结果')}</TableCell>
+                  <TableCell>{uiText('Detail', '详情')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

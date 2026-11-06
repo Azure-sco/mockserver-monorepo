@@ -28,6 +28,7 @@ import { buildTurnPositionMap } from '../lib/scenarioState';
 import { deleteExpectation } from '../lib/expectations';
 import { humanizeError } from '../lib/errorMessage';
 import type { JsonListItem } from '../types';
+import { uiText } from '../lib/dashboardLocale';
 
 /** Pull the expectation id out of a row value, when present. */
 function expectationIdOf(item: JsonListItem): string | null {
@@ -169,7 +170,7 @@ function ExpectationPanel() {
       useDashboardStore.setState((s) => ({
         activeExpectations: s.activeExpectations.filter((e) => e.key !== pendingDelete.key),
       }));
-      setNotification({ message: `Expectation ${id} deleted`, severity: 'success' });
+      setNotification({ message: uiText(`Expectation ${id} deleted`, `已删除 Mock 规则 ${id}`), severity: 'success' });
     } catch (e) {
       setNotification({ message: humanizeError(e).message, severity: 'error' });
     } finally {
@@ -250,11 +251,11 @@ function ExpectationPanel() {
         return next;
       });
       if (failures.length === 0) {
-        setNotification({ message: `Deleted ${succeededKeys.size} expectation${succeededKeys.size === 1 ? '' : 's'}`, severity: 'success' });
+        setNotification({ message: uiText(`Deleted ${succeededKeys.size} expectation${succeededKeys.size === 1 ? '' : 's'}`, `已删除 ${succeededKeys.size} 条 Mock 规则`), severity: 'success' });
       } else if (succeededKeys.size === 0) {
-        setNotification({ message: `Failed to delete ${failures.length} expectation${failures.length === 1 ? '' : 's'}`, severity: 'error' });
+        setNotification({ message: uiText(`Failed to delete ${failures.length} expectation${failures.length === 1 ? '' : 's'}`, `${failures.length} 条 Mock 规则删除失败`), severity: 'error' });
       } else {
-        setNotification({ message: `Deleted ${succeededKeys.size}, ${failures.length} failed`, severity: 'warning' });
+        setNotification({ message: uiText(`Deleted ${succeededKeys.size}, ${failures.length} failed`, `已删除 ${succeededKeys.size} 条，${failures.length} 条删除失败`), severity: 'warning' });
       }
     } finally {
       deletingRef.current = false;
@@ -273,43 +274,43 @@ function ExpectationPanel() {
 
         headerActions={
           <>
-            <Tooltip title="Sort by match priority (highest first)">
+            <Tooltip title={uiText('Sort by match priority (highest first)', '按匹配优先级排序（从高到低）')}>
               <ToggleButton
                 value="priority"
                 selected={sortByPriority}
                 onChange={() => setSortByPriority((prev) => !prev)}
                 size="small"
-                aria-label="Sort by priority"
+                aria-label={uiText('Sort by priority', '按优先级排序')}
                 sx={{ height: 24, px: 0.75, py: 0, textTransform: 'none', gap: 0.25 }}
               >
                 <SortIcon sx={{ fontSize: '1rem' }} />
-                <Typography variant="caption">Priority</Typography>
+                <Typography variant="caption">{uiText('Priority', '优先级')}</Typography>
               </ToggleButton>
             </Tooltip>
-            <Tooltip title="Select multiple expectations to delete at once">
+            <Tooltip title={uiText('Select multiple expectations to delete at once', '选择多条 Mock 规则并批量删除')}>
               <ToggleButton
                 value="select"
                 selected={selectMode}
                 onChange={toggleSelectMode}
                 size="small"
-                aria-label="Select expectations"
+                aria-label={uiText('Select expectations', '选择 Mock 规则')}
                 sx={{ height: 24, px: 0.75, py: 0, textTransform: 'none', gap: 0.25 }}
               >
                 <ChecklistIcon sx={{ fontSize: '1rem' }} />
-                <Typography variant="caption">Select</Typography>
+                <Typography variant="caption">{uiText('Select', '选择')}</Typography>
               </ToggleButton>
             </Tooltip>
-            <Tooltip title="Lint: find expectations that can never match, or will not match as written">
+            <Tooltip title={uiText('Lint: find expectations that can never match, or will not match as written', '检查无法命中或匹配条件有误的 Mock 规则')}>
               <Button
                 size="small"
                 variant="outlined"
                 color="inherit"
                 onClick={() => setLintOpen(true)}
-                aria-label="Lint expectations"
+                aria-label={uiText('Lint expectations', '检查 Mock 规则')}
                 startIcon={<FactCheckIcon sx={{ fontSize: '1rem' }} />}
                 sx={{ height: 24, minWidth: 0, px: 0.75, py: 0, textTransform: 'none', borderColor: 'divider', '& .MuiButton-startIcon': { mr: 0.25 } }}
               >
-                <Typography variant="caption">Lint</Typography>
+                <Typography variant="caption">{uiText('Lint', '规则检查')}</Typography>
               </Button>
             </Tooltip>
           </>
@@ -337,11 +338,11 @@ function ExpectationPanel() {
               indeterminate={someSelected}
               disabled={selectableItems.length === 0}
               onChange={toggleSelectAll}
-              slotProps={{ input: { 'aria-label': 'Select all expectations' } }}
+              slotProps={{ input: { 'aria-label': uiText('Select all expectations', '选择全部 Mock 规则') } }}
               sx={{ p: 0.25 }}
             />
             <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
-              {effectiveSelected.length} selected
+              {uiText(`${effectiveSelected.length} selected`, `已选择 ${effectiveSelected.length} 条`)}
             </Typography>
             <Button
               size="small"
@@ -352,26 +353,26 @@ function ExpectationPanel() {
               onClick={() => setBulkDeleteConfirm(true)}
               sx={{ height: 24, py: 0, textTransform: 'none' }}
             >
-              Delete selected
+              {uiText('Delete selected', '删除所选规则')}
             </Button>
           </Box>
         )}
         {shown.length === 0 ? (
           expectations.length === 0 ? (
             <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-              No active expectations —{' '}
+              {uiText('No active expectations — ', '暂无生效规则。可以')}
               <Link component="button" type="button" onClick={() => setView('composer')} sx={{ verticalAlign: 'baseline' }}>
-                add one in the Mocks composer
+                {uiText('add one in the Mocks composer', '前往编辑器创建规则')}
               </Link>
-              , or{' '}
+              {uiText(', or ', '，或')}
               <Link component="button" type="button" onClick={() => setOpenApiOpen(true)} sx={{ verticalAlign: 'baseline' }}>
-                import an OpenAPI spec
+                {uiText('import an OpenAPI spec', '导入 OpenAPI 规范')}
               </Link>
-              .
+              {uiText('.', '。')}
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-              No matching expectations
+              {uiText('No matching expectations', '没有符合条件的 Mock 规则')}
             </Typography>
           )
         ) : (
@@ -405,21 +406,21 @@ function ExpectationPanel() {
       </Panel>
       <ConfirmDialog
         open={pendingDelete !== null}
-        title="Delete this expectation?"
+        title={uiText('Delete this expectation?', '删除这条 Mock 规则？')}
         message={
           pendingDelete
-            ? `Remove expectation ${expectationIdOf(pendingDelete) ?? ''} from the server. Recorded requests and logs are kept. This cannot be undone.`
+            ? uiText(`Remove expectation ${expectationIdOf(pendingDelete) ?? ''} from the server. Recorded requests and logs are kept. This cannot be undone.`, `此操作会删除服务器上的 Mock 规则 ${expectationIdOf(pendingDelete) ?? ''}，保留请求记录和日志。删除后无法撤销。`)
             : ''
         }
-        confirmLabel="Delete"
+        confirmLabel={uiText('Delete', '删除')}
         onConfirm={() => { void handleConfirmDelete(); }}
         onClose={() => setPendingDelete(null)}
       />
       <ConfirmDialog
         open={bulkDeleteConfirm}
-        title={`Delete ${effectiveSelected.length} expectation${effectiveSelected.length === 1 ? '' : 's'}?`}
-        message={`Remove the ${effectiveSelected.length} selected expectation${effectiveSelected.length === 1 ? '' : 's'} from the server. Recorded requests and logs are kept. This cannot be undone.`}
-        confirmLabel="Delete selected"
+        title={uiText(`Delete ${effectiveSelected.length} expectation${effectiveSelected.length === 1 ? '' : 's'}?`, `删除 ${effectiveSelected.length} 条 Mock 规则？`)}
+        message={uiText(`Remove the ${effectiveSelected.length} selected expectation${effectiveSelected.length === 1 ? '' : 's'} from the server. Recorded requests and logs are kept. This cannot be undone.`, `此操作会删除服务器上选中的 ${effectiveSelected.length} 条 Mock 规则，保留请求记录和日志。删除后无法撤销。`)}
+        confirmLabel={uiText('Delete selected', '删除所选规则')}
         onConfirm={() => { void handleBulkDelete(); }}
         onClose={() => setBulkDeleteConfirm(false)}
       />

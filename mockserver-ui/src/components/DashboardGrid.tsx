@@ -7,6 +7,7 @@ import { useDragResize } from '../hooks/useDragResize';
 import LogPanel from './LogPanel';
 import ExpectationPanel from './ExpectationPanel';
 import RequestPanel from './RequestPanel';
+import { uiText } from '../lib/dashboardLocale';
 
 // Keep at least 15% / at most 85% of each axis for a panel so no quadrant can be
 // dragged to nothing.
@@ -39,7 +40,7 @@ export default function DashboardGrid() {
     min: SPLIT_MIN,
     max: SPLIT_MAX,
     storageKey: 'mockserver-dashboard-grid-col',
-    ariaLabel: 'Resize dashboard columns',
+    ariaLabel: uiText('Resize dashboard columns', '调整面板列宽'),
     computeFromPointer: (event) => {
       const rect = gridRef.current?.getBoundingClientRect();
       if (!rect || rect.width === 0) return 0.5;
@@ -52,7 +53,7 @@ export default function DashboardGrid() {
     min: SPLIT_MIN,
     max: SPLIT_MAX,
     storageKey: 'mockserver-dashboard-grid-row',
-    ariaLabel: 'Resize dashboard rows',
+    ariaLabel: uiText('Resize dashboard rows', '调整面板行高'),
     computeFromPointer: (event) => {
       const rect = gridRef.current?.getBoundingClientRect();
       if (!rect || rect.height === 0) return 0.5;

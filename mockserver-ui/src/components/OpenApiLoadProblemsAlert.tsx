@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { OpenApiLoadProblem } from '../lib/openapiImport';
 import { monospaceFontFamily } from '../theme';
+import { uiText } from '../lib/dashboardLocale';
 
 /** Enough to act on; the import response holds every problem. */
 const MAX_SHOWN = 50;
@@ -36,7 +37,7 @@ export default function OpenApiLoadProblemsAlert({ problems, noExpectationsCreat
     }
   }
   const count = problems.length;
-  const problemCount = `${count} Problem${count === 1 ? '' : 's'}`;
+  const problemCount = uiText(`${count} Problem${count === 1 ? '' : 's'}`, `${count} 个问题`);
   return (
     <Alert
       severity={noExpectationsCreated ? 'error' : 'warning'}
@@ -46,13 +47,13 @@ export default function OpenApiLoadProblemsAlert({ problems, noExpectationsCreat
     >
       <AlertTitle>
         {noExpectationsCreated
-          ? `No Expectations Created: Spec Has ${problemCount}`
-          : `Spec Loaded With ${problemCount}`}
+          ? uiText(`No Expectations Created: Spec Has ${problemCount}`, `未创建 Mock 规则，规范包含 ${problemCount}`)
+          : uiText(`Spec Loaded With ${problemCount}`, `规范已加载，发现 ${problemCount}`)}
       </AlertTitle>
       <Typography variant="body2" sx={{ mb: 1 }}>
         {noExpectationsCreated
-          ? 'These parts of the spec break the OpenAPI rules. Fix them and import the spec again.'
-          : 'These parts of the spec break the OpenAPI rules, so the expectations generated from them may not behave as expected.'}
+          ? uiText('These parts of the spec break the OpenAPI rules. Fix them and import the spec again.', '这些内容不符合 OpenAPI 规范。请修正后重新导入。')
+          : uiText('These parts of the spec break the OpenAPI rules, so the expectations generated from them may not behave as expected.', '这些内容不符合 OpenAPI 规范，由此生成的 Mock 规则可能与预期不符。')}
       </Typography>
       {[...groups.entries()].map(([kindLabel, group]) => (
         <Box key={kindLabel} sx={{ mb: 1 }}>
@@ -73,7 +74,7 @@ export default function OpenApiLoadProblemsAlert({ problems, noExpectationsCreat
                 </Typography>
                 {problem.hint && (
                   <Typography variant="caption" color="text.secondary" component="p">
-                    Hint: {problem.hint}
+                    {uiText('Hint: ', '提示：')}{problem.hint}
                   </Typography>
                 )}
               </Box>
@@ -83,7 +84,7 @@ export default function OpenApiLoadProblemsAlert({ problems, noExpectationsCreat
       ))}
       {count > MAX_SHOWN && (
         <Typography variant="caption" component="p">
-          {count - MAX_SHOWN} more not shown; PUT /mockserver/openapi?includeLoadProblems=true returns every problem.
+          {count - MAX_SHOWN}{uiText(' more not shown; PUT /mockserver/openapi?includeLoadProblems=true returns every problem.', ' 个问题未显示。可通过 PUT /mockserver/openapi?includeLoadProblems=true 查看全部问题。')}
         </Typography>
       )}
     </Alert>

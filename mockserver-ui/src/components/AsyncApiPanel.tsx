@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useMemo, useState, type ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -129,12 +130,12 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
       : 'default';
 
   const connectionLabel = unavailable
-    ? 'unavailable'
+    ? uiText('unavailable', "不可用")
     : status?.loaded
       ? brokerAttached
-        ? 'broker connected'
-        : 'spec loaded, no broker'
-      : 'no spec loaded';
+        ? uiText('broker connected', "已连接消息代理")
+        : uiText('spec loaded, no broker', "已加载规范，尚未连接消息代理")
+      : uiText('no spec loaded', "暂未加载规范");
 
   return (
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
@@ -142,7 +143,7 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <HubIcon fontSize="small" color="primary" />
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          AsyncAPI Broker Mock
+          {uiText("AsyncAPI Broker Mock", "AsyncAPI 消息代理 Mock")}
         </Typography>
         <Chip
           size="small"
@@ -158,24 +159,22 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
           />
         )}
         <Box sx={{ flex: 1 }} />
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh async status">
+        <Tooltip title={uiText("Refresh now", "立即刷新")}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText("Refresh async status", "刷新异步服务状态")}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        Live status of the AsyncAPI broker mock — loaded spec, active channels,
-        and messages recorded from broker subscriptions. Load a spec via the Tools
-        menu or the <code>PUT /mockserver/asyncapi</code> endpoint.
+        {uiText("Live status of the AsyncAPI broker mock — loaded spec, active channels, and messages recorded from broker subscriptions. Load a spec via the Tools menu or the ", "查看 AsyncAPI 消息代理 Mock 的实时状态，包括已加载的规范、生效的通道，以及订阅消息的记录。可通过导入工具或 ")}<code>PUT /mockserver/asyncapi</code>{uiText(" endpoint.", " 端点加载规范。")}
       </Typography>
 
       {unavailable && (
         <Alert severity="warning" sx={{ mb: 1.5 }}>
-          <AlertTitle>Module Unavailable</AlertTitle>
+          <AlertTitle>{uiText("Module Unavailable", "模块不可用")}</AlertTitle>
           {unavailableMessage ??
-            "The AsyncAPI module (mockserver-async) is not on this server's classpath. Broker mocking requires the mockserver-async jar."}
+            uiText("The AsyncAPI module (mockserver-async) is not on this server's classpath. Broker mocking requires the mockserver-async jar.", "此服务器的类路径中没有 AsyncAPI 模块。模拟消息代理需要 mockserver-async JAR。")}
         </Alert>
       )}
 
@@ -184,33 +183,33 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
           severity="error"
           sx={{ mb: 1.5 }}
           action={
-            <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry">
+            <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText("Retry", "重试")}>
               <RefreshIcon fontSize="small" />
             </IconButton>
           }
         >
-          <AlertTitle>Could not load async status</AlertTitle>
+          <AlertTitle>{uiText("Could not load async status", "无法加载 AsyncAPI 状态")}</AlertTitle>
           {loadError}
         </Alert>
       )}
 
       {/* Channels table */}
       <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-        Channels
+        {uiText("Channels", "通道")}
       </Typography>
       <Paper variant="outlined" sx={{ p: 1.25, mb: 2 }}>
         {channels.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            No channels loaded. Load an AsyncAPI spec to start mocking broker channels.
+            {uiText("No channels loaded. Load an AsyncAPI spec to start mocking broker channels.", "暂未加载通道。加载 AsyncAPI 规范后即可模拟消息代理的通道。")}
           </Typography>
         ) : (
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Channel / Topic</TableCell>
-                  <TableCell align="center">Schema</TableCell>
-                  <TableCell align="right">Examples</TableCell>
+                  <TableCell>{uiText("Channel / Topic", "通道 / 主题")}</TableCell>
+                  <TableCell align="center">{uiText("Schema", "数据结构")}</TableCell>
+                  <TableCell align="right">{uiText("Examples", "示例")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -244,17 +243,17 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
         <Box sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
           <Chip
             size="small"
-            label={`${status.publishers ?? 0} publisher(s)`}
+            label={uiText(`${status.publishers ?? 0} publisher(s)`, `${status.publishers ?? 0} 个发布者`)}
             variant="outlined"
           />
           <Chip
             size="small"
-            label={`${status.subscribers ?? 0} subscriber(s)`}
+            label={uiText(`${status.subscribers ?? 0} subscriber(s)`, `${status.subscribers ?? 0} 个订阅者`)}
             variant="outlined"
           />
           <Chip
             size="small"
-            label={`${recordedMessages.length} recorded message(s)`}
+            label={uiText(`${recordedMessages.length} recorded message(s)`, `已记录 ${recordedMessages.length} 条消息`)}
             color={recordedMessages.length > 0 ? 'info' : 'default'}
             variant="outlined"
           />
@@ -264,13 +263,13 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
       {/* Recorded messages */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          Recorded Messages
+          {uiText("Recorded Messages", "消息记录")}
         </Typography>
         <Box sx={{ flex: 1 }} />
         <TextField
           size="small"
-          label="Filter"
-          placeholder="channel, key, or payload..."
+          label={uiText("Filter", "筛选")}
+          placeholder={uiText("channel, key, or payload...", "通道、键或消息内容…")}
           value={filterText}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value)}
           sx={{ width: { xs: 140, sm: 220 } }}
@@ -280,19 +279,19 @@ export default function AsyncApiPanel({ connectionParams }: AsyncApiPanelProps) 
         {filteredMessages.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
             {status?.loaded
-              ? 'No messages recorded yet. Enable consumers with "consume": true in your brokerConfig, then publish messages to see them here.'
-              : 'Load an AsyncAPI spec with consumer subscriptions to see recorded messages.'}
+              ? uiText('No messages recorded yet. Enable consumers with "consume": true in your brokerConfig, then publish messages to see them here.', "暂无消息记录。请在 brokerConfig 中设置 \"consume\": true 启用消费者，再发布消息查看。")
+              : uiText('Load an AsyncAPI spec with consumer subscriptions to see recorded messages.', "加载含有消费者订阅的 AsyncAPI 规范后，即可查看记录的消息。")}
           </Typography>
         ) : (
           <TableContainer sx={{ maxHeight: 400 }}>
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Channel</TableCell>
-                  <TableCell>Key</TableCell>
-                  <TableCell>Payload</TableCell>
-                  <TableCell align="center">Valid</TableCell>
-                  <TableCell>Time</TableCell>
+                  <TableCell>{uiText("Channel", "通道")}</TableCell>
+                  <TableCell>{uiText("Key", "键")}</TableCell>
+                  <TableCell>{uiText("Payload", "消息内容")}</TableCell>
+                  <TableCell align="center">{uiText("Valid", "是否有效")}</TableCell>
+                  <TableCell>{uiText("Time", "时间")}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

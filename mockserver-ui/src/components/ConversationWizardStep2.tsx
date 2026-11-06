@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -82,7 +83,7 @@ function outputSchemaWarning(v: string | undefined): string | undefined {
     JSON.parse(v);
     return undefined;
   } catch {
-    return 'Invalid JSON';
+    return uiText('Invalid JSON', "无效的 JSON");
   }
 }
 
@@ -199,12 +200,12 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
         <Card key={i} variant="outlined">
           <CardContent sx={{ pb: '12px !important' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="subtitle2">Turn {i}</Typography>
+              <Typography variant="subtitle2">{uiText("Turn ", "对话轮次 ")}{i}</Typography>
               <IconButton
                 size="small"
                 onClick={() => removeTurn(i)}
                 disabled={turns.length <= 1}
-                aria-label={`Remove turn ${i}`}
+                aria-label={uiText(`Remove turn ${i}`, `移除第 ${i} 轮`)}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -212,7 +213,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
 
             {/* Predicates */}
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-              Match predicates
+              {uiText("Match predicates", "匹配条件")}
             </Typography>
 
             {/* Preview pills */}
@@ -220,7 +221,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
 
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1, mb: 1.5 }}>
               <TextField
-                label="Turn index"
+                label={uiText("Turn index", "轮次索引")}
                 size="small"
                 type="number"
                 value={turn.predicates.turnIndex ?? ''}
@@ -234,7 +235,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 sx={{ width: { xs: '100%', sm: 110 } }}
               />
               <TextField
-                label="Latest msg contains"
+                label={uiText("Latest msg contains", "最新消息包含")}
                 size="small"
                 value={turn.predicates.latestMessageContains ?? ''}
                 onChange={(e) =>
@@ -245,7 +246,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 sx={{ flex: 1, minWidth: 160 }}
               />
               <TextField
-                label="Latest msg regex"
+                label={uiText("Latest msg regex", "最新消息正则表达式")}
                 size="small"
                 value={turn.predicates.latestMessageMatches ?? ''}
                 onChange={(e) =>
@@ -256,7 +257,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 sx={{ flex: 1, minWidth: 160 }}
               />
               <TextField
-                label="Latest msg role"
+                label={uiText("Latest msg role", "最新消息角色")}
                 size="small"
                 select
                 value={turn.predicates.latestMessageRole ?? ''}
@@ -268,7 +269,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 }
                 sx={{ width: { xs: '100%', sm: 130 } }}
               >
-                <MenuItem value="">None</MenuItem>
+                <MenuItem value="">{uiText("None", "无")}</MenuItem>
                 {ROLES.map((r) => (
                   <MenuItem key={r} value={r}>
                     {r}
@@ -276,7 +277,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 ))}
               </TextField>
               <TextField
-                label="Contains tool result for"
+                label={uiText("Contains tool result for", "包含此工具的执行结果")}
                 size="small"
                 value={turn.predicates.containsToolResultFor ?? ''}
                 onChange={(e) =>
@@ -287,7 +288,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                 sx={{ flex: 1, minWidth: 160 }}
               />
               <TextField
-                label="Semantic match (exploratory)"
+                label={uiText("Semantic match (exploratory)", "语义匹配（实验性）")}
                 size="small"
                 value={turn.predicates.semanticMatchAgainst ?? ''}
                 onChange={(e) =>
@@ -295,7 +296,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                     semanticMatchAgainst: e.target.value || undefined,
                   })
                 }
-                helperText="LLM-judged; off unless enabled server-side"
+                helperText={uiText("LLM-judged; off unless enabled server-side", "由 LLM 判定。需要在服务器端启用。")}
                 sx={{ flex: 1, minWidth: 200 }}
               />
             </Box>
@@ -309,20 +310,20 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                   size="small"
                 />
               }
-              label="Normalise prompt matching"
+              label={uiText("Normalise prompt matching", "匹配前规范化提示词")}
               sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' }, mb: 0.5 }}
             />
             <Collapse in={turn.predicates.normalization != null} unmountOnExit>
               <Box sx={{ pl: 1.5, mb: 1.5 }}>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                  Applied to the latest message before the contains / regex predicates match — deterministic, so it never makes a test flaky.
+                  {uiText("Applied to the latest message before the contains / regex predicates match — deterministic, so it never makes a test flaky.", "在检查最新消息是否满足包含或正则条件之前进行处理。规则固定，不会引入随机性。")}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
                   {([
-                    ['collapseWhitespace', 'Collapse whitespace'],
-                    ['lowercase', 'Lowercase'],
-                    ['sortJsonKeys', 'Sort JSON keys'],
-                    ['dropBuiltInVolatileFields', 'Drop timestamps / UUIDs / ids'],
+                    ['collapseWhitespace', uiText('Collapse whitespace', "合并连续空白")],
+                    ['lowercase', uiText('Lowercase', "转为小写")],
+                    ['sortJsonKeys', uiText('Sort JSON keys', "对 JSON 键排序")],
+                    ['dropBuiltInVolatileFields', uiText('Drop timestamps / UUIDs / ids', "移除时间戳、UUID 和 ID")],
                   ] as [keyof NormalizationDraft, string][]).map(([key, label]) => (
                     <FormControlLabel
                       key={key}
@@ -339,7 +340,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                   ))}
                 </Box>
                 <TextField
-                  label="Drop JSON fields (comma-separated)"
+                  label={uiText("Drop JSON fields (comma-separated)", "删除指定 JSON 字段（用逗号分隔）")}
                   size="small"
                   fullWidth
                   value={(turn.predicates.normalization?.dropVolatileFields ?? []).join(', ')}
@@ -357,11 +358,11 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
 
             {/* Response */}
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-              Response
+              {uiText("Response", "响应")}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <TextField
-                label="Text"
+                label={uiText("Text", "文本")}
                 size="small"
                 fullWidth
                 multiline
@@ -375,23 +376,23 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    Tool Calls
+                    {uiText("Tool Calls", "工具调用")}
                   </Typography>
-                  <IconButton size="small" onClick={() => addToolCall(i)} aria-label="Add tool call">
+                  <IconButton size="small" onClick={() => addToolCall(i)} aria-label={uiText("Add tool call", "添加工具调用")}>
                     <AddIcon sx={{ fontSize: '0.875rem' }} />
                   </IconButton>
                 </Box>
                 {turn.response.toolCalls.map((tc, j) => (
                   <Box key={j} sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'flex-start' }}>
                     <TextField
-                      label="Name"
+                      label={uiText("Name", "名称")}
                       size="small"
                       value={tc.name}
                       onChange={(e) => updateToolCall(i, j, { name: e.target.value })}
                       sx={{ flex: 1 }}
                     />
                     <TextField
-                      label="Arguments"
+                      label={uiText("Arguments", "参数")}
                       size="small"
                       value={tc.arguments ?? ''}
                       onChange={(e) => updateToolCall(i, j, { arguments: e.target.value })}
@@ -400,7 +401,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                     <IconButton
                       size="small"
                       onClick={() => removeToolCall(i, j)}
-                      aria-label="Remove tool call"
+                      aria-label={uiText("Remove tool call", "移除工具调用")}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -410,7 +411,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
 
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <TextField
-                  label="Stop reason"
+                  label={uiText("Stop reason", "停止原因")}
                   size="small"
                   value={turn.response.stopReason}
                   onChange={(e) => updateResponse(i, { stopReason: e.target.value })}
@@ -424,17 +425,17 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                       size="small"
                     />
                   }
-                  label="Streaming"
+                  label={uiText("Streaming", "流式传输")}
                   sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' } }}
                 />
               </Box>
               <Collapse in={turn.response.streaming} unmountOnExit>
                 <Box sx={{ pl: 1.5, mb: 1, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ width: '100%', mb: 0.5 }}>
-                    Streaming physics — controls the timing of SSE token delivery.
+                    {uiText("Streaming physics — controls the timing of SSE token delivery.", "设置 SSE 传输令牌的时序。")}
                   </Typography>
                   <TextField
-                    label="Time to first token (ms)"
+                    label={uiText("Time to first token (ms)", "首个令牌等待时间（毫秒）")}
                     size="small"
                     type="number"
                     value={turn.response.streamingPhysics?.timeToFirstToken ?? ''}
@@ -448,7 +449,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                     sx={{ width: { xs: '100%', sm: 180 } }}
                   />
                   <TextField
-                    label="Tokens/sec"
+                    label={uiText("Tokens/sec", "令牌数/秒")}
                     size="small"
                     type="number"
                     value={turn.response.streamingPhysics?.tokensPerSecond ?? ''}
@@ -464,7 +465,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                     sx={{ width: { xs: '100%', sm: 120 } }}
                   />
                   <TextField
-                    label="Jitter (0-1)"
+                    label={uiText("Jitter (0-1)", "抖动（0–1）")}
                     size="small"
                     type="number"
                     value={turn.response.streamingPhysics?.jitter ?? ''}
@@ -485,7 +486,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
 
             {/* Structured output schema */}
             <TextField
-              label="Output schema (JSON Schema for structured output)"
+              label={uiText("Output schema (JSON Schema for structured output)", "输出结构（用于结构化输出的 JSON Schema）")}
               size="small"
               fullWidth
               multiline
@@ -495,7 +496,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
               onChange={(e) => updateResponse(i, { outputSchema: e.target.value || undefined })}
               placeholder='{"type":"object","properties":{"answer":{"type":"string"}}}'
               error={!!outputSchemaWarning(turn.response.outputSchema)}
-              helperText={outputSchemaWarning(turn.response.outputSchema) ?? 'Optional JSON Schema to validate the response text against'}
+              helperText={outputSchemaWarning(turn.response.outputSchema) ?? uiText('Optional JSON Schema to validate the response text against', "可选。使用 JSON Schema 验证响应文本。")}
               sx={{ mt: 0.5 }}
             />
 
@@ -508,13 +509,13 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                   size="small"
                 />
               }
-              label="Inject fault / chaos"
+              label={uiText("Inject fault / chaos", "故障注入")}
               sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' }, mt: 0.5 }}
             />
             <Collapse in={turn.chaos != null} unmountOnExit>
               <Box sx={{ pl: 1.5, mb: 1, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
                 <TextField
-                  label="Error status"
+                  label={uiText("Error status", "错误状态码")}
                   size="small"
                   type="number"
                   value={turn.chaos?.errorStatus ?? ''}
@@ -531,7 +532,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                   sx={{ width: { xs: '100%', sm: 110 } }}
                 />
                 <TextField
-                  label="Error prob (0-1)"
+                  label={uiText("Error prob (0-1)", "错误概率（0–1）")}
                   size="small"
                   type="number"
                   value={turn.chaos?.errorProbability ?? ''}
@@ -541,18 +542,18 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                   sx={{ width: { xs: '100%', sm: 130 } }}
                 />
                 <TextField
-                  label="Truncate"
+                  label={uiText("Truncate", "截断")}
                   size="small"
                   select
                   value={turn.chaos?.truncateMode ?? 'NONE'}
                   onChange={(e) => updateChaos(i, { truncateMode: e.target.value as ChaosDraft['truncateMode'] })}
                   sx={{ width: { xs: '100%', sm: 130 } }}
                 >
-                  <MenuItem value="NONE">None</MenuItem>
-                  <MenuItem value="MID_STREAM">Mid-stream</MenuItem>
+                  <MenuItem value="NONE">{uiText("None", "无")}</MenuItem>
+                  <MenuItem value="MID_STREAM">{uiText("Mid-stream", "流式传输中途")}</MenuItem>
                 </TextField>
                 <TextField
-                  label="Truncate frac"
+                  label={uiText("Truncate frac", "截断比例")}
                   size="small"
                   type="number"
                   value={turn.chaos?.truncateAtFraction ?? ''}
@@ -569,17 +570,17 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
                       onChange={(e) => updateChaos(i, { malformedSse: e.target.checked })}
                     />
                   }
-                  label="Malformed SSE"
+                  label={uiText("Malformed SSE", "生成格式错误的 SSE")}
                   sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' } }}
                 />
                 <TextField
-                  label="Seed"
+                  label={uiText("Seed", "随机种子")}
                   size="small"
                   type="number"
                   value={turn.chaos?.seed ?? ''}
                   onChange={(e) => { const n = parseInt(e.target.value, 10); updateChaos(i, { seed: e.target.value === '' || Number.isNaN(n) ? undefined : n }); }}
                   sx={{ width: { xs: '100%', sm: 100 } }}
-                  helperText="reproducible prob"
+                  helperText={uiText("reproducible prob", "用于复现随机故障")}
                 />
               </Box>
             </Collapse>
@@ -594,7 +595,7 @@ export default function ConversationWizardStep2({ turns, onTurnsChange }: Step2P
         onClick={addTurn}
         sx={{ alignSelf: 'flex-start', textTransform: 'none' }}
       >
-        Add turn
+        {uiText("Add turn", "添加一轮")}
       </Button>
     </Box>
   );

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -122,17 +123,16 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="pact-dialog-title">
-      <DialogTitle id="pact-dialog-title">Pact Contract</DialogTitle>
+      <DialogTitle id="pact-dialog-title">{uiText('Pact Contract', 'Pact 契约')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Export the active response expectations as a Pact v3 consumer contract for publishing to
-          a Pact Broker / PactFlow.
+          {uiText('Export the active response expectations as a Pact v3 consumer contract for publishing to a Pact Broker / PactFlow.', '将生效的响应规则导出为 Pact v3 消费者契约，可发布到 Pact Broker 或 PactFlow。')}
         </Typography>
         <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
           <TextField
             value={consumer}
             onChange={(e) => setConsumer(e.target.value)}
-            label="Consumer"
+            label={uiText('Consumer', '消费者')}
             placeholder="consumer"
             size="small"
             fullWidth
@@ -140,7 +140,7 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
           <TextField
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
-            label="Provider"
+            label={uiText('Provider', '提供方')}
             placeholder="provider"
             size="small"
             fullWidth
@@ -150,7 +150,7 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
         {pactText !== null && (
           <TextField
             value={pactText}
-            label="Pact contract (JSON)"
+            label={uiText('Pact contract (JSON)', 'Pact 契约（JSON）')}
             multiline
             minRows={10}
             fullWidth
@@ -160,14 +160,14 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Verify a Contract</Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{uiText('Verify a Contract', '验证契约')}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Paste a Pact contract to check it against the registered expectations.
+          {uiText('Paste a Pact contract to check it against the registered expectations.', '粘贴 Pact 契约，检查已注册的规则是否满足契约。')}
         </Typography>
         <TextField
           value={verifyText}
           onChange={(e) => setVerifyText(e.target.value)}
-          label="Pact contract to verify (JSON)"
+          label={uiText('Pact contract to verify (JSON)', '待验证的 Pact 契约（JSON）')}
           placeholder={'{\n  "consumer": { "name": "..." },\n  "provider": { "name": "..." },\n  "interactions": [ ... ]\n}'}
           multiline
           minRows={6}
@@ -178,7 +178,7 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
         {verifyError !== null && <HumanErrorAlert error={verifyError} sx={{ mt: 1 }} />}
         {verifyResult !== null && (
           <Alert severity={verifyResult.verified ? 'success' : 'warning'} sx={{ mt: 1 }}>
-            {verifyResult.verified ? 'Contract verified — all interactions are satisfied.' : 'Not verified — some interactions are not satisfied.'}
+            {verifyResult.verified ? uiText('Contract verified — all interactions are satisfied.', '契约验证通过，所有交互均满足要求。') : uiText('Not verified — some interactions are not satisfied.', '验证未通过，部分交互不满足要求。')}
             <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5, maxHeight: 220, overflow: 'auto' }}>
               {JSON.stringify(verifyResult.result, null, 2)}
             </Box>
@@ -186,20 +186,20 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
         )}
         <Box sx={{ mt: 1 }}>
           <Button variant="outlined" size="small" onClick={() => void handleVerify()} disabled={verifyBusy || !verifyText.trim()}>
-            {verifyBusy ? 'Verifying…' : 'Verify contract'}
+            {verifyBusy ? uiText('Verifying…', '正在验证…') : uiText('Verify contract', '验证契约')}
           </Button>
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Import a Contract</Typography>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>{uiText('Import a Contract', '导入契约')}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Paste a Pact contract to register its interactions as expectations.
+          {uiText('Paste a Pact contract to register its interactions as expectations.', '粘贴 Pact 契约，将其中的交互注册为 Mock 规则。')}
         </Typography>
         <TextField
           value={importText}
           onChange={(e) => setImportText(e.target.value)}
-          label="Pact contract to import (JSON)"
+          label={uiText('Pact contract to import (JSON)', '待导入的 Pact 契约（JSON）')}
           placeholder={'{\n  "consumer": { "name": "..." },\n  "provider": { "name": "..." },\n  "interactions": [ ... ]\n}'}
           multiline
           minRows={6}
@@ -211,8 +211,8 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
         {importResult !== null && (
           <Alert severity="success" sx={{ mt: 1 }}>
             {importResult.length > 0
-              ? `Imported ${importResult.length} expectation${importResult.length === 1 ? '' : 's'}.`
-              : 'Import succeeded.'}
+              ? uiText(`Imported ${importResult.length} expectation${importResult.length === 1 ? '' : 's'}.`, `已导入 ${importResult.length} 条 Mock 规则。`)
+              : uiText('Import succeeded.', '导入成功。')}
             {importResult.length > 0 && (
               <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5, maxHeight: 220, overflow: 'auto' }}>
                 {JSON.stringify(importResult, null, 2)}
@@ -222,16 +222,16 @@ export default function PactExportDialog({ open, onClose, connectionParams }: Pa
         )}
         <Box sx={{ mt: 1 }}>
           <Button variant="outlined" size="small" onClick={() => void handleImport()} disabled={importBusy || !importText.trim()}>
-            {importBusy ? 'Importing…' : 'Import contract'}
+            {importBusy ? uiText('Importing…', '正在导入…') : uiText('Import contract', '导入契约')}
           </Button>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        {pactText !== null && <Button onClick={handleCopy}>Copy</Button>}
-        {pactText !== null && <Button onClick={handleDownload}>Download</Button>}
+        <Button onClick={handleClose}>{uiText('Close', '关闭')}</Button>
+        {pactText !== null && <Button onClick={handleCopy}>{uiText('Copy', '复制')}</Button>}
+        {pactText !== null && <Button onClick={handleDownload}>{uiText('Download', '下载')}</Button>}
         <Button variant="contained" onClick={() => void handleExport()} disabled={busy}>
-          {busy ? 'Exporting…' : 'Export'}
+          {busy ? uiText('Exporting…', '正在导出…') : uiText('Export', '导出')}
         </Button>
       </DialogActions>
     </Dialog>

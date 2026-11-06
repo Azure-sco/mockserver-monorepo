@@ -3,6 +3,7 @@ import { useDashboardStore } from '../store';
 import type { ConnectionParams } from './useConnectionParams';
 import type { DebugMismatchResult } from '../types';
 import { buildBaseUrl } from '../lib/mcpClient';
+import { uiText } from '../lib/dashboardLocale';
 
 export function useDebugMismatch(params: ConnectionParams) {
   const openDebugMismatch = useDashboardStore((s) => s.openDebugMismatch);
@@ -37,20 +38,20 @@ export function useDebugMismatch(params: ConnectionParams) {
           const reason = data?.error?.trim() || text.trim();
           setError(
             reason
-              ? `Request failed (${response.status}): ${reason}`
-              : `Request failed: ${response.status}`,
+              ? uiText(`Request failed (${response.status}): ${reason}`, `请求失败（${response.status}）：${reason}`)
+              : uiText(`Request failed: ${response.status}`, `请求失败（${response.status}）`),
           );
           return;
         }
         if (!data) {
-          setError('Received an unexpected response from MockServer');
+          setError(uiText('Received an unexpected response from MockServer', 'MockServer 返回了意外的响应'));
           return;
         }
         // Attach the original request so the dialog can offer "Create Expectation"
         data.unmatchedRequest = request;
         openDebugMismatch(data);
       } catch {
-        setError('Failed to connect to MockServer');
+        setError(uiText('Failed to connect to MockServer', '无法连接到 MockServer'));
       }
     },
     [params, openDebugMismatch, setLoading, setError],

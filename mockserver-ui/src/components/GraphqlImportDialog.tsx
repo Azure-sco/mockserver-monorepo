@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -58,17 +59,15 @@ export default function GraphqlImportDialog({ open, onClose, connectionParams }:
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="graphql-dialog-title">
-      <DialogTitle id="graphql-dialog-title">Import GraphQL Schema</DialogTitle>
+      <DialogTitle id="graphql-dialog-title">{uiText("Import GraphQL Schema", "导入 GraphQL Schema")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Paste a GraphQL SDL schema. MockServer generates an expectation that matches GraphQL
-          queries posted to the endpoint against the schema and responds with schema-shaped mock
-          data.
+          {uiText("Paste a GraphQL SDL schema. MockServer generates an expectation that matches GraphQL queries posted to the endpoint against the schema and responds with schema-shaped mock data.", "粘贴 GraphQL SDL Schema。MockServer 会生成一条规则，按 Schema 匹配提交到端点的 GraphQL 查询，并返回符合 Schema 的模拟数据。")}
         </Typography>
         <TextField
           value={path}
           onChange={(e) => setPath(e.target.value)}
-          label="Endpoint path"
+          label={uiText("Endpoint path", "端点路径")}
           placeholder="/graphql"
           fullWidth
           size="small"
@@ -89,18 +88,18 @@ export default function GraphqlImportDialog({ open, onClose, connectionParams }:
         )}
         {createdCount !== null && (
           <Alert severity="success" sx={{ mt: 1 }}>
-            Imported {createdCount} expectation{createdCount === 1 ? '' : 's'}.
+            {uiText("Imported ", "已导入 ")}{createdCount}{uiText(" expectation", " 条规则")}{createdCount === 1 ? '' : uiText('s', "")}.
           </Alert>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{uiText("Close", "关闭")}</Button>
         <Button
           variant="contained"
           onClick={() => void handleImport()}
           disabled={busy || schema.trim().length === 0}
         >
-          {busy ? 'Importing…' : 'Import'}
+          {busy ? uiText('Importing…', "正在导入…") : uiText('Import', "导入")}
         </Button>
       </DialogActions>
     </Dialog>

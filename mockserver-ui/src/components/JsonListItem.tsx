@@ -76,6 +76,7 @@ interface JsonListItemProps {
 }
 
 import { PROVIDER_DISPLAY } from '../lib/clientFilters';
+import { uiText } from '../lib/dashboardLocale';
 
 // Re-use the canonical provider display map from clientFilters
 const PROVIDER_LABELS = PROVIDER_DISPLAY;
@@ -135,17 +136,17 @@ function describedRequestParts(description: unknown): { method: string | null; p
 // label. Used to give non-HTTP expectations (gRPC / spec-derived matchers with
 // no method+path) a meaningful row summary instead of repeating the id.
 const ACTION_LABELS: ReadonlyArray<readonly [string, string]> = [
-  ['httpResponse', 'HTTP response'],
-  ['httpResponseTemplate', 'response template'],
-  ['httpResponseClassCallback', 'response callback'],
-  ['httpResponseObjectCallback', 'response callback'],
-  ['httpForward', 'forward'],
-  ['httpForwardTemplate', 'forward template'],
-  ['httpForwardClassCallback', 'forward callback'],
-  ['httpForwardObjectCallback', 'forward callback'],
-  ['httpOverrideForwardedRequest', 'override forward'],
-  ['httpError', 'error'],
-  ['httpLlmResponse', 'LLM response'],
+  ['httpResponse', uiText('HTTP response', 'HTTP 响应')],
+  ['httpResponseTemplate', uiText('response template', '响应模板')],
+  ['httpResponseClassCallback', uiText('response callback', '响应回调')],
+  ['httpResponseObjectCallback', uiText('response callback', '响应回调')],
+  ['httpForward', uiText('forward', '转发')],
+  ['httpForwardTemplate', uiText('forward template', '转发模板')],
+  ['httpForwardClassCallback', uiText('forward callback', '转发回调')],
+  ['httpForwardObjectCallback', uiText('forward callback', '转发回调')],
+  ['httpOverrideForwardedRequest', uiText('override forward', '修改后转发')],
+  ['httpError', uiText('error', '错误')],
+  ['httpLlmResponse', uiText('LLM response', 'LLM 响应')],
 ];
 
 /**
@@ -158,7 +159,7 @@ function extractActionLabel(value: Record<string, unknown>): string {
   for (const [key, label] of ACTION_LABELS) {
     if (value[key] != null) return label;
   }
-  return 'expectation';
+  return uiText('expectation', 'Mock 规则');
 }
 
 /**
@@ -265,9 +266,9 @@ function extractChaosSummary(value: Record<string, unknown>): string | null {
   if (typeof c['succeedFirst'] === 'number' || typeof c['failRequestCount'] === 'number') {
     const sf = typeof c['succeedFirst'] === 'number' ? c['succeedFirst'] as number : 0;
     const fc = typeof c['failRequestCount'] === 'number' ? `${c['failRequestCount']}` : '∞';
-    parts.push(`window ${sf}+${fc}`);
+    parts.push(uiText(`window ${sf}+${fc}`, `前 ${sf} 次成功，随后 ${fc} 次失败`));
   }
-  return parts.length > 0 ? parts.join(', ') : 'enabled';
+  return parts.length > 0 ? parts.join(', ') : uiText('enabled', '已启用');
 }
 
 
@@ -348,7 +349,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
               checked={!!selected}
               onClick={(e) => e.stopPropagation()}
               onChange={() => onSelectToggle(item.key)}
-              slotProps={{ input: { 'aria-label': `Select expectation ${index}` } }}
+              slotProps={{ input: { 'aria-label': uiText(`Select expectation ${index}`, `选择第 ${index} 条 Mock 规则`) } }}
               sx={{ p: 0.25, flexShrink: 0 }}
             />
           )}
@@ -356,7 +357,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
               stays click-to-toggle for the mouse but is not itself a button. */}
           <IconButton
             size="small"
-            aria-label={expanded ? 'Collapse' : 'Expand'}
+            aria-label={expanded ? uiText('Collapse', '折叠') : uiText('Expand', '展开')}
             aria-expanded={expanded}
             onClick={(e) => { e.stopPropagation(); handleToggle(); }}
             sx={{ p: 0, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
@@ -441,7 +442,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
             // default 0) so the match order is visible at a glance; emphasised
             // when non-default. Stays visible (not hover-gated) so it can be
             // scanned and sorted against.
-            <Tooltip title={`Match priority ${priority} (higher wins)`}>
+            <Tooltip title={uiText(`Match priority ${priority} (higher wins)`, `匹配优先级 ${priority}（数值越大越优先）`)}>
               <Chip
                 label={`P${priority}`}
                 size="small"
@@ -469,10 +470,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
               }}
             >
               {onTest && (
-                <Tooltip title="Test what this expectation matches">
+                <Tooltip title={uiText('Test what this expectation matches', '测试这条规则可匹配哪些请求')}>
                   <IconButton
                     size="small"
-                    aria-label="Test expectation"
+                    aria-label={uiText('Test expectation', '测试 Mock 规则')}
                     onClick={(e) => { e.stopPropagation(); onTest(item); }}
                     sx={{ p: 0.25, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
                   >
@@ -481,10 +482,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
                 </Tooltip>
               )}
               {onEdit && (
-                <Tooltip title="Edit in Composer">
+                <Tooltip title={uiText('Edit in Composer', '在编辑器中修改')}>
                   <IconButton
                     size="small"
-                    aria-label="Edit expectation"
+                    aria-label={uiText('Edit expectation', '编辑 Mock 规则')}
                     onClick={(e) => { e.stopPropagation(); onEdit(item); }}
                     sx={{ p: 0.25, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
                   >
@@ -493,10 +494,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
                 </Tooltip>
               )}
               {onDuplicate && (
-                <Tooltip title="Duplicate as new expectation">
+                <Tooltip title={uiText('Duplicate as new expectation', '复制为新规则')}>
                   <IconButton
                     size="small"
-                    aria-label="Duplicate expectation"
+                    aria-label={uiText('Duplicate expectation', '复制 Mock 规则')}
                     onClick={(e) => { e.stopPropagation(); onDuplicate(item); }}
                     sx={{ p: 0.25, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
                   >
@@ -505,11 +506,11 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
                 </Tooltip>
               )}
               {onDelete && (
-                <Tooltip title="Delete expectation">
+                <Tooltip title={uiText('Delete expectation', '删除 Mock 规则')}>
                   <IconButton
                     size="small"
                     color="error"
-                    aria-label="Delete expectation"
+                    aria-label={uiText('Delete expectation', '删除 Mock 规则')}
                     onClick={(e) => { e.stopPropagation(); onDelete(item); }}
                     sx={{ p: 0.25, '& .MuiSvgIcon-root': { fontSize: '1rem' } }}
                   >
@@ -528,11 +529,11 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
           if (llmBadge.streaming) {
             optionalChips.push({
               key: 'stream',
-              tooltipLabel: 'streaming',
+              tooltipLabel: uiText('streaming', '流式响应'),
               element: (
                 <Chip
                   icon={<BoltIcon sx={{ fontSize: '0.8rem' }} />}
-                  label="stream"
+                  label={uiText('stream', '流式响应')}
                   size="small"
                   variant="outlined"
                   sx={{ height: 20, fontSize: (t) => t.typography.caption.fontSize }}
@@ -541,7 +542,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
             });
           }
           if (llmBadge.toolCallCount > 0) {
-            const lbl = `${llmBadge.toolCallCount} tool${llmBadge.toolCallCount > 1 ? 's' : ''}`;
+            const lbl = uiText(`${llmBadge.toolCallCount} tool${llmBadge.toolCallCount > 1 ? 's' : ''}`, `${llmBadge.toolCallCount} 次工具调用`);
             optionalChips.push({
               key: 'tools',
               tooltipLabel: lbl,
@@ -558,10 +559,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
           if (llmBadge.isEmbedding) {
             optionalChips.push({
               key: 'embedding',
-              tooltipLabel: 'embedding',
+              tooltipLabel: uiText('embedding', '向量嵌入'),
               element: (
                 <Chip
-                  label="embedding"
+                  label={uiText('embedding', '向量嵌入')}
                   size="small"
                   variant="outlined"
                   sx={{ height: 20, fontSize: (t) => t.typography.caption.fontSize }}
@@ -575,10 +576,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
             // since the latter is absent on turns that match via other
             // predicates (e.g. containsToolResultFor).
             const lbl = turnPosition
-              ? `turn ${turnPosition.position} of ${turnPosition.total}`
+              ? uiText(`turn ${turnPosition.position} of ${turnPosition.total}`, `第 ${turnPosition.position} 轮，共 ${turnPosition.total} 轮`)
               : llmBadge.turnIndex != null
-                ? `turn ${llmBadge.turnIndex}`
-                : 'stateful';
+                ? uiText(`turn ${llmBadge.turnIndex}`, `第 ${llmBadge.turnIndex} 轮`)
+                : uiText('stateful', '有状态');
             optionalChips.push({
               key: 'stateful',
               tooltipLabel: lbl,
@@ -594,7 +595,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
             });
           }
           if (llmBadge.isolationLabel) {
-            const lbl = `iso=${llmBadge.isolationLabel}`;
+            const lbl = uiText(`iso=${llmBadge.isolationLabel}`, `隔离条件 ${llmBadge.isolationLabel}`);
             optionalChips.push({
               key: 'isolation',
               tooltipLabel: lbl,
@@ -622,7 +623,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, pl: 6, flexWrap: 'wrap' }}>
             <Chip
               icon={<SmartToyIcon sx={{ fontSize: '0.85rem' }} />}
-              label={`LLM Response – ${llmBadge.provider}${llmBadge.model ? ' / ' + llmBadge.model : ''}`}
+              label={uiText(`LLM Response – ${llmBadge.provider}${llmBadge.model ? ' / ' + llmBadge.model : ''}`, `LLM 响应 – ${llmBadge.provider}${llmBadge.model ? ' / ' + llmBadge.model : ''}`)}
               size="small"
               color="secondary"
               variant="outlined"
@@ -632,7 +633,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
             {hiddenChips.length > 0 && (
               <Tooltip title={hiddenChips.map((c) => c.tooltipLabel).join(', ')}>
                 <Chip
-                  label={`+${hiddenChips.length} more`}
+                  label={uiText(`+${hiddenChips.length} more`, `另有 ${hiddenChips.length} 项`)}
                   size="small"
                   variant="outlined"
                   sx={{ height: 20, fontSize: (t) => t.typography.caption.fontSize }}
@@ -663,7 +664,7 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
         {chaosSummary && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, pl: 6 }}>
             <Chip
-              label={`Chaos: ${chaosSummary}`}
+              label={uiText(`Chaos: ${chaosSummary}`, `故障注入 ${chaosSummary}`)}
               size="small"
               color="warning"
               variant="outlined"
@@ -704,10 +705,10 @@ function JsonListItem({ item, index, turnPosition, expanded: expandedProp, onTog
           )}
           {metadataEntries && (
             <Box sx={{ mb: 1, fontSize: (t) => t.typography.caption.fontSize }}>
-              <Box sx={{ fontWeight: 600, color: 'text.secondary' }}>Metadata</Box>
+              <Box sx={{ fontWeight: 600, color: 'text.secondary' }}>{uiText('Metadata', '元数据')}</Box>
               <Box
                 component="dl"
-                aria-label="Metadata"
+                aria-label={uiText('Metadata', '元数据')}
                 sx={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', columnGap: 1, rowGap: 0.25, m: 0 }}
               >
                 {metadataEntries.map(([k, v]) => (

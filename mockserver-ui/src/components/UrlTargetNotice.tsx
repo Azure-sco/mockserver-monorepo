@@ -2,11 +2,16 @@ import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import { describeTarget, pageOriginDashboardUrl, resolveUrlConnection, type UrlTargetField } from '../lib/connectionTarget';
+import { uiText } from '../lib/dashboardLocale';
 
-const FIELD_NAMES: Record<UrlTargetField, string> = { host: 'host', port: 'port', basePath: 'base path' };
+const FIELD_NAMES: Record<UrlTargetField, string> = {
+  host: uiText('host', '主机'),
+  port: uiText('port', '端口'),
+  basePath: uiText('base path', '基础路径'),
+};
 
 function listOf(names: string[]): string {
-  return names.length <= 1 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  return names.length <= 1 ? names.join('') : uiText(`${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`, names.join('、'));
 }
 
 /**
@@ -27,12 +32,14 @@ export default function UrlTargetNotice() {
           data-testid="url-target-foreign-host"
           action={(
             <Button color="inherit" size="small" href={pageOriginDashboardUrl()}>
-              Use {describeTarget(page)}
+              {uiText(`Use ${describeTarget(page)}`, `使用 ${describeTarget(page)}`)}
             </Button>
           )}
         >
-          This dashboard link points at {describeTarget(params)}, not the server that served this page. Workspaces
-          that follow the link show that server&apos;s data, and what you create or upload in them is sent there.
+          {uiText(
+            `This dashboard link points at ${describeTarget(params)}, not the server that served this page. Workspaces that follow the link show that server's data, and what you create or upload in them is sent there.`,
+            `此链接将运行面板连接到 ${describeTarget(params)}。跟随此链接的工作区会显示该服务器的数据，创建或上传的内容也会发送到该服务器。`,
+          )}
         </Alert>
       )}
       {rejected.length > 0 && !dismissed && (
@@ -42,8 +49,10 @@ export default function UrlTargetNotice() {
           sx={{ mx: 1, mt: 1, flexShrink: 0 }}
           data-testid="url-target-notice"
         >
-          The {fields} in this dashboard link {rejected.length === 1 ? 'is' : 'are'} not valid, so the dashboard ignored{' '}
-          {rejected.length === 1 ? 'it' : 'them'}; workspaces that follow the link use {describeTarget(params)}.
+          {uiText(
+            `The ${fields} in this dashboard link ${rejected.length === 1 ? 'is' : 'are'} not valid, so the dashboard ignored ${rejected.length === 1 ? 'it' : 'them'}; workspaces that follow the link use ${describeTarget(params)}.`,
+            `此链接中的${fields}无效，已忽略。跟随此链接的工作区将连接到 ${describeTarget(params)}。`,
+          )}
         </Alert>
       )}
     </>

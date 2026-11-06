@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -84,10 +85,10 @@ function ListTab({
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography variant="body2" color="text.secondary">
-          No cassettes tracked yet
+          {uiText('No cassettes tracked yet', '暂无录制归档')}
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-          Record or load a cassette to see it here.
+          {uiText('Record or load a cassette to see it here.', '录制或加载归档后，可在此查看。')}
         </Typography>
       </Box>
     );
@@ -98,15 +99,15 @@ function ListTab({
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ typography: 'subtitle2' }}>Filename</TableCell>
-            <TableCell sx={{ typography: 'subtitle2' }}>Path</TableCell>
+            <TableCell sx={{ typography: 'subtitle2' }}>{uiText('Filename', '文件名')}</TableCell>
+            <TableCell sx={{ typography: 'subtitle2' }}>{uiText('Path', '路径')}</TableCell>
             <TableCell sx={{ typography: 'subtitle2' }} align="right">
-              Expectations
+              {uiText('Expectations', '规则数')}
             </TableCell>
-            <TableCell sx={{ typography: 'subtitle2' }}>Last Used</TableCell>
-            <TableCell sx={{ typography: 'subtitle2' }}>Origin</TableCell>
+            <TableCell sx={{ typography: 'subtitle2' }}>{uiText('Last Used', '上次使用时间')}</TableCell>
+            <TableCell sx={{ typography: 'subtitle2' }}>{uiText('Origin', '来源')}</TableCell>
             <TableCell sx={{ typography: 'subtitle2' }} align="center">
-              Actions
+              {uiText('Actions', '操作')}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -125,11 +126,11 @@ function ListTab({
                 {c.expectationCount >= 0 ? c.expectationCount : '?'}
               </TableCell>
               <TableCell sx={{ typography: 'caption' }}>
-                {c.lastUsed ? new Date(c.lastUsed).toLocaleString() : 'N/A'}
+                {c.lastUsed ? new Date(c.lastUsed).toLocaleString() : uiText('N/A', '暂无')}
               </TableCell>
               <TableCell>
                 <Chip
-                  label={c.origin}
+                  label={uiText(c.origin, c.origin === 'recorded' ? '录制' : c.origin === 'loaded' ? '加载' : c.origin)}
                   size="small"
                   color={c.origin === 'recorded' ? 'primary' : 'secondary'}
                   variant="outlined"
@@ -140,7 +141,7 @@ function ListTab({
                 <IconButton
                   size="small"
                   onClick={() => handleRemove(c.path)}
-                  aria-label={`Remove ${c.filename}`}
+                  aria-label={uiText(`Remove ${c.filename}`, `移除 ${c.filename}`)}
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
@@ -188,7 +189,7 @@ function RecordTab({
         // Nothing was written, so there is no cassette to list.
         setWarning(typeof result.result['message'] === 'string'
           ? result.result['message']
-          : 'No recorded traffic found matching the filter, so no cassette was written.');
+          : uiText('No recorded traffic found matching the filter, so no cassette was written.', '未找到符合筛选条件的录制流量，因此未写入归档。'));
       } else if (result.ok && result.result) {
         const count = typeof result.result['count'] === 'number' ? result.result['count'] : -1;
         const cassettePath = resolvedPath(result.result, path.trim());
@@ -198,7 +199,7 @@ function RecordTab({
         void registerServerCassette(connectionParams, { path: cassettePath, expectationCount: count, origin: 'recorded' }).catch(() => undefined);
         const msg = typeof result.result['message'] === 'string'
           ? result.result['message']
-          : `Recorded ${count} expectation(s)`;
+          : uiText(`Recorded ${count} expectation(s)`, `已录制 ${count} 条 Mock 规则`);
         setSuccess(msg);
         onRecorded();
       } else {
@@ -221,31 +222,31 @@ function RecordTab({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
       <TextField
-        label="File path (required)"
+        label={uiText('File path (required)', '文件路径（必填）')}
         size="small"
         fullWidth
         value={path}
         onChange={(e) => setPath(e.target.value)}
         placeholder="/path/to/cassette.json"
-        helperText="Server filesystem path where the fixture file will be written"
+        helperText={uiText('Server filesystem path where the fixture file will be written', '写入录制归档的服务端文件路径')}
       />
       <TextField
-        label="Request path filter (optional)"
+        label={uiText('Request path filter (optional)', '请求路径筛选（选填）')}
         size="small"
         fullWidth
         value={requestPath}
         onChange={(e) => setRequestPath(e.target.value)}
         placeholder="/v1/messages"
-        helperText="Only include traffic whose request path matches this value"
+        helperText={uiText('Only include traffic whose request path matches this value', '仅包含请求路径匹配此条件的流量')}
       />
       <TextField
-        label="Host filter (optional)"
+        label={uiText('Host filter (optional)', '主机筛选（选填）')}
         size="small"
         fullWidth
         value={host}
         onChange={(e) => setHost(e.target.value)}
         placeholder="api.anthropic.com"
-        helperText="Only include traffic whose Host header matches this value"
+        helperText={uiText('Only include traffic whose Host header matches this value', '仅包含 Host 请求头匹配此条件的流量')}
       />
       <Button
         variant="contained"
@@ -253,7 +254,7 @@ function RecordTab({
         disabled={recording || !path.trim()}
         sx={{ alignSelf: 'flex-start' }}
       >
-        {recording ? 'Recording...' : 'Record'}
+        {recording ? uiText('Recording...', '正在录制…') : uiText('Record', '录制')}
       </Button>
       {error && <Alert severity="error">{error}</Alert>}
       {warning && <Alert severity="warning">{warning}</Alert>}
@@ -290,7 +291,7 @@ function LoadTab({
         // The file held no expectations, so nothing was loaded and there is no cassette to list.
         setWarning(typeof result.result['message'] === 'string'
           ? result.result['message']
-          : 'File contained no expectations.');
+          : uiText('File contained no expectations.', '文件中没有 Mock 规则。'));
       } else if (result.ok && result.result) {
         const count = typeof result.result['count'] === 'number' ? result.result['count'] : -1;
         const cassettePath = resolvedPath(result.result, filePath.trim());
@@ -299,7 +300,7 @@ function LoadTab({
         void registerServerCassette(connectionParams, { path: cassettePath, expectationCount: count, origin: 'loaded' }).catch(() => undefined);
         const msg = typeof result.result['message'] === 'string'
           ? result.result['message']
-          : `Loaded ${count} expectation(s)`;
+          : uiText(`Loaded ${count} expectation(s)`, `已加载 ${count} 条 Mock 规则`);
         setSuccess(msg);
         onLoaded();
       } else {
@@ -322,13 +323,13 @@ function LoadTab({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
       <TextField
-        label="File path (required)"
+        label={uiText('File path (required)', '文件路径（必填）')}
         size="small"
         fullWidth
         value={filePath}
         onChange={(e) => setFilePath(e.target.value)}
         placeholder="/path/to/cassette.json"
-        helperText="Path to a MockServer expectations JSON file on the server filesystem"
+        helperText={uiText('Path to a MockServer expectations JSON file on the server filesystem', '服务端文件系统上存放 MockServer 规则 JSON 的路径')}
       />
       <Button
         variant="contained"
@@ -336,7 +337,7 @@ function LoadTab({
         disabled={loading || !filePath.trim()}
         sx={{ alignSelf: 'flex-start' }}
       >
-        {loading ? 'Loading…' : 'Load Expectations'}
+        {loading ? uiText('Loading…', '正在加载…') : uiText('Load Expectations', '加载规则')}
       </Button>
       {error && <Alert severity="error">{error}</Alert>}
       {warning && <Alert severity="warning">{warning}</Alert>}
@@ -379,7 +380,7 @@ function ExportTab({ cassettes }: { cassettes: CassetteEntry[] }) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography variant="body2" color="text.secondary">
-          No cassettes available to export
+          {uiText('No cassettes available to export', '没有可导出的录制归档')}
         </Typography>
       </Box>
     );
@@ -388,7 +389,7 @@ function ExportTab({ cassettes }: { cassettes: CassetteEntry[] }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
       <TextField
-        label="Select cassette"
+        label={uiText('Select cassette', '选择录制归档')}
         size="small"
         select
         fullWidth
@@ -396,7 +397,7 @@ function ExportTab({ cassettes }: { cassettes: CassetteEntry[] }) {
         onChange={(e) => setSelected(e.target.value)}
         slotProps={{ select: { native: true } }}
       >
-        <option value="">-- Select a cassette --</option>
+        <option value="">{uiText('-- Select a cassette --', '— 请选择归档 —')}</option>
         {cassettes.map((c) => (
           <option key={c.path} value={c.path}>
             {c.filename} ({c.path})
@@ -409,11 +410,10 @@ function ExportTab({ cassettes }: { cassettes: CassetteEntry[] }) {
         disabled={!selected}
         sx={{ alignSelf: 'flex-start' }}
       >
-        Download Cassette Info
+        {uiText('Download Cassette Info', '下载归档信息')}
       </Button>
       <Typography variant="caption" color="text.secondary">
-        Downloads a JSON file with the cassette metadata. The actual fixture file
-        lives on the server filesystem and can be copied directly.
+        {uiText('Downloads a JSON file with the cassette metadata. The actual fixture file lives on the server filesystem and can be copied directly.', '下载包含录制归档元数据的 JSON 文件。归档文件保存在服务端文件系统中，可直接复制。')}
       </Typography>
     </Box>
   );
@@ -475,7 +475,12 @@ export function CassetteManagerBody({
     [serverCassettes, refreshKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const tabLabels = ['List', 'Record', 'Load', 'Export'];
+  const tabLabels = [
+    ['List', '列表'],
+    ['Record', '录制'],
+    ['Load', '加载'],
+    ['Export', '导出'],
+  ] as const;
 
   return (
     <Box>
@@ -484,8 +489,8 @@ export function CassetteManagerBody({
         onChange={(_, v: number) => setTab(v)}
         sx={{ mb: 2, minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.5, typography: 'body2' } }}
       >
-        {tabLabels.map((label) => (
-          <Tab key={label} label={label} />
+        {tabLabels.map(([id, chineseLabel]) => (
+          <Tab key={id} label={uiText(id, chineseLabel)} />
         ))}
       </Tabs>
 
@@ -509,13 +514,13 @@ export default function CassetteManager({ open, onClose, connectionParams }: Cas
       fullScreen={fullScreen}
       aria-labelledby="cassette-manager-title"
     >
-      <DialogTitle id="cassette-manager-title">Cassette Manager</DialogTitle>
+      <DialogTitle id="cassette-manager-title">{uiText('Cassette Manager', '录制归档管理')}</DialogTitle>
       <DialogContent dividers>
         {/* Re-mounted each time the dialog opens, so the body re-fetches on open. */}
         <CassetteManagerBody connectionParams={connectionParams} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{uiText('Close', '关闭')}</Button>
       </DialogActions>
     </Dialog>
   );

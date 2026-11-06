@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -81,10 +82,10 @@ export default function AgentRunGraph({
         if (parsed && parsed.nodes.length > 0) {
           setGraph(parsed);
         } else {
-          setError('No call graph available for this session.');
+          setError(uiText('No call graph available for this session.', '此会话暂无调用图。'));
         }
       } else {
-        setError(typeof result.error === 'string' ? result.error : 'Failed to load call graph');
+        setError(typeof result.error === 'string' ? result.error : uiText('Failed to load call graph', '无法加载调用图'));
       }
     } catch (err) {
       setError(humanizeError(err).message);
@@ -117,7 +118,7 @@ export default function AgentRunGraph({
         disabled={loading}
         sx={{ textTransform: 'none', fontSize: '0.7rem', px: 0.5, minWidth: 0 }}
       >
-        {loading ? 'Loading…' : open ? 'Hide graph' : 'Show graph'}
+        {loading ? uiText('Loading…', '正在加载…') : open ? uiText('Hide graph', '隐藏调用图') : uiText('Show graph', '显示调用图')}
       </Button>
       <Collapse in={open} unmountOnExit>
         {error ? (
@@ -133,7 +134,7 @@ export default function AgentRunGraph({
                 onClick={() => setShowSource((s) => !s)}
                 sx={{ textTransform: 'none', fontSize: '0.65rem', px: 0.5, minWidth: 0 }}
               >
-                {showSource ? 'Hide Mermaid source' : 'Show Mermaid source'}
+                {showSource ? uiText('Hide Mermaid source', '隐藏 Mermaid 源码') : uiText('Show Mermaid source', '显示 Mermaid 源码')}
               </Button>
               <CopyButton text={source} />
             </Box>
@@ -208,13 +209,13 @@ function MermaidDiagram({ source, themeMode, showSource }: MermaidDiagramProps) 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
           <CircularProgress size={14} thickness={5} />
           <Typography variant="caption" color="text.secondary">
-            Rendering graph…
+            {uiText('Rendering graph…', '正在渲染调用图…')}
           </Typography>
         </Box>
       )}
       {state.status === 'failed' && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-          Could not render the diagram — showing the Mermaid source instead.
+          {uiText('Could not render the diagram — showing the Mermaid source instead.', '无法渲染调用图，已显示 Mermaid 源码。')}
         </Typography>
       )}
       {state.status === 'rendered' && (

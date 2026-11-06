@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -135,48 +136,47 @@ export default function RepeatAdvancedDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ fontSize: '0.95rem' }}>Repeat Request</DialogTitle>
+      <DialogTitle sx={{ fontSize: '0.95rem' }}>{uiText("Repeat Request", "重发请求")}</DialogTitle>
       <DialogContent dividers>
         <Alert severity="warning" sx={{ mb: 1.5 }}>
-          This re-sends <strong>{method} {path || 'the request'}</strong> to its original upstream
-          target, once per iteration.
-          {isNonGet && ` The method is ${method}, which may mutate state or incur costs (e.g. LLM API charges).`}
-          {' '}A high iteration count amplifies any cost or side effect.
+          {uiText("This re-sends ", "此操作会将 ")}<strong>{method} {path || uiText('the request', "该请求")}</strong>{uiText(" to its original upstream target, once per iteration.", " 重新发送到原上游目标，每轮发送一次。")}
+          {isNonGet && uiText(` The method is ${method}, which may mutate state or incur costs (e.g. LLM API charges).`, ` 请求方法为 ${method}，重发可能修改状态或产生费用（例如 LLM API 调用费）。`)}
+          {' '}{uiText("A high iteration count amplifies any cost or side effect.", "迭代次数越多，产生的费用或副作用可能越大。")}
         </Alert>
 
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 1 }}>
           <TextField
             size="small"
-            label="Iterations"
+            label={uiText("Iterations", "重发次数")}
             type="number"
             value={iterations}
             disabled={running}
             error={iterationsError}
-            helperText={iterationsError ? `1 – ${MAX_REPEAT_ITERATIONS}` : `Max ${MAX_REPEAT_ITERATIONS}`}
+            helperText={iterationsError ? `1 – ${MAX_REPEAT_ITERATIONS}` : uiText(`Max ${MAX_REPEAT_ITERATIONS}`, `最多 ${MAX_REPEAT_ITERATIONS}`)}
             onChange={(e) => setIterations(e.target.value)}
             sx={{ width: 130 }}
             slotProps={{ htmlInput: { min: 1, max: MAX_REPEAT_ITERATIONS } }}
           />
           <TextField
             size="small"
-            label="Concurrency"
+            label={uiText("Concurrency", "并发数")}
             type="number"
             value={concurrency}
             disabled={running}
             error={concurrencyError}
-            helperText={concurrencyError ? `1 – ${MAX_REPEAT_CONCURRENCY}` : `Max ${MAX_REPEAT_CONCURRENCY}`}
+            helperText={concurrencyError ? `1 – ${MAX_REPEAT_CONCURRENCY}` : uiText(`Max ${MAX_REPEAT_CONCURRENCY}`, `最多 ${MAX_REPEAT_CONCURRENCY}`)}
             onChange={(e) => setConcurrency(e.target.value)}
             sx={{ width: 130 }}
             slotProps={{ htmlInput: { min: 1, max: MAX_REPEAT_CONCURRENCY } }}
           />
           <TextField
             size="small"
-            label="Delay (ms)"
+            label={uiText("Delay (ms)", "延迟（毫秒）")}
             type="number"
             value={delayMs}
             disabled={running}
             error={delayError}
-            helperText={delayError ? '≥ 0' : 'Between requests'}
+            helperText={delayError ? '≥ 0' : uiText('Between requests', "每次请求之间的间隔")}
             onChange={(e) => setDelayMs(e.target.value)}
             sx={{ width: 130 }}
             slotProps={{ htmlInput: { min: 0 } }}
@@ -189,7 +189,7 @@ export default function RepeatAdvancedDialog({
           <Box sx={{ mt: 1.5 }}>
             <LinearProgress variant="determinate" value={pct} sx={{ mb: 0.5 }} />
             <Typography variant="caption" color="text.secondary">
-              {`${progress.done} / ${progress.total} sent${progress.failed > 0 ? ` — ${progress.failed} failed` : ''}`}
+              {uiText(`${progress.done} / ${progress.total} sent${progress.failed > 0 ? uiText(` — ${progress.failed} failed`, ` ，失败 ${progress.failed} 次`) : ''}`, `已发送 ${progress.done} / ${progress.total}${progress.failed > 0 ? uiText(` — ${progress.failed} failed`, ` ，失败 ${progress.failed} 次`) : ''}`)}
             </Typography>
           </Box>
         )}
@@ -208,20 +208,20 @@ export default function RepeatAdvancedDialog({
                     onClose();
                   }}
                 >
-                  View Them
+                  {uiText("View Them", "查看请求")}
                 </Button>
               ) : undefined
             }
           >
-            {`${summary.aborted ? 'Cancelled' : 'Done'} — ${summary.succeeded} succeeded, ${summary.failed} failed${summary.aborted ? ` (of ${summary.total})` : ''}. New traffic entries appear in the list.`}
+            {uiText(`${summary.aborted ? uiText('Cancelled', "已取消") : uiText('Done', "已完成")} — ${summary.succeeded} succeeded, ${summary.failed} failed${summary.aborted ? uiText(` (of ${summary.total})`, ` （共 ${summary.total} 次）`) : ''}. New traffic entries appear in the list.`, `${summary.aborted ? uiText('Cancelled', "已取消") : uiText('Done', "已完成")}，成功 ${summary.succeeded} 次，失败 ${summary.failed} 次${summary.aborted ? uiText(` (of ${summary.total})`, ` （共 ${summary.total} 次）`) : ''}。新请求会显示在流量列表中。`)}
           </Alert>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} size="small">Close</Button>
+        <Button onClick={handleClose} size="small">{uiText("Close", "关闭")}</Button>
         {running ? (
           <Button onClick={handleCancel} color="warning" variant="outlined" size="small">
-            Cancel
+            {uiText("Cancel", "取消")}
           </Button>
         ) : (
           <Button
@@ -231,7 +231,7 @@ export default function RepeatAdvancedDialog({
             size="small"
             startIcon={<RepeatIcon sx={{ fontSize: '0.875rem' }} />}
           >
-            {summary ? 'Repeat Again' : 'Start'}
+            {summary ? uiText('Repeat Again', "再次重发") : uiText('Start', "开始")}
           </Button>
         )}
       </DialogActions>

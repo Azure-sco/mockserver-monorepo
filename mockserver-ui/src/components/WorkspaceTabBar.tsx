@@ -10,6 +10,7 @@ import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import { useDashboardStore } from '../store';
 import { describeTarget, effectiveConnection, urlConnectionParams } from '../lib/connectionTarget';
 import WorkspaceTargetDialog from './WorkspaceTargetDialog';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * The workspace switcher.
@@ -69,7 +70,7 @@ export default function WorkspaceTabBar() {
   return (
     <Box
       role="group"
-      aria-label="Workspaces"
+      aria-label={uiText('Workspaces', '工作区')}
       data-testid="workspace-tab-bar"
       sx={{
         flexShrink: 0,
@@ -107,7 +108,7 @@ export default function WorkspaceTabBar() {
               <InputBase
                 autoFocus
                 value={draftName}
-                inputProps={{ 'aria-label': `Rename workspace ${workspace.name}` }}
+                inputProps={{ 'aria-label': uiText(`Rename workspace ${workspace.name}`, `重命名工作区 ${workspace.name}`) }}
                 onChange={(e) => setDraftName(e.target.value)}
                 onBlur={commitRename}
                 onKeyDown={(e) => {
@@ -122,9 +123,9 @@ export default function WorkspaceTabBar() {
                 sx={{ px: 1, fontSize: '0.75rem', width: 140 }}
               />
             ) : (
-              <Tooltip title={active ? `${workspace.name} (double-click to rename)` : `Switch to ${workspace.name}`}>
+              <Tooltip title={active ? uiText(`${workspace.name} (double-click to rename)`, `${workspace.name}（双击重命名）`) : uiText(`Switch to ${workspace.name}`, `切换到 ${workspace.name}`)}>
                 <ButtonBase
-                  aria-label={`Workspace ${workspace.name}`}
+                  aria-label={uiText(`Workspace ${workspace.name}`, `工作区 ${workspace.name}`)}
                   aria-current={active ? 'true' : undefined}
                   onClick={() => switchWorkspace(workspace.id)}
                   onDoubleClick={() => {
@@ -156,10 +157,10 @@ export default function WorkspaceTabBar() {
                 </ButtonBase>
               </Tooltip>
             )}
-            <Tooltip title={`MockServer for ${workspace.name}: ${target}`}>
+            <Tooltip title={uiText(`MockServer for ${workspace.name}: ${target}`, `工作区 ${workspace.name} 的 MockServer 地址 ${target}`)}>
               <IconButton
                 size="small"
-                aria-label={`Set MockServer for workspace ${workspace.name}`}
+                aria-label={uiText(`Set MockServer for workspace ${workspace.name}`, `设置工作区 ${workspace.name} 的 MockServer 地址`)}
                 onClick={() => setTargetEditId(workspace.id)}
               >
                 <DnsOutlinedIcon sx={{ fontSize: '0.8rem' }} />
@@ -168,7 +169,7 @@ export default function WorkspaceTabBar() {
             {workspaces.length > 1 && (
               <IconButton
                 size="small"
-                aria-label={`Close workspace ${workspace.name}`}
+                aria-label={uiText(`Close workspace ${workspace.name}`, `关闭工作区 ${workspace.name}`)}
                 onClick={() => closeWorkspace(workspace.id)}
                 sx={{ mr: 0.25 }}
               >
@@ -178,8 +179,8 @@ export default function WorkspaceTabBar() {
           </Box>
         );
       })}
-      <Tooltip title="New workspace">
-        <IconButton size="small" aria-label="New workspace" onClick={addWorkspace} sx={{ flexShrink: 0 }}>
+      <Tooltip title={uiText('New workspace', '新建工作区')}>
+        <IconButton size="small" aria-label={uiText('New workspace', '新建工作区')} onClick={addWorkspace} sx={{ flexShrink: 0 }}>
           <AddIcon sx={{ fontSize: '0.875rem' }} />
         </IconButton>
       </Tooltip>

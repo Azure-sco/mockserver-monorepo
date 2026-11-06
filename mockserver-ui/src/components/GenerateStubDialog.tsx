@@ -17,6 +17,7 @@ import { humanizeError, type HumanError } from '../lib/errorMessage';
 import HumanErrorAlert from './HumanErrorAlert';
 import JsonViewer from './JsonViewer';
 import LintWarningsBadge from './LintWarningsBadge';
+import { uiText } from '../lib/dashboardLocale';
 
 interface GenerateStubDialogProps {
   open: boolean;
@@ -65,10 +66,10 @@ export default function GenerateStubDialog({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="generate-stub-dialog-title">
       <DialogTitle id="generate-stub-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        Generated Expectation
+        {uiText('Generated Expectation', '生成的 Mock 规则')}
         <Chip
           size="small"
-          label={`${Math.round(confidence * 100)}% confidence`}
+          label={uiText(`${Math.round(confidence * 100)}% confidence`, `置信度 ${Math.round(confidence * 100)}%`)}
           color={confidence >= 0.8 ? 'success' : confidence >= 0.5 ? 'warning' : 'error'}
           variant="outlined"
         />
@@ -79,7 +80,7 @@ export default function GenerateStubDialog({
         )}
         {registered.has(selectedIndex) && (
           <Alert severity="success" sx={{ mb: 1.5 }}>
-            Suggestion {selectedIndex + 1} registered successfully.
+            {uiText(`Suggestion ${selectedIndex + 1} registered successfully.`, `已成功注册建议 ${selectedIndex + 1}。`)}
             {(registered.get(selectedIndex) ?? 0) > 0 && (
               <Box sx={{ mt: 1 }}>
                 <LintWarningsBadge count={registered.get(selectedIndex)!} connectionParams={connectionParams} />
@@ -89,7 +90,7 @@ export default function GenerateStubDialog({
         )}
         {suggestions.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            No suggestions returned by the server.
+            {uiText('No suggestions returned by the server.', '服务器未返回建议。')}
           </Typography>
         ) : (
           <Box>
@@ -98,7 +99,7 @@ export default function GenerateStubDialog({
                 {suggestions.map((_, i) => (
                   <Chip
                     key={i}
-                    label={`Suggestion ${i + 1}`}
+                    label={uiText(`Suggestion ${i + 1}`, `建议 ${i + 1}`)}
                     size="small"
                     variant={i === selectedIndex ? 'filled' : 'outlined'}
                     color={registered.has(i) ? 'success' : i === selectedIndex ? 'primary' : 'default'}
@@ -113,14 +114,14 @@ export default function GenerateStubDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>{uiText('Cancel', '取消')}</Button>
         <Button
           variant="contained"
           disabled={registering || registered.has(selectedIndex) || suggestions.length === 0}
           onClick={() => void handleRegister()}
           startIcon={registering ? <CircularProgress size={16} /> : undefined}
         >
-          {registered.has(selectedIndex) ? 'Registered' : 'Register Now'}
+          {registered.has(selectedIndex) ? uiText('Registered', '已注册') : uiText('Register Now', '立即注册')}
         </Button>
       </DialogActions>
     </Dialog>

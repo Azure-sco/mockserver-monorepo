@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useMemo, useCallback } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -58,15 +59,15 @@ function VerdictBanner({ report }: { report: DiffReport }) {
   let message: string;
 
   if (report.verdict === 'identical') {
-    message = `IDENTICAL -- both runs have ${report.turnCountA} turn(s) with the same structural skeleton`;
+    message = uiText(`IDENTICAL -- both runs have ${report.turnCountA} turn(s) with the same structural skeleton`, `结构相同，两次运行均有 ${report.turnCountA} 轮，结构一致`);
   } else if (report.verdict === 'different-length') {
-    message = `DIFFERENT LENGTHS -- Run A has ${report.turnCountA} turn(s), Run B has ${report.turnCountB} turn(s)`;
+    message = uiText(`DIFFERENT LENGTHS -- Run A has ${report.turnCountA} turn(s), Run B has ${report.turnCountB} turn(s)`, `轮次不同，运行 A 有 ${report.turnCountA} 轮，运行 B 有 ${report.turnCountB} 轮`);
   } else {
     const d = report.firstDivergence;
     if (d) {
-      message = `DIVERGENT at turn ${d.turn} (${d.kind}): Run A = "${d.a}" vs Run B = "${d.b}"`;
+      message = uiText(`DIVERGENT at turn ${d.turn} (${d.kind}): Run A = "${d.a}" vs Run B = "${d.b}"`, `第 ${d.turn} 轮出现差异（${d.kind}）：运行 A 为「${d.a}」，运行 B 为「${d.b}」`);
     } else {
-      message = 'DIVERGENT';
+      message = uiText('DIVERGENT', '存在差异');
     }
   }
 
@@ -105,7 +106,7 @@ function ToolCallChain({
       >
         {turns.map((turn, i) => {
           const toolLabel =
-            turn.toolCalls.length > 0 ? turn.toolCalls.join(', ') : '(no tools)';
+            turn.toolCalls.length > 0 ? turn.toolCalls.join(', ') : uiText('(no tools)', '（无工具调用）');
           const isError = turn.statusCode !== null && turn.statusCode >= 400;
           return (
             <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
@@ -131,7 +132,7 @@ function ToolCallChain({
         })}
         {turns.length === 0 && (
           <Typography variant="caption" color="text.secondary">
-            (empty)
+            {uiText('(empty)', '（空）')}
           </Typography>
         )}
       </Box>
@@ -151,18 +152,18 @@ function TokenTable({ report }: { report: DiffReport }) {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Turn</TableCell>
+            <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Turn', '轮次')}</TableCell>
             <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }} align="right">
-              A Input
+              {uiText('A Input', 'A 的输入')}
             </TableCell>
             <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }} align="right">
-              A Output
+              {uiText('A Output', 'A 的输出')}
             </TableCell>
             <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }} align="right">
-              B Input
+              {uiText('B Input', 'B 的输入')}
             </TableCell>
             <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }} align="right">
-              B Output
+              {uiText('B Output', 'B 的输出')}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -264,9 +265,9 @@ function ServerDiffView({ result }: { result: RunDiffResult }) {
     <Box>
       <Alert severity={result.promptChanged ? 'warning' : 'success'} sx={{ mb: 2 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>
-          {result.promptChanged ? 'PROMPTS CHANGED' : 'PROMPTS IDENTICAL'}
+          {result.promptChanged ? uiText('PROMPTS CHANGED', '提示词有变化') : uiText('PROMPTS IDENTICAL', '提示词相同')}
           {' — '}
-          {result.messageCountBefore} → {result.messageCountAfter} message(s)
+          {result.messageCountBefore} → {result.messageCountAfter}{uiText(' message(s)', '条消息')}
         </Typography>
       </Alert>
 
@@ -285,10 +286,10 @@ function ServerDiffView({ result }: { result: RunDiffResult }) {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Change</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Role</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Before</TableCell>
-              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>After</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Change', '变更')}</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Role', '角色')}</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Before', '修改前')}</TableCell>
+              <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('After', '修改后')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -307,7 +308,7 @@ function ServerDiffView({ result }: { result: RunDiffResult }) {
             {result.messageDiffs.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4}>
-                  <Typography variant="body2" color="text.secondary">No message-level differences.</Typography>
+                  <Typography variant="body2" color="text.secondary">{uiText('No message-level differences.', '消息内容无差异。')}</Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -318,23 +319,23 @@ function ServerDiffView({ result }: { result: RunDiffResult }) {
       {result.tokenDelta && (
         <>
           <Typography variant="subtitle2" sx={{ fontSize: '0.8rem', fontWeight: 600, mt: 2 }}>
-            Token / Cost Delta
+            {uiText('Token / Cost Delta', 'Token 用量及费用差异')}
           </Typography>
           <TableContainer component={Paper} variant="outlined" sx={{ mt: 1 }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Metric</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Before</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>After</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>Delta</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Metric', '指标')}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Before', '修改前')}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('After', '修改后')}</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{uiText('Delta', '差值')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {([
-                  ['Input tokens', result.tokenDelta.inputTokensBefore, result.tokenDelta.inputTokensAfter, result.tokenDelta.inputTokensDelta],
-                  ['Output tokens', result.tokenDelta.outputTokensBefore, result.tokenDelta.outputTokensAfter, result.tokenDelta.outputTokensDelta],
-                  ['Cost (USD)', result.tokenDelta.costUsdBefore, result.tokenDelta.costUsdAfter, result.tokenDelta.costUsdDelta],
+                  [uiText('Input tokens', '输入 Token'), result.tokenDelta.inputTokensBefore, result.tokenDelta.inputTokensAfter, result.tokenDelta.inputTokensDelta],
+                  [uiText('Output tokens', '输出 Token'), result.tokenDelta.outputTokensBefore, result.tokenDelta.outputTokensAfter, result.tokenDelta.outputTokensDelta],
+                  [uiText('Cost (USD)', '费用（美元）'), result.tokenDelta.costUsdBefore, result.tokenDelta.costUsdAfter, result.tokenDelta.costUsdDelta],
                 ] as const).map(([label, before, after, delta]) => (
                   <TableRow key={label}>
                     <TableCell sx={{ fontSize: '0.7rem' }}>{label}</TableCell>
@@ -474,14 +475,14 @@ export function CompareRunsBody() {
         onChange={(_, v) => { if (v) setMode(v as 'client' | 'server'); }}
         sx={{ mb: 2 }}
       >
-        <ToggleButton value="client" sx={{ textTransform: 'none' }}>Structural (Client)</ToggleButton>
-        <ToggleButton value="server" sx={{ textTransform: 'none' }}>Server Diff (Decoded Prompts)</ToggleButton>
+        <ToggleButton value="client" sx={{ textTransform: 'none' }}>{uiText('Structural (Client)', '结构对比（客户端）')}</ToggleButton>
+        <ToggleButton value="server" sx={{ textTransform: 'none' }}>{uiText('Server Diff (Decoded Prompts)', '服务端对比（解码后的提示词）')}</ToggleButton>
       </ToggleButtonGroup>
 
       {/* Session selectors */}
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <TextField
-          label="Trace A"
+          label={uiText('Trace A', '调用链 A')}
           size="small"
           select
           fullWidth
@@ -492,7 +493,7 @@ export function CompareRunsBody() {
             inputLabel: { shrink: true },
           }}
         >
-          <option value="">— select a trace —</option>
+          <option value="">{uiText('— select a trace —', '— 请选择调用链 —')}</option>
           {sessions.map((s) => (
             <option key={sessionKey(s)} value={sessionKey(s)}>
               {sessionLabel(s)}
@@ -500,7 +501,7 @@ export function CompareRunsBody() {
           ))}
         </TextField>
         <TextField
-          label="Trace B"
+          label={uiText('Trace B', '调用链 B')}
           size="small"
           select
           fullWidth
@@ -511,7 +512,7 @@ export function CompareRunsBody() {
             inputLabel: { shrink: true },
           }}
         >
-          <option value="">— select a trace —</option>
+          <option value="">{uiText('— select a trace —', '— 请选择调用链 —')}</option>
           {sessions.map((s) => (
             <option key={sessionKey(s)} value={sessionKey(s)}>
               {sessionLabel(s)}
@@ -524,9 +525,9 @@ export function CompareRunsBody() {
       {(!runA || !runB) && (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="body2" color="text.secondary">
-            {!runA && !runB && 'Choose two captured traces to compare.'}
-            {runA && !runB && 'Trace A selected — choose Trace B to compare.'}
-            {!runA && runB && 'Trace B selected — choose Trace A to compare.'}
+            {!runA && !runB && uiText('Choose two captured traces to compare.', '请选择两条已捕获的调用链进行对比。')}
+            {runA && !runB && uiText('Trace A selected — choose Trace B to compare.', '已选择调用链 A，请再选择调用链 B。')}
+            {!runA && runB && uiText('Trace B selected — choose Trace A to compare.', '已选择调用链 B，请再选择调用链 A。')}
           </Typography>
         </Box>
       )}
@@ -538,13 +539,13 @@ export function CompareRunsBody() {
 
           {/* Side-by-side tool call chains */}
           <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <ToolCallChain label="Run A" turns={trajA.turns} />
-            <ToolCallChain label="Run B" turns={trajB.turns} />
+            <ToolCallChain label={uiText('Run A', '运行 A')} turns={trajA.turns} />
+            <ToolCallChain label={uiText('Run B', '运行 B')} turns={trajB.turns} />
           </Box>
 
           {/* Token trajectory table */}
           <Typography variant="subtitle2" sx={{ fontSize: '0.8rem', fontWeight: 600, mt: 2 }}>
-            Token Usage per Turn
+            {uiText('Token Usage per Turn', '每轮 Token 用量')}
           </Typography>
           <TokenTable report={report} />
         </>
@@ -561,11 +562,11 @@ export function CompareRunsBody() {
               onClick={() => void runServerDiff()}
               startIcon={serverBusy ? <CircularProgress size={16} color="inherit" /> : undefined}
             >
-              {serverBusy ? 'Diffing…' : 'Compute Server Diff'}
+              {serverBusy ? uiText('Diffing…', '正在对比…') : uiText('Compute Server Diff', '在服务端计算差异')}
             </Button>
             <Typography variant="caption" color="text.secondary">
-              Decodes and diffs the prompts server-side (grouped by upstream host
-              {hostA ? ` — A: ${hostA}` : ''}{hostB ? `, B: ${hostB}` : ''}).
+              {uiText('Decodes and diffs the prompts server-side (grouped by upstream host', '在服务端解码并对比提示词（按上游主机分组')}
+              {hostA ? uiText(` — A: ${hostA}`, `，A：${hostA}`) : ''}{hostB ? uiText(`, B: ${hostB}`, `，B：${hostB}`) : ''}{uiText(').', '）。')}
             </Typography>
           </Box>
           {serverError && <HumanErrorAlert error={serverError} sx={{ mb: 2 }} />}
@@ -588,12 +589,12 @@ export default function CompareRunsDialog({ open, onClose }: CompareRunsDialogPr
       fullScreen={fullScreen}
       aria-labelledby="compare-runs-title"
     >
-      <DialogTitle id="compare-runs-title">Compare Runs</DialogTitle>
+      <DialogTitle id="compare-runs-title">{uiText('Compare Runs', '对比运行记录')}</DialogTitle>
       <DialogContent dividers>
         <CompareRunsBody />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{uiText('Close', '关闭')}</Button>
       </DialogActions>
     </Dialog>
   );

@@ -14,6 +14,7 @@ import { useConnectionParams } from '../hooks/useConnectionParams';
 import { useFollow } from '../hooks/useFollow';
 import { matchesItemSearch } from '../lib/searchMatcher';
 import { monospaceFontFamily } from '../theme';
+import { uiText } from '../lib/dashboardLocale';
 
 interface RequestPanelProps {
   title: string;
@@ -91,7 +92,7 @@ function TraceparentPill({ info }: { info: TraceparentInfo }) {
     `traceparent: ${info.raw}`,
     `traceId: ${info.traceId}`,
     `parentId: ${info.parentId}`,
-    `flags: ${info.flags} (${info.flags === '01' ? 'sampled' : 'not sampled'})`,
+    uiText(`flags: ${info.flags} (${info.flags === '01' ? 'sampled' : 'not sampled'})`, `flags: ${info.flags}（${info.flags === '01' ? '已采样' : '未采样'}）`),
   ].join('\n');
 
   return (
@@ -210,9 +211,9 @@ function RequestPanel({
       {shown.length === 0 ? (
         items.length === 0 ? (
           <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>No requests yet.</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>{uiText('No requests yet.', '暂无请求。')}</Typography>
             <Typography variant="caption" component="div" sx={{ mb: 1 }}>
-              Send a request through MockServer — as a proxy or to a mock — and it appears here. For example:
+              {uiText('Send a request through MockServer — as a proxy or to a mock — and it appears here. For example:', '通过 MockServer 转发请求，或向模拟接口发送请求，记录就会显示在这里。可以试试下面的命令。')}
             </Typography>
             <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, maxWidth: '100%' }}>
               <Box
@@ -236,7 +237,7 @@ function RequestPanel({
           </Box>
         ) : (
           <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-            No matching requests
+            {uiText('No matching requests', '没有符合条件的请求')}
           </Typography>
         )
       ) : (

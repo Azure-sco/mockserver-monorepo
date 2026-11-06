@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { dashboardLocale, uiText } from './lib/dashboardLocale';
 // Upgrades the shared `operation:` filter operator from the built-in
 // operationName-member resolver to the real GraphQL body parser. Registered
 // here rather than relying on a component import: every search surface shares
@@ -11,6 +12,9 @@ import App from './App';
 import { registerGraphqlOperationField } from './lib/graphqlOperation';
 
 registerGraphqlOperationField();
+
+document.documentElement.lang = dashboardLocale;
+document.title = uiText('MockServer Dashboard', 'MockServer 控制台');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

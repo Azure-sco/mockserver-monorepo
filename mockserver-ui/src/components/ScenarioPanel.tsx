@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useEffect, useReducer, useRef, useId, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -331,9 +332,9 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
     <Paper variant="outlined" sx={{ p: 1.5, mb: 1 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
-          Scenario State Machine
+          {uiText("Scenario State Machine", "场景状态机")}
         </Typography>
-        <Tooltip title="Refresh the list of existing scenarios">
+        <Tooltip title={uiText("Refresh the list of existing scenarios", "刷新已有场景列表")}>
           <span>
             <Button
               size="small"
@@ -341,7 +342,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
               startIcon={<RefreshIcon sx={{ fontSize: '0.875rem' }} />}
               sx={{ height: 24, fontSize: '0.65rem', textTransform: 'none', minWidth: 0 }}
             >
-              List
+              {uiText("List", "查看列表")}
             </Button>
           </span>
         </Tooltip>
@@ -350,11 +351,11 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
       {/* Existing scenarios — click a chip to populate the query/set/trigger forms below */}
       <Box sx={{ mb: 1 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
-          Existing scenarios{scenarios.length > 0 ? ` (${scenarios.length})` : ''}
+          {uiText("Existing scenarios", "已有场景")}{scenarios.length > 0 ? ` (${scenarios.length})` : ''}
         </Typography>
         {scenarios.length === 0 ? (
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontStyle: 'italic' }}>
-            None yet — set a state below (or match an expectation that uses one) to create a scenario.
+            {uiText("None yet — set a state below (or match an expectation that uses one) to create a scenario.", "暂无场景。可在下方设置状态，或发送能匹配场景规则的请求来创建。")}
           </Typography>
         ) : (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -389,7 +390,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <TextField
           size="small"
-          placeholder="Scenario name"
+          placeholder={uiText("Scenario name", "场景名称")}
           value={scenarioName}
           onChange={(e) => setScenarioName(e.target.value)}
           onKeyDown={(e) => {
@@ -408,7 +409,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
           disabled={loading || !scenarioName.trim()}
           sx={{ height: 28, fontSize: '0.7rem', textTransform: 'none' }}
         >
-          Refresh
+          {uiText("Refresh", "刷新")}
         </Button>
       </Box>
 
@@ -416,7 +417,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
       {currentState !== null && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-            Current state:
+            {uiText("Current state:", "当前状态：")}
           </Typography>
           <Chip
             label={currentState}
@@ -425,7 +426,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
             sx={{ height: 20, fontSize: '0.65rem', fontFamily: 'monospace' }}
           />
           {countdown !== null && countdown > 0 && scheduledNextState && (
-            <Tooltip title={`Auto-transition to "${scheduledNextState}" in ${formatCountdown(countdown)}`}>
+            <Tooltip title={uiText(`Auto-transition to "${scheduledNextState}" in ${formatCountdown(countdown)}`, `${formatCountdown(countdown)} 后自动切换到“${scheduledNextState}”`)}>
               <Chip
                 icon={<TimerIcon sx={{ fontSize: '0.75rem' }} />}
                 label={`${formatCountdown(countdown)} -> ${scheduledNextState}`}
@@ -444,7 +445,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
       {graphSource !== '' && (
         <Box sx={{ mb: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
-            State machine
+            {uiText("State machine", "状态机")}
           </Typography>
           <MermaidStateDiagram source={graphSource} themeMode={themeMode} />
         </Box>
@@ -460,12 +461,12 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
 
       {/* Set state form */}
       <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
-        Set State
+        {uiText("Set State", "设置状态")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5, flexWrap: 'wrap' }}>
         <TextField
           size="small"
-          placeholder="State"
+          placeholder={uiText("State", "状态")}
           value={newState}
           onChange={(e) => setNewState(e.target.value)}
           sx={{
@@ -474,10 +475,10 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
             '& .MuiInputBase-root': { height: 24, fontSize: '0.7rem' },
           }}
         />
-        <Tooltip title="Optional auto-transition delay in milliseconds (e.g. 60000 = 1 minute). Pair with a Next state to schedule the transition.">
+        <Tooltip title={uiText("Optional auto-transition delay in milliseconds (e.g. 60000 = 1 minute). Pair with a Next state to schedule the transition.", "可选。填入自动切换的等待时间（毫秒，例如 60000 表示 1 分钟），并指定下一状态。")}>
           <TextField
             size="small"
-            placeholder="Delay (ms)"
+            placeholder={uiText("Delay (ms)", "延迟（毫秒）")}
             type="number"
             value={transitionAfterMs}
             onChange={(e) => setTransitionAfterMs(e.target.value)}
@@ -489,7 +490,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
         </Tooltip>
         <TextField
           size="small"
-          placeholder="Next state"
+          placeholder={uiText("Next state", "下一状态")}
           value={nextState}
           onChange={(e) => setNextState(e.target.value)}
           sx={{
@@ -505,7 +506,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
           disabled={loading || !scenarioName.trim() || !newState.trim()}
           sx={{ height: 24, fontSize: '0.65rem', textTransform: 'none' }}
         >
-          Set
+          {uiText("Set", "设置")}
         </Button>
       </Box>
 
@@ -513,12 +514,12 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
 
       {/* Trigger form */}
       <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
-        Trigger
+        {uiText("Trigger", "触发切换")}
       </Typography>
       <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
         <TextField
           size="small"
-          placeholder="New state"
+          placeholder={uiText("New state", "目标状态")}
           value={triggerState}
           onChange={(e) => setTriggerState(e.target.value)}
           sx={{
@@ -534,15 +535,15 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
           disabled={loading || !scenarioName.trim() || !triggerState.trim()}
           sx={{ height: 24, fontSize: '0.65rem', textTransform: 'none' }}
         >
-          Trigger
+          {uiText("Trigger", "触发切换")}
         </Button>
       </Box>
 
       <ConfirmDialog
         open={confirmTriggerOpen}
-        title="Trigger scenario transition?"
-        message={`This forces scenario "${scenarioName.trim()}" to state "${triggerState.trim()}", advancing the state machine and firing any associated transition side-effects. This cannot be undone.`}
-        confirmLabel="Trigger transition"
+        title={uiText("Trigger scenario transition?", "要触发场景状态切换吗？")}
+        message={uiText(`This forces scenario "${scenarioName.trim()}" to state "${triggerState.trim()}", advancing the state machine and firing any associated transition side-effects. This cannot be undone.`, `此操作会强制将场景“${scenarioName.trim()}”切换至“${triggerState.trim()}”，推进状态机并执行相关的切换动作。操作不可撤销。`)}
+        confirmLabel={uiText("Trigger transition", "触发切换")}
         onConfirm={() => void handleTrigger()}
         onClose={() => setConfirmTriggerOpen(false)}
       />
@@ -551,11 +552,7 @@ export default function ScenarioPanel({ connectionParams }: ScenarioPanelProps) 
       <Divider sx={{ my: 1 }} />
       <Box sx={{ px: 0.5 }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
-          Cross-protocol correlation: Expectations with <code>crossProtocolScenarios</code> advance
-          scenario state when matched, enabling coordinated behaviour across HTTP, gRPC, DNS, and
-          SSE protocols. Triggers from one protocol can advance the state machine for expectations
-          matched by another. Use the Trigger button above or the <code>/trigger</code> endpoint to
-          manually advance a cross-protocol scenario.
+          {uiText("Cross-protocol correlation: Expectations with ", "跨协议联动：配置了 ")}<code>crossProtocolScenarios</code>{uiText(" advance scenario state when matched, enabling coordinated behaviour across HTTP, gRPC, DNS, and SSE protocols. Triggers from one protocol can advance the state machine for expectations matched by another. Use the Trigger button above or the ", " 的 Mock 规则在匹配时会推进场景状态，使 HTTP、gRPC、DNS 和 SSE 之间能够联动。一个协议中的匹配可以推进另一个协议的场景状态。也可以点击上方的“触发切换”或调用 ")}<code>/trigger</code>{uiText(" endpoint to manually advance a cross-protocol scenario.", " 端点，手动推进跨协议场景。")}
         </Typography>
       </Box>
     </Paper>
@@ -573,7 +570,7 @@ function shortenScenarioName(name: string): string {
 
 /** A compact `METHOD /path` summary of a bound expectation's matcher. */
 function summariseRequest(e: BoundExpectation): string {
-  return `${e.method ?? 'ANY'} ${e.path ?? '(any path)'}`;
+  return `${e.method ?? 'ANY'} ${e.path ?? uiText('(any path)', "（任意路径）")}`;
 }
 
 interface ScenarioDetailsSectionProps {
@@ -629,7 +626,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
   return (
     <Box sx={{ mb: 1 }}>
       <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
-        Scenario Details
+        {uiText("Scenario Details", "场景详情")}
       </Typography>
       {details.map((d) => {
         const isOpen = expanded.has(d.scenarioName);
@@ -645,7 +642,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
             >
               <IconButton
                 size="small"
-                aria-label={isOpen ? 'Collapse scenario' : 'Expand scenario'}
+                aria-label={isOpen ? uiText('Collapse scenario', "收起场景") : uiText('Expand scenario', "展开场景")}
                 sx={{ p: 0.25 }}
               >
                 {isOpen ? (
@@ -672,7 +669,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                 </Box>
               </Tooltip>
               {d.currentState != null && (
-                <Tooltip title={`Current state: ${d.currentState}`}>
+                <Tooltip title={uiText(`Current state: ${d.currentState}`, `当前状态：${d.currentState}`)}>
                   <Chip
                     label={d.currentState}
                     size="small"
@@ -683,16 +680,16 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                 </Tooltip>
               )}
               <Chip
-                label={`${d.expectationCount} mock${d.expectationCount === 1 ? '' : 's'}`}
+                label={uiText(`${d.expectationCount} mock${d.expectationCount === 1 ? '' : 's'}`, `${d.expectationCount} 条规则`)}
                 size="small"
                 variant="outlined"
                 sx={{ height: 18, fontSize: '0.6rem' }}
               />
               {d.expectationCount > 0 && (
-                <Tooltip title="Edit this scenario's mock in the Composer">
+                <Tooltip title={uiText("Edit this scenario's mock in the Composer", "在规则编辑器中编辑此场景的规则")}>
                   <Button
                     size="small"
-                    aria-label="Edit scenario"
+                    aria-label={uiText("Edit scenario", "编辑场景")}
                     startIcon={<EditIcon sx={{ fontSize: '0.75rem' }} />}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -700,7 +697,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                     }}
                     sx={{ height: 20, fontSize: '0.6rem', textTransform: 'none', minWidth: 0 }}
                   >
-                    Edit
+                    {uiText("Edit", "编辑")}
                   </Button>
                 </Tooltip>
               )}
@@ -713,8 +710,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                     color="text.secondary"
                     sx={{ fontSize: '0.65rem', fontStyle: 'italic' }}
                   >
-                    No mocks bound to this scenario in this dashboard — it may advance via cross-protocol
-                    triggers.
+                    {uiText("No mocks bound to this scenario in this dashboard — it may advance via cross-protocol triggers.", "控制台中没有绑定到此场景的规则。场景可能由跨协议触发操作推进。")}
                   </Typography>
                 ) : (
                   d.states.map((group) => (
@@ -728,7 +724,7 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                           sx={{ height: 18, fontSize: '0.6rem', fontFamily: 'monospace' }}
                         />
                         <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
-                          mocks
+                          {uiText("mocks", "条规则")}
                         </Typography>
                       </Box>
                       {group.expectations.map((e) => (
@@ -745,8 +741,8 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                           <Tooltip
                             title={
                               e.newScenarioState
-                                ? `Transitions to "${e.newScenarioState}"`
-                                : 'No state transition'
+                                ? uiText(`Transitions to "${e.newScenarioState}"`, `切换至“${e.newScenarioState}”`)
+                                : uiText('No state transition', "不切换状态")
                             }
                           >
                             <Box
@@ -761,11 +757,11 @@ function ScenarioDetailsSection({ details, selectedScenario, onEdit }: ScenarioD
                               {`${e.scenarioState} → ${e.newScenarioState ?? '·'}`}
                             </Box>
                           </Tooltip>
-                          <Tooltip title="Edit in Composer">
+                          <Tooltip title={uiText("Edit in Composer", "在规则编辑器中编辑")}>
                             <span>
                               <IconButton
                                 size="small"
-                                aria-label="Edit expectation"
+                                aria-label={uiText("Edit expectation", "编辑规则")}
                                 onClick={() => onEdit(e.value)}
                                 sx={{ p: 0.25 }}
                               >
@@ -864,7 +860,7 @@ function MermaidStateDiagram({ source, themeMode }: MermaidStateDiagramProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
           <CircularProgress size={14} thickness={5} />
           <Typography variant="caption" color="text.secondary">
-            Rendering state machine…
+            {uiText("Rendering state machine…", "正在渲染状态机…")}
           </Typography>
         </Box>
       )}
@@ -886,7 +882,7 @@ function MermaidStateDiagram({ source, themeMode }: MermaidStateDiagramProps) {
       {state.status === 'failed' && (
         <Box>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-            Could not render the diagram — showing the Mermaid source instead.
+            {uiText("Could not render the diagram — showing the Mermaid source instead.", "无法渲染状态图，改为显示 Mermaid 源码。")}
           </Typography>
           <Box
             component="pre"

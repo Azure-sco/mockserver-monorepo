@@ -30,8 +30,19 @@ import {
   validateRegex,
   type FilterPreset,
 } from '../lib/filterPresets';
+import { uiText } from '../lib/dashboardLocale';
 
 const HTTP_METHODS = ['', 'CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'TRACE'];
+
+const ACTION_TYPE_LABELS: Record<(typeof ACTION_TYPES)[number], string> = {
+  httpResponse: uiText('httpResponse', 'HTTP 响应'),
+  httpForward: uiText('httpForward', 'HTTP 转发'),
+  httpLlmResponse: uiText('httpLlmResponse', 'LLM 响应'),
+  httpSseResponse: uiText('httpSseResponse', 'SSE 响应'),
+  httpError: uiText('httpError', '连接错误'),
+  httpClassCallback: uiText('httpClassCallback', '类回调'),
+  httpObjectCallback: uiText('httpObjectCallback', '对象回调'),
+};
 
 // ---------------------------------------------------------------------------
 // Multi-select chip cluster
@@ -115,7 +126,7 @@ export function MultiValueField({ label, items, onChange, disabled }: MultiValue
         <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mb: 0.5, flexWrap: 'wrap' }}>
           <TextField
             size="small"
-            label="Name"
+            label={uiText('Name', '名称')}
             value={item.name}
             onChange={(e) => setName(i, e.target.value)}
             disabled={disabled}
@@ -126,38 +137,38 @@ export function MultiValueField({ label, items, onChange, disabled }: MultiValue
               <Box key={vi} sx={{ display: 'flex', alignItems: 'center' }}>
                 <TextField
                   size="small"
-                  label="Value"
+                  label={uiText('Value', '值')}
                   value={val}
                   onChange={(e) => setValue(i, vi, e.target.value)}
                   disabled={disabled}
                   sx={{ width: { xs: '100%', sm: 120 } }}
                 />
                 {vi > 0 && (
-                  <Tooltip title="Remove value">
-                    <IconButton size="small" disabled={disabled} onClick={() => removeValue(i, vi)} aria-label="Remove value">
+                  <Tooltip title={uiText('Remove value', '移除此值')}>
+                    <IconButton size="small" disabled={disabled} onClick={() => removeValue(i, vi)} aria-label={uiText('Remove value', '移除此值')}>
                       <RemoveCircleOutlineIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 )}
               </Box>
             ))}
-            <Tooltip title="Add value">
-              <IconButton size="small" disabled={disabled} onClick={() => addValue(i)} aria-label="Add value">
+            <Tooltip title={uiText('Add value', '添加值')}>
+              <IconButton size="small" disabled={disabled} onClick={() => addValue(i)} aria-label={uiText('Add value', '添加值')}>
                 <AddCircleOutlineIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Box>
           {i > 0 && (
-            <Tooltip title="Remove filter row">
-              <IconButton size="small" disabled={disabled} onClick={() => removeRow(i)} aria-label="Remove filter row">
+            <Tooltip title={uiText('Remove filter row', '移除此筛选项')}>
+              <IconButton size="small" disabled={disabled} onClick={() => removeRow(i)} aria-label={uiText('Remove filter row', '移除此筛选项')}>
                 <RemoveCircleOutlineIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
         </Box>
       ))}
-      <Tooltip title="Add filter row">
-        <IconButton size="small" disabled={disabled} onClick={addRow} aria-label="Add filter row">
+      <Tooltip title={uiText('Add filter row', '添加筛选项')}>
+        <IconButton size="small" disabled={disabled} onClick={addRow} aria-label={uiText('Add filter row', '添加筛选项')}>
           <AddCircleOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -187,7 +198,7 @@ export function SingleValueField({ label, items, onChange, disabled }: SingleVal
         <Box key={i} sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.5 }}>
           <TextField
             size="small"
-            label="Name"
+            label={uiText('Name', '名称')}
             value={item.name}
             onChange={(e) => setField(i, 'name', e.target.value)}
             disabled={disabled}
@@ -195,23 +206,23 @@ export function SingleValueField({ label, items, onChange, disabled }: SingleVal
           />
           <TextField
             size="small"
-            label="Value"
+            label={uiText('Value', '值')}
             value={item.value}
             onChange={(e) => setField(i, 'value', e.target.value)}
             disabled={disabled}
             sx={{ width: { xs: '100%', sm: 180 } }}
           />
           {i > 0 && (
-            <Tooltip title="Remove filter row">
-              <IconButton size="small" disabled={disabled} onClick={() => removeRow(i)} aria-label="Remove filter row">
+            <Tooltip title={uiText('Remove filter row', '移除此筛选项')}>
+              <IconButton size="small" disabled={disabled} onClick={() => removeRow(i)} aria-label={uiText('Remove filter row', '移除此筛选项')}>
                 <RemoveCircleOutlineIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
         </Box>
       ))}
-      <Tooltip title="Add filter row">
-        <IconButton size="small" disabled={disabled} onClick={addRow} aria-label="Add filter row">
+      <Tooltip title={uiText('Add filter row', '添加筛选项')}>
+        <IconButton size="small" disabled={disabled} onClick={addRow} aria-label={uiText('Add filter row', '添加筛选项')}>
           <AddCircleOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -413,7 +424,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
       >
         <FilterListIcon sx={{ mr: 1 }} fontSize="small" />
         <Typography variant="subtitle2" component="span" sx={{ flex: 1 }}>
-          Request Filter
+          {uiText('Request Filter', '请求筛选')}
         </Typography>
         {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
       </ButtonBase>
@@ -428,11 +439,11 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                     onChange={(e) => setFilterEnabled(e.target.checked)}
                   />
                 }
-                label="Enabled"
+                label={uiText('Enabled', '启用')}
               />
               {!filterEnabled && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5 }}>
-                  Type in any field to start filtering.
+                  {uiText('Type in any field to start filtering.', '填写任一字段即可开始筛选。')}
                 </Typography>
               )}
             </Box>
@@ -440,7 +451,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
               <TextField
                 select
                 size="small"
-                label="Method"
+                label={uiText('Method', '请求方法')}
                 value={method}
                 onChange={(e) => { arm(); setMethod(e.target.value); }}
                 disabled={disabled}
@@ -448,27 +459,27 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
               >
                 {HTTP_METHODS.map((m) => (
                   <MenuItem key={m} value={m}>
-                    {m || '(any)'}
+                    {m || uiText('(any)', '（任意）')}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
                 size="small"
-                label={regex ? 'Path (regex)' : 'Path'}
+                label={regex ? uiText('Path (regex)', '路径（正则表达式）') : uiText('Path', '路径')}
                 value={path}
                 onChange={(e) => { arm(); setPath(e.target.value); }}
                 disabled={disabled}
                 error={Boolean(pathRegexError)}
-                helperText={pathRegexError}
+                helperText={pathRegexError && uiText(pathRegexError, `正则表达式无效（${pathRegexError}）`)}
                 sx={{ width: { xs: '100%', sm: 200 } }}
               />
               <TextField
                 size="small"
-                label="Body contains"
+                label={uiText('Body contains', '请求正文包含')}
                 value={body}
                 onChange={(e) => { arm(); setBody(e.target.value); }}
                 disabled={disabled}
-                placeholder="text in the request body"
+                placeholder={uiText('text in the request body', '输入请求正文中的文本')}
                 sx={{ width: { xs: '100%', sm: 200 } }}
               />
               <FormControlLabel
@@ -480,7 +491,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                     disabled={disabled}
                   />
                 }
-                label="Regex"
+                label={uiText('Regex', '正则表达式')}
               />
               <FormControlLabel
                 control={
@@ -491,7 +502,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                     disabled={disabled}
                   />
                 }
-                label="Secure"
+                label={uiText('Secure', '使用 HTTPS')}
               />
               <FormControlLabel
                 control={
@@ -502,21 +513,22 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                     disabled={disabled}
                   />
                 }
-                label="Keep-Alive"
+                label={uiText('Keep-Alive', '保持连接')}
               />
             </Box>
           </Box>
           <Box sx={{ mt: 2 }}>
             <ChipCluster
-              label="Action Type (expectations only)"
+              label={uiText('Action Type (expectations only)', '动作类型（仅筛选 Mock 规则）')}
               options={ACTION_TYPES}
+              displayMap={ACTION_TYPE_LABELS}
               selected={actionTypeFilter}
               onChange={(v) => { arm(); setActionTypeFilter(v); }}
               disabled={disabled}
             />
             {hasLlmExpectations && (
               <ChipCluster
-                label="LLM Provider (expectations only)"
+                label={uiText('LLM Provider (expectations only)', 'LLM 提供方（仅筛选 Mock 规则）')}
                 options={LLM_PROVIDERS}
                 selected={llmProviderFilter}
                 onChange={(v) => { arm(); setLlmProviderFilter(v); }}
@@ -527,7 +539,7 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
           </Box>
           <Box sx={{ mt: 1 }}>
             <Typography variant="caption" color="primary" sx={{ mb: 0.5, display: 'block' }}>
-              Log Display
+              {uiText('Log Display', '日志显示')}
             </Typography>
             <FormControlLabel
               control={
@@ -537,25 +549,25 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                   onChange={(e) => setLogShowForwarded(e.target.checked)}
                 />
               }
-              label="Show forwarded"
+              label={uiText('Show forwarded', '显示转发记录')}
             />
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5 }}>
-              Hide proxied / forwarded request entries from the Log panel when off.
+              {uiText('Hide proxied / forwarded request entries from the Log panel when off.', '关闭后，日志面板会隐藏代理和转发请求的记录。')}
             </Typography>
           </Box>
           <Box sx={{ mt: 2 }}>
-            <MultiValueField label="Headers" items={headers} onChange={(v) => { arm(); setHeaders(v); }} disabled={disabled} />
-            <SingleValueField label="Cookies" items={cookies} onChange={(v) => { arm(); setCookies(v); }} disabled={disabled} />
-            <MultiValueField label="Query Parameters" items={queryParams} onChange={(v) => { arm(); setQueryParams(v); }} disabled={disabled} />
+            <MultiValueField label={uiText('Headers', '请求头')} items={headers} onChange={(v) => { arm(); setHeaders(v); }} disabled={disabled} />
+            <SingleValueField label={uiText('Cookies', 'Cookie')} items={cookies} onChange={(v) => { arm(); setCookies(v); }} disabled={disabled} />
+            <MultiValueField label={uiText('Query Parameters', '查询参数')} items={queryParams} onChange={(v) => { arm(); setQueryParams(v); }} disabled={disabled} />
           </Box>
           <Box sx={{ mt: 2 }}>
             <Typography variant="caption" color="primary" sx={{ mb: 0.5, display: 'block' }}>
-              Saved Presets
+              {uiText('Saved Presets', '已保存的筛选预设')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
               <TextField
                 size="small"
-                label="Preset name"
+                label={uiText('Preset name', '预设名称')}
                 value={presetName}
                 onChange={(e) => setPresetName(e.target.value)}
                 onKeyDown={(e) => {
@@ -573,12 +585,12 @@ export default function FilterPanel({ onFilterChange }: FilterPanelProps) {
                 disabled={!presetName.trim()}
                 onClick={handleSavePreset}
               >
-                Save
+                {uiText('Save', '保存')}
               </Button>
             </Box>
             {presets.length === 0 ? (
               <Typography variant="caption" color="text.secondary">
-                No saved presets. Configure a filter and save it to re-apply later.
+                {uiText('No saved presets. Configure a filter and save it to re-apply later.', '暂无筛选预设。设置筛选条件并保存，下次可以直接应用。')}
               </Typography>
             ) : (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import type { OnChange, OnMount, OnValidate } from '@monaco-editor/react';
@@ -126,7 +127,7 @@ export default function JsonEditor({
         tabToggleRef.current?.dispose();
         tabToggleRef.current = editor.addAction({
           id: 'mockserver.toggleTabMovesFocus',
-          label: 'Toggle Tab Key Moves Focus',
+          label: uiText('Toggle Tab Key Moves Focus', "切换 Tab 键移动焦点"),
           keybindings: [mac ? KeyMod.WinCtrl | KeyMod.Shift | KeyCode.KeyM : KeyMod.CtrlCmd | KeyCode.KeyM],
           keybindingContext: 'editorTextFocus',
           run: () => setTabMovesFocus((current) => !current),
@@ -255,8 +256,8 @@ export default function JsonEditor({
           data-testid="json-editor-errors"
         >
           {markers.length === 1
-            ? `Line ${markers[0].startLineNumber}: ${markers[0].message}`
-            : `${markers.length} problems — line ${markers[0].startLineNumber}: ${markers[0].message}`}
+            ? uiText(`Line ${markers[0].startLineNumber}: ${markers[0].message}`, `第 ${markers[0].startLineNumber} 行：${markers[0].message}`)
+            : uiText(`${markers.length} problems — line ${markers[0].startLineNumber}: ${markers[0].message}`, `共 ${markers.length} 个问题。第 ${markers[0].startLineNumber} 行：${markers[0].message}`)}
         </Typography>
       )}
     </Box>

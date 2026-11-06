@@ -1,3 +1,5 @@
+import { uiText } from './dashboardLocale';
+
 /**
  * Humanises server / control-plane errors for the dashboard.
  *
@@ -14,6 +16,11 @@ export interface HumanError {
   /** Raw underlying text (server body / exception message) for a Details expander. */
   details?: string;
 }
+
+export const unavailableFeatureMessage = uiText(
+  'This feature isn’t available on the connected MockServer (it may be an older version).',
+  '当前连接的 MockServer 不支持此功能，可能需要更新服务器版本。',
+);
 
 /** Matches the `MockServer returned <status>: <body>` thrown shape (also `Replay failed (<status>): <body>`). */
 const SERVER_ERROR_SHAPE = /^MockServer returned (\d{3}):\s*([\s\S]*)$/;
@@ -76,18 +83,17 @@ export function humanizeServerError(status: number, rawBody: string): HumanError
     const reason = extractReason(rawBody);
     return {
       message: reason
-        ? `The request was rejected as invalid: ${reason}`
-        : 'The request was rejected as invalid.',
+        ? uiText(`The request was rejected as invalid: ${reason}`, `请求无效：${reason}`)
+        : uiText('The request was rejected as invalid.', '服务器拒绝了无效请求。'),
       details,
     };
   }
   if (status === 401 || status === 403) {
-    return { message: 'Not authorised — the server rejected the credentials.', details };
+    return { message: uiText('Not authorised — the server rejected the credentials.', '未获授权，服务器拒绝了提供的凭据。'), details };
   }
   if (status === 404) {
     return {
-      message:
-        'This feature isn’t available on the connected MockServer (it may be an older version).',
+      message: unavailableFeatureMessage,
       details,
     };
   }
@@ -95,15 +101,15 @@ export function humanizeServerError(status: number, rawBody: string): HumanError
     const reason = extractReason(rawBody);
     return {
       message: reason
-        ? `The request conflicts with the current state: ${reason}`
-        : 'The request conflicts with the current state.',
+        ? uiText(`The request conflicts with the current state: ${reason}`, `请求与当前状态冲突：${reason}`)
+        : uiText('The request conflicts with the current state.', '请求与当前状态冲突。'),
       details,
     };
   }
   if (status >= 500) {
-    return { message: 'The MockServer encountered an internal error.', details };
+    return { message: uiText('The MockServer encountered an internal error.', 'MockServer 发生内部错误。'), details };
   }
-  return { message: `The MockServer returned an unexpected status (${status}).`, details };
+  return { message: uiText(`The MockServer returned an unexpected status (${status}).`, `MockServer 返回了意外的状态码（${status}）。`), details };
 }
 
 /**
@@ -124,12 +130,12 @@ export function humanizeError(e: unknown): HumanError {
 
   if (isNetworkError(message)) {
     return {
-      message: 'Couldn’t reach the MockServer — is it still running?',
+      message: uiText('Couldn’t reach the MockServer — is it still running?', '无法连接 MockServer，请确认服务仍在运行。'),
       details: message || undefined,
     };
   }
 
-  return { message: message || 'An unexpected error occurred.' };
+  return { message: message || uiText('An unexpected error occurred.', '发生意外错误。') };
 }
 
 /**

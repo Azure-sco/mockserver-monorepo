@@ -6,6 +6,7 @@
  * JavaScript syntax for each snippet based on the currently selected template
  * engine. Each snippet also shows a short description and an example rendering.
  */
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -53,10 +54,10 @@ export default function SnippetPalette({ engine, onInsert }: SnippetPaletteProps
         size="small"
         variant="outlined"
         onClick={handleOpen}
-        aria-label="Insert snippet"
+        aria-label={uiText("Insert snippet", "插入代码片段")}
         sx={{ textTransform: 'none', fontSize: '0.78rem' }}
       >
-        Insert snippet
+        {uiText("Insert snippet", "插入代码片段")}
       </Button>
       <Popover
         open={open}
@@ -75,10 +76,10 @@ export default function SnippetPalette({ engine, onInsert }: SnippetPaletteProps
       >
         <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
           <Typography variant="subtitle2">
-            Template Snippets
+            {uiText("Template Snippets", "模板代码片段")}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Click a snippet to insert {engine === 'VELOCITY' ? 'Velocity' : engine === 'MUSTACHE' ? 'Mustache' : 'JavaScript'} syntax
+            {uiText("Click a snippet to insert ", "点击代码片段以插入 ")}{engine === 'VELOCITY' ? 'Velocity' : engine === 'MUSTACHE' ? 'Mustache' : 'JavaScript'}{uiText(" syntax", " 语法")}
           </Typography>
         </Box>
 

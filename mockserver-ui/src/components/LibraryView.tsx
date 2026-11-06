@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useEffect, useMemo, useRef, type ChangeEvent } from 'react';
 import { useTransientFlag } from '../hooks/useTransientFlag';
 import Box from '@mui/material/Box';
@@ -83,10 +84,10 @@ type ExportFormat =
 type VerifyLang = 'java' | 'node' | 'python' | 'go' | 'csharp' | 'ruby' | 'rust';
 
 const SCOPES: { value: ExportScope; label: string; retrieveType: string }[] = [
-  { value: 'requests', label: 'Recorded requests', retrieveType: 'REQUEST_RESPONSES' },
-  { value: 'expectations', label: 'Active expectations', retrieveType: 'ACTIVE_EXPECTATIONS' },
-  { value: 'recorded', label: 'Recorded expectations', retrieveType: 'RECORDED_EXPECTATIONS' },
-  { value: 'logs', label: 'Server logs', retrieveType: 'LOGS' },
+  { value: 'requests', label: uiText('Recorded requests', '已录制的请求'), retrieveType: 'REQUEST_RESPONSES' },
+  { value: 'expectations', label: uiText('Active expectations', '生效规则'), retrieveType: 'ACTIVE_EXPECTATIONS' },
+  { value: 'recorded', label: uiText('Recorded expectations', '已录制的 Mock 规则'), retrieveType: 'RECORDED_EXPECTATIONS' },
+  { value: 'logs', label: uiText('Server logs', '服务端日志'), retrieveType: 'LOGS' },
 ];
 
 // retrieveFormat is the server's Format enum name; scopes restricts which export
@@ -101,27 +102,27 @@ const SCOPES: { value: ExportScope; label: string; retrieveType: string }[] = [
 const FORMATS: { value: ExportFormat; label: string; retrieveFormat: string; scopes: ExportScope[]; verifyLang?: VerifyLang }[] = [
   { value: 'json', label: 'MockServer JSON', retrieveFormat: 'JSON', scopes: ['expectations', 'recorded', 'requests'] },
   { value: 'java', label: 'MockServer Java DSL', retrieveFormat: 'JAVA', scopes: ['expectations', 'recorded'] },
-  { value: 'javascript', label: 'JavaScript client code', retrieveFormat: 'JAVASCRIPT', scopes: ['expectations', 'recorded'] },
-  { value: 'python', label: 'Python client code', retrieveFormat: 'PYTHON', scopes: ['expectations', 'recorded'] },
-  { value: 'go', label: 'Go client code', retrieveFormat: 'GO', scopes: ['expectations', 'recorded'] },
-  { value: 'csharp', label: 'C# client code', retrieveFormat: 'CSHARP', scopes: ['expectations', 'recorded'] },
-  { value: 'ruby', label: 'Ruby client code', retrieveFormat: 'RUBY', scopes: ['expectations', 'recorded'] },
-  { value: 'rust', label: 'Rust client code', retrieveFormat: 'RUST', scopes: ['expectations', 'recorded'] },
-  { value: 'php', label: 'PHP client code', retrieveFormat: 'PHP', scopes: ['expectations', 'recorded'] },
-  { value: 'har', label: 'HAR (HTTP Archive)', retrieveFormat: 'HAR', scopes: ['expectations', 'recorded', 'requests'] },
-  { value: 'openapi', label: 'OpenAPI 3 spec', retrieveFormat: 'OPENAPI', scopes: ['expectations', 'recorded', 'requests'] },
-  { value: 'postman', label: 'Postman collection v2.1', retrieveFormat: 'POSTMAN', scopes: ['expectations', 'recorded', 'requests'] },
-  { value: 'bruno', label: 'Bruno collection (.zip)', retrieveFormat: 'BRUNO', scopes: ['expectations', 'recorded', 'requests'] },
-  { value: 'logentries', label: 'Log entries (JSON)', retrieveFormat: 'LOG_ENTRIES', scopes: ['recorded', 'requests', 'logs'] },
-  { value: 'curl', label: 'cURL commands', retrieveFormat: 'CURL', scopes: ['requests'] },
+  { value: 'javascript', label: uiText('JavaScript client code', 'JavaScript 客户端代码'), retrieveFormat: 'JAVASCRIPT', scopes: ['expectations', 'recorded'] },
+  { value: 'python', label: uiText('Python client code', 'Python 客户端代码'), retrieveFormat: 'PYTHON', scopes: ['expectations', 'recorded'] },
+  { value: 'go', label: uiText('Go client code', 'Go 客户端代码'), retrieveFormat: 'GO', scopes: ['expectations', 'recorded'] },
+  { value: 'csharp', label: uiText('C# client code', 'C# 客户端代码'), retrieveFormat: 'CSHARP', scopes: ['expectations', 'recorded'] },
+  { value: 'ruby', label: uiText('Ruby client code', 'Ruby 客户端代码'), retrieveFormat: 'RUBY', scopes: ['expectations', 'recorded'] },
+  { value: 'rust', label: uiText('Rust client code', 'Rust 客户端代码'), retrieveFormat: 'RUST', scopes: ['expectations', 'recorded'] },
+  { value: 'php', label: uiText('PHP client code', 'PHP 客户端代码'), retrieveFormat: 'PHP', scopes: ['expectations', 'recorded'] },
+  { value: 'har', label: uiText('HAR (HTTP Archive)', 'HAR（HTTP 归档）'), retrieveFormat: 'HAR', scopes: ['expectations', 'recorded', 'requests'] },
+  { value: 'openapi', label: uiText('OpenAPI 3 spec', 'OpenAPI 3 规范'), retrieveFormat: 'OPENAPI', scopes: ['expectations', 'recorded', 'requests'] },
+  { value: 'postman', label: uiText('Postman collection v2.1', 'Postman 集合 v2.1'), retrieveFormat: 'POSTMAN', scopes: ['expectations', 'recorded', 'requests'] },
+  { value: 'bruno', label: uiText('Bruno collection (.zip)', 'Bruno 集合（.zip）'), retrieveFormat: 'BRUNO', scopes: ['expectations', 'recorded', 'requests'] },
+  { value: 'logentries', label: uiText('Log entries (JSON)', '日志条目（JSON）'), retrieveFormat: 'LOG_ENTRIES', scopes: ['recorded', 'requests', 'logs'] },
+  { value: 'curl', label: uiText('cURL commands', 'cURL 命令'), retrieveFormat: 'CURL', scopes: ['requests'] },
   // Verification code — generated client-side from the recorded requests.
-  { value: 'verify-java', label: 'Verification code (Java)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'java' },
-  { value: 'verify-javascript', label: 'Verification code (JavaScript)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'node' },
-  { value: 'verify-python', label: 'Verification code (Python)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'python' },
-  { value: 'verify-go', label: 'Verification code (Go)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'go' },
-  { value: 'verify-csharp', label: 'Verification code (C#)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'csharp' },
-  { value: 'verify-ruby', label: 'Verification code (Ruby)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'ruby' },
-  { value: 'verify-rust', label: 'Verification code (Rust)', retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'rust' },
+  { value: 'verify-java', label: uiText('Verification code (Java)', '验证代码（Java）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'java' },
+  { value: 'verify-javascript', label: uiText('Verification code (JavaScript)', '验证代码（JavaScript）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'node' },
+  { value: 'verify-python', label: uiText('Verification code (Python)', '验证代码（Python）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'python' },
+  { value: 'verify-go', label: uiText('Verification code (Go)', '验证代码（Go）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'go' },
+  { value: 'verify-csharp', label: uiText('Verification code (C#)', '验证代码（C#）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'csharp' },
+  { value: 'verify-ruby', label: uiText('Verification code (Ruby)', '验证代码（Ruby）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'ruby' },
+  { value: 'verify-rust', label: uiText('Verification code (Rust)', '验证代码（Rust）'), retrieveFormat: 'JSON', scopes: ['requests'], verifyLang: 'rust' },
 ];
 
 // One verify(...) snippet per recorded request, joined into a single document.
@@ -185,177 +186,177 @@ interface ExportDetail {
 const DETAILS: Record<ExportScope, Partial<Record<ExportFormat, ExportDetail>>> = {
   expectations: {
     json: {
-      description: 'Round-trippable JSON of every registered expectation. Re-import via PUT /mockserver/expectation.',
+      description: uiText('Round-trippable JSON of every registered expectation. Re-import via PUT /mockserver/expectation.', '将所有已注册规则导出为可重新导入的 JSON，可通过 PUT /mockserver/expectation 导入。'),
       filename: 'mockserver-expectations.json',
     },
     java: {
-      description: 'MockServer Java DSL that recreates each expectation — paste into a JUnit test or client.',
+      description: uiText('MockServer Java DSL that recreates each expectation — paste into a JUnit test or client.', '用 MockServer Java DSL 重建每条规则，可复制到 JUnit 测试或客户端代码中。'),
       filename: 'mockserver-expectations.java',
     },
     javascript: {
-      description: 'Node.js client code — one mockAnyResponse(...) call per expectation. Paste into a script using mockserver-client.',
+      description: uiText('Node.js client code — one mockAnyResponse(...) call per expectation. Paste into a script using mockserver-client.', '每条规则对应一次 Node.js 客户端的 mockAnyResponse(...) 调用，可复制到使用 mockserver-client 的脚本。'),
       filename: 'mockserver-expectations.js',
     },
     python: {
-      description: 'Python client code — one client.upsert(...) call per expectation. Paste into a script using the mockserver package.',
+      description: uiText('Python client code — one client.upsert(...) call per expectation. Paste into a script using the mockserver package.', '每条规则对应一次 Python 客户端的 client.upsert(...) 调用，可复制到使用 mockserver 包的脚本。'),
       filename: 'mockserver-expectations.py',
     },
     go: {
-      description: 'Go client code — one client.Upsert(...) call per expectation. Paste into a program using the mockserver-client-go package.',
+      description: uiText('Go client code — one client.Upsert(...) call per expectation. Paste into a program using the mockserver-client-go package.', '每条规则对应一次 Go 客户端的 client.Upsert(...) 调用，可复制到使用 mockserver-client-go 包的程序。'),
       filename: 'mockserver-expectations.go',
     },
     csharp: {
-      description: 'C# client code — one client.Upsert(...) call per expectation. Paste into a project using the MockServer.Client NuGet package.',
+      description: uiText('C# client code — one client.Upsert(...) call per expectation. Paste into a project using the MockServer.Client NuGet package.', '每条规则对应一次 C# 客户端的 client.Upsert(...) 调用，可复制到使用 MockServer.Client NuGet 包的项目。'),
       filename: 'mockserver-expectations.cs',
     },
     ruby: {
-      description: 'Ruby client code — one client.upsert(...) call per expectation. Paste into a script using the mockserver-client gem.',
+      description: uiText('Ruby client code — one client.upsert(...) call per expectation. Paste into a script using the mockserver-client gem.', '每条规则对应一次 Ruby 客户端的 client.upsert(...) 调用，可复制到使用 mockserver-client gem 的脚本。'),
       filename: 'mockserver-expectations.rb',
     },
     rust: {
-      description: 'Rust client code — one client.upsert(...) call per expectation. Paste into a program using the mockserver-client crate.',
+      description: uiText('Rust client code — one client.upsert(...) call per expectation. Paste into a program using the mockserver-client crate.', '每条规则对应一次 Rust 客户端的 client.upsert(...) 调用，可复制到使用 mockserver-client crate 的程序。'),
       filename: 'mockserver-expectations.rs',
     },
     php: {
-      description: 'PHP client code — one $client->upsertExpectation(...) call per expectation. Paste into a script using the mock-server/mockserver-client package.',
+      description: uiText('PHP client code — one $client->upsertExpectation(...) call per expectation. Paste into a script using the mock-server/mockserver-client package.', '每条规则对应一次 PHP 客户端的 $client->upsertExpectation(...) 调用，可复制到使用 mock-server/mockserver-client 包的脚本。'),
       filename: 'mockserver-expectations.php',
     },
     har: {
-      description: 'HAR-formatted archive of each expectation as a synthetic request/response pair.',
+      description: uiText('HAR-formatted archive of each expectation as a synthetic request/response pair.', '将每条 Mock 规则转换为一组模拟请求和响应，并归档为 HAR。'),
       filename: 'mockserver-expectations.har',
     },
     openapi: {
-      description: 'One operation per (method, path) with the registered response body as an example.',
+      description: uiText('One operation per (method, path) with the registered response body as an example.', '每种 HTTP 方法与路径组合生成一个操作，并以已配置的响应体为示例。'),
       filename: 'mockserver-expectations.openapi.json',
     },
     postman: {
-      description: 'Postman collection of every expectation as a request item with example response.',
+      description: uiText('Postman collection of every expectation as a request item with example response.', '将每条 Mock 规则导出为带响应示例的 Postman 请求。'),
       filename: 'mockserver-expectations.postman.json',
     },
     bruno: {
-      description: 'Bruno collection — one .bru file per expectation, packaged as a zip archive.',
+      description: uiText('Bruno collection — one .bru file per expectation, packaged as a zip archive.', '每条规则对应一个 .bru 文件，打包为 Bruno 集合的 ZIP 归档。'),
       filename: 'mockserver-expectations.bruno.zip',
     },
   },
   requests: {
     json: {
-      description: 'Every request/response pair MockServer has logged, as a JSON array.',
+      description: uiText('Every request/response pair MockServer has logged, as a JSON array.', '将 MockServer 记录的所有请求和响应导出为 JSON 数组。'),
       filename: 'mockserver-traffic.json',
     },
     har: {
-      description: 'Browser-tooling-compatible archive of every captured request/response pair.',
+      description: uiText('Browser-tooling-compatible archive of every captured request/response pair.', '将捕获的所有请求和响应导出为浏览器工具可读取的归档。'),
       filename: 'mockserver-traffic.har',
     },
     openapi: {
-      description: 'OpenAPI spec derived from observed traffic; useful for capturing a real API shape.',
+      description: uiText('OpenAPI spec derived from observed traffic; useful for capturing a real API shape.', '从捕获的流量生成 OpenAPI 规范，方便了解真实接口结构。'),
       filename: 'mockserver-traffic.openapi.json',
     },
     postman: {
-      description: 'Postman collection where each item is a captured request with its observed response.',
+      description: uiText('Postman collection where each item is a captured request with its observed response.', '将每条捕获的请求和对应的响应导出为 Postman 集合中的一项。'),
       filename: 'mockserver-traffic.postman.json',
     },
     bruno: {
-      description: 'Bruno collection (one .bru per captured request) packaged as a zip archive.',
+      description: uiText('Bruno collection (one .bru per captured request) packaged as a zip archive.', '将每条捕获的请求导出为 .bru 文件，再打包为 Bruno 集合的 ZIP 归档。'),
       filename: 'mockserver-traffic.bruno.zip',
     },
     logentries: {
-      description: 'Raw MockServer log events for the captured request/response pairs (verbose JSON; mainly for debugging).',
+      description: uiText('Raw MockServer log events for the captured request/response pairs (verbose JSON; mainly for debugging).', '导出与捕获的请求和响应对应的 MockServer 原始事件（详细 JSON，主要用于排查问题）。'),
       filename: 'mockserver-traffic.log-entries.json',
     },
     curl: {
-      description: 'A cURL command per captured request — paste into a shell to replay the traffic.',
+      description: uiText('A cURL command per captured request — paste into a shell to replay the traffic.', '为每条捕获的请求生成一条 cURL 命令，可复制到终端回放请求。'),
       filename: 'mockserver-traffic.curl.sh',
     },
     'verify-java': {
-      description: 'Java verify(...) call per captured request — paste into a JUnit test using the MockServer Java client.',
+      description: uiText('Java verify(...) call per captured request — paste into a JUnit test using the MockServer Java client.', '为每条捕获的请求生成一次 Java verify(...) 调用，可复制到使用 MockServer Java 客户端的 JUnit 测试。'),
       filename: 'mockserver-verify.java',
     },
     'verify-javascript': {
-      description: 'JavaScript verify(...) call per captured request — paste into a script using mockserver-client.',
+      description: uiText('JavaScript verify(...) call per captured request — paste into a script using mockserver-client.', '为每条捕获的请求生成一次 JavaScript verify(...) 调用，可复制到使用 mockserver-client 的脚本。'),
       filename: 'mockserver-verify.js',
     },
     'verify-python': {
-      description: 'Python client.verify(...) call per captured request — paste into a script using the mockserver package.',
+      description: uiText('Python client.verify(...) call per captured request — paste into a script using the mockserver package.', '为每条捕获的请求生成一次 Python client.verify(...) 调用，可复制到使用 mockserver 包的脚本。'),
       filename: 'mockserver-verify.py',
     },
     'verify-go': {
-      description: 'Go client.Verify(...) call per captured request — paste into a program using the mockserver-client-go package.',
+      description: uiText('Go client.Verify(...) call per captured request — paste into a program using the mockserver-client-go package.', '为每条捕获的请求生成一次 Go client.Verify(...) 调用，可复制到使用 mockserver-client-go 包的程序。'),
       filename: 'mockserver-verify.go',
     },
     'verify-csharp': {
-      description: 'C# client.Verify(...) call per captured request — paste into a project using the MockServer.Client package.',
+      description: uiText('C# client.Verify(...) call per captured request — paste into a project using the MockServer.Client package.', '为每条捕获的请求生成一次 C# client.Verify(...) 调用，可复制到使用 MockServer.Client 包的项目。'),
       filename: 'mockserver-verify.cs',
     },
     'verify-ruby': {
-      description: 'Ruby client.verify(...) call per captured request — paste into a script using the mockserver-client gem.',
+      description: uiText('Ruby client.verify(...) call per captured request — paste into a script using the mockserver-client gem.', '为每条捕获的请求生成一次 Ruby client.verify(...) 调用，可复制到使用 mockserver-client gem 的脚本。'),
       filename: 'mockserver-verify.rb',
     },
     'verify-rust': {
-      description: 'Rust client.verify(...) call per captured request — paste into a program using the mockserver-client crate.',
+      description: uiText('Rust client.verify(...) call per captured request — paste into a program using the mockserver-client crate.', '为每条捕获的请求生成一次 Rust client.verify(...) 调用，可复制到使用 mockserver-client crate 的程序。'),
       filename: 'mockserver-verify.rs',
     },
   },
   recorded: {
     json: {
-      description: 'Expectations auto-recorded while proxying in CAPTURE mode, as round-trippable JSON.',
+      description: uiText('Expectations auto-recorded while proxying in CAPTURE mode, as round-trippable JSON.', '将 CAPTURE 模式下自动录制的代理规则导出为可重新导入的 JSON。'),
       filename: 'mockserver-recorded-expectations.json',
     },
     java: {
-      description: 'MockServer Java DSL recreating each recorded expectation.',
+      description: uiText('MockServer Java DSL recreating each recorded expectation.', '用 MockServer Java DSL 重建每条录制的规则。'),
       filename: 'mockserver-recorded-expectations.java',
     },
     javascript: {
-      description: 'Node.js client code recreating each recorded expectation — one mockAnyResponse(...) call per expectation.',
+      description: uiText('Node.js client code recreating each recorded expectation — one mockAnyResponse(...) call per expectation.', '用 Node.js 客户端代码重建录制的规则，每条规则调用一次 mockAnyResponse(...)。'),
       filename: 'mockserver-recorded-expectations.js',
     },
     python: {
-      description: 'Python client code recreating each recorded expectation — one client.upsert(...) call per expectation.',
+      description: uiText('Python client code recreating each recorded expectation — one client.upsert(...) call per expectation.', '用 Python 客户端代码重建录制的规则，每条规则调用一次 client.upsert(...)。'),
       filename: 'mockserver-recorded-expectations.py',
     },
     go: {
-      description: 'Go client code recreating each recorded expectation — one client.Upsert(...) call per expectation.',
+      description: uiText('Go client code recreating each recorded expectation — one client.Upsert(...) call per expectation.', '用 Go 客户端代码重建录制的规则，每条规则调用一次 client.Upsert(...)。'),
       filename: 'mockserver-recorded-expectations.go',
     },
     csharp: {
-      description: 'C# client code recreating each recorded expectation — one client.Upsert(...) call per expectation.',
+      description: uiText('C# client code recreating each recorded expectation — one client.Upsert(...) call per expectation.', '用 C# 客户端代码重建录制的规则，每条规则调用一次 client.Upsert(...)。'),
       filename: 'mockserver-recorded-expectations.cs',
     },
     ruby: {
-      description: 'Ruby client code recreating each recorded expectation — one client.upsert(...) call per expectation.',
+      description: uiText('Ruby client code recreating each recorded expectation — one client.upsert(...) call per expectation.', '用 Ruby 客户端代码重建录制的规则，每条规则调用一次 client.upsert(...)。'),
       filename: 'mockserver-recorded-expectations.rb',
     },
     rust: {
-      description: 'Rust client code recreating each recorded expectation — one client.upsert(...) call per expectation.',
+      description: uiText('Rust client code recreating each recorded expectation — one client.upsert(...) call per expectation.', '用 Rust 客户端代码重建录制的规则，每条规则调用一次 client.upsert(...)。'),
       filename: 'mockserver-recorded-expectations.rs',
     },
     php: {
-      description: 'PHP client code recreating each recorded expectation — one $client->upsertExpectation(...) call per expectation.',
+      description: uiText('PHP client code recreating each recorded expectation — one $client->upsertExpectation(...) call per expectation.', '用 PHP 客户端代码重建录制的规则，每条规则调用一次 $client->upsertExpectation(...)。'),
       filename: 'mockserver-recorded-expectations.php',
     },
     har: {
-      description: 'HAR archive of each recorded expectation as a request/response pair.',
+      description: uiText('HAR archive of each recorded expectation as a request/response pair.', '将录制的每条规则作为一组请求和响应导出为 HAR 归档。'),
       filename: 'mockserver-recorded-expectations.har',
     },
     openapi: {
-      description: 'OpenAPI spec derived from the recorded expectations.',
+      description: uiText('OpenAPI spec derived from the recorded expectations.', '根据录制的规则生成 OpenAPI 规范。'),
       filename: 'mockserver-recorded-expectations.openapi.json',
     },
     postman: {
-      description: 'Postman collection of the recorded expectations.',
+      description: uiText('Postman collection of the recorded expectations.', '将录制的规则导出为 Postman 集合。'),
       filename: 'mockserver-recorded-expectations.postman.json',
     },
     bruno: {
-      description: 'Bruno collection of the recorded expectations, packaged as a zip archive.',
+      description: uiText('Bruno collection of the recorded expectations, packaged as a zip archive.', '将录制的规则导出为 Bruno 集合并打包成 ZIP。'),
       filename: 'mockserver-recorded-expectations.bruno.zip',
     },
     logentries: {
-      description: 'Raw log events behind the recorded expectations (verbose JSON; mainly for debugging).',
+      description: uiText('Raw log events behind the recorded expectations (verbose JSON; mainly for debugging).', '导出录制规则对应的原始日志事件（详细 JSON，主要用于排查问题）。'),
       filename: 'mockserver-recorded-expectations.log-entries.json',
     },
   },
   logs: {
     logentries: {
-      description: "The server's raw event log as JSON — the full request/response/expectation lifecycle, for debugging.",
+      description: uiText("The server's raw event log as JSON — the full request/response/expectation lifecycle, for debugging.", '将服务端的原始事件日志导出为 JSON，便于排查请求、响应和规则的完整生命周期。'),
       filename: 'mockserver-logs.json',
     },
   },
@@ -382,14 +383,14 @@ function ExportTab({ connectionParams }: { connectionParams: ConnectionParams })
   let notice: string | null = null;
   if ((scope === 'expectations' || scope === 'recorded') && ['openapi', 'postman', 'bruno', 'har'].includes(format)) {
     notice =
-      'Best-effort export. Positive-string matchers round-trip cleanly, but NottableString ' +
-      'negation, regex bodies, and dynamic actions (forward / template / callback / error / LLM) ' +
-      'become placeholders — these formats describe client requests and example responses, not ' +
-      'the full MockServer expectation graph.';
+      uiText('Best-effort export. Positive-string matchers round-trip cleanly, but NottableString ', '导出会尽量保留原规则。普通字符串匹配可完整导出和重新导入，但 NottableString ') +
+      uiText('negation, regex bodies, and dynamic actions (forward / template / callback / error / LLM) ', '的否定条件、请求体正则和动态动作（转发、模板、回调、错误和 LLM）') +
+      uiText('become placeholders — these formats describe client requests and example responses, not ', '会以占位内容导出。这些格式用于记录客户端请求和响应示例，') +
+      uiText('the full MockServer expectation graph.', '无法表示 MockServer 的全部规则行为。');
   } else if (scope === 'requests' && ['openapi', 'postman', 'bruno'].includes(format)) {
     notice =
-      'Derived from the traffic MockServer has observed — only the requests it actually handled ' +
-      'are included.';
+      uiText('Derived from the traffic MockServer has observed — only the requests it actually handled ', '文件由 MockServer 捕获的流量生成，仅包含') +
+      uiText('are included.', '实际处理过的请求。');
   }
 
   const handleScopeChange = (next: ExportScope) => {
@@ -469,12 +470,10 @@ function ExportTab({ connectionParams }: { connectionParams: ConnectionParams })
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
       <Typography variant="body2" color="text.secondary">
-        Download captured traffic or registered expectations as a file. The file is
-        produced by the running MockServer instance — what you see in the dashboard
-        is what you get.
+        {uiText('Download captured traffic or registered expectations as a file. The file is produced by the running MockServer instance — what you see in the dashboard is what you get.', '可下载捕获的请求流量或已注册的 Mock 规则。文件由当前 MockServer 实例生成，内容与控制台中的记录一致。')}
       </Typography>
       <FormControl>
-        <FormLabel sx={{ typography: 'body2' }}>What to export</FormLabel>
+        <FormLabel sx={{ typography: 'body2' }}>{uiText('What to export', '导出内容')}</FormLabel>
         <RadioGroup
           row
           value={scope}
@@ -491,7 +490,7 @@ function ExportTab({ connectionParams }: { connectionParams: ConnectionParams })
         </RadioGroup>
       </FormControl>
       <TextField
-        label="Format"
+        label={uiText('Format', '文件格式')}
         size="small"
         select
         value={format}
@@ -513,7 +512,7 @@ function ExportTab({ connectionParams }: { connectionParams: ConnectionParams })
           onClick={() => void handleDownload()}
           disabled={downloading}
         >
-          {downloading ? 'Downloading…' : `Download ${detail.filename}`}
+          {downloading ? uiText('Downloading…', '正在下载…') : uiText(`Download ${detail.filename}`, `下载 ${detail.filename}`)}
         </Button>
         {copyable && (
           <Button
@@ -522,7 +521,7 @@ function ExportTab({ connectionParams }: { connectionParams: ConnectionParams })
             startIcon={<ContentCopyIcon sx={{ fontSize: '0.875rem' }} />}
             onClick={() => void handleCopy()}
           >
-            {copied ? 'Copied!' : 'Copy as code'}
+            {copied ? uiText('Copied!', '已复制') : uiText('Copy as code', '复制代码')}
           </Button>
         )}
       </Box>
@@ -569,7 +568,7 @@ function WasmTestDialog({
     try {
       parsed = JSON.parse(requestText) as WasmSampleRequest;
     } catch {
-      setError({ message: 'Sample request must be valid JSON.' });
+      setError({ message: uiText('Sample request must be valid JSON.', '示例请求必须是有效的 JSON。') });
       return;
     }
     setBusy(true);
@@ -586,14 +585,13 @@ function WasmTestDialog({
 
   return (
     <Dialog open={moduleName !== null} onClose={onClose} maxWidth="sm" fullWidth aria-labelledby="wasm-test-dialog-title">
-      <DialogTitle id="wasm-test-dialog-title">Test WASM Module “{moduleName}”</DialogTitle>
+      <DialogTitle id="wasm-test-dialog-title">{uiText('Test WASM Module “', '测试 WASM 模块「')}{moduleName}{uiText('”', '」')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Dry-run the module against a sample request. The module's match decision (and any shaped
-          response) is shown below — nothing is registered.
+          {uiText('Dry-run the module against a sample request. The module\'s match decision (and any shaped response) is shown below — nothing is registered.', '用示例请求试跑模块。下方会显示是否匹配及模块生成的响应，此操作不会注册 Mock 规则。')}
         </Typography>
         <TextField
-          label="Sample request (JSON)"
+          label={uiText('Sample request (JSON)', '示例请求（JSON）')}
           multiline
           minRows={6}
           maxRows={16}
@@ -606,8 +604,8 @@ function WasmTestDialog({
         {result && (
           <Alert severity={result.matched ? 'success' : 'info'} sx={{ mt: 1 }}>
             {result.matched
-              ? 'Matched — the module accepted this request.'
-              : 'Not matched — the module rejected this request.'}
+              ? uiText('Matched — the module accepted this request.', '已匹配，模块接受了此请求。')
+              : uiText('Not matched — the module rejected this request.', '未匹配，模块拒绝了此请求。')}
             {result.shaped !== undefined && result.shaped !== null && (
               <Box component="pre" sx={{ whiteSpace: 'pre-wrap', typography: 'caption', fontFamily: monospaceFontFamily, m: 0, mt: 0.5, maxHeight: 220, overflow: 'auto' }}>
                 {JSON.stringify(result.shaped, null, 2)}
@@ -617,9 +615,9 @@ function WasmTestDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{uiText('Close', '关闭')}</Button>
         <Button variant="contained" onClick={() => void handleRun()} disabled={busy || !requestText.trim()}>
-          {busy ? 'Testing…' : 'Run test'}
+          {busy ? uiText('Testing…', '正在测试…') : uiText('Run test', '运行测试')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -680,12 +678,12 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
 
   const handleUpload = useCallback(async () => {
     if (!uploadName.trim()) {
-      setActionError({ message: 'Module name is required' });
+      setActionError({ message: uiText('Module name is required', '请填写模块名称') });
       return;
     }
     const input = fileInputRef.current;
     if (!input?.files?.length) {
-      setActionError({ message: 'Select a .wasm file to upload' });
+      setActionError({ message: uiText('Select a .wasm file to upload', '请选择要上传的 .wasm 文件') });
       return;
     }
     setBusy(true);
@@ -720,15 +718,14 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
       <Typography variant="body2" color="text.secondary">
-        Upload and manage WASM custom rule modules. Each module can be referenced
-        by name in expectation actions.
+        {uiText('Upload and manage WASM custom rule modules. Each module can be referenced by name in expectation actions.', '上传和管理 WASM 自定义规则模块。Mock 规则的动作可以按名称引用这些模块。')}
       </Typography>
 
       {/* Upload form */}
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
           size="small"
-          label="Module name"
+          label={uiText('Module name', '模块名称')}
           placeholder="my-rule"
           value={uploadName}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setUploadName(e.target.value)}
@@ -741,7 +738,7 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
           startIcon={<UploadFileIcon sx={{ fontSize: '0.875rem' }} />}
           sx={{ height: 40 }}
         >
-          Select .wasm
+          {uiText('Select .wasm', '选择 .wasm 文件')}
           <input
             ref={fileInputRef}
             type="file"
@@ -756,10 +753,10 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
           onClick={() => void handleUpload()}
           sx={{ height: 40 }}
         >
-          Upload
+          {uiText('Upload', '上传')}
         </Button>
-        <Tooltip title="Refresh module list">
-          <IconButton size="small" onClick={() => setRefreshTick((t) => t + 1)} aria-label="Refresh WASM modules">
+        <Tooltip title={uiText('Refresh module list', '刷新模块列表')}>
+          <IconButton size="small" onClick={() => setRefreshTick((t) => t + 1)} aria-label={uiText('Refresh WASM modules', '刷新 WASM 模块')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -775,25 +772,25 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
 
       {wasmDisabled && (
         <Alert severity="info">
-          WASM rules are turned off on this server. Turn them on by starting MockServer with{' '}
-          <code>-Dmockserver.wasmEnabled=true</code> (or the <code>MOCKSERVER_WASM_ENABLED=true</code>{' '}
-          environment variable), or at runtime with <code>PUT /mockserver/configuration</code> and the body{' '}
-          <code>{'{"wasmEnabled": true}'}</code>, then press Refresh.
+          {uiText('WASM rules are turned off on this server. Turn them on by starting MockServer with', '此服务尚未启用 WASM 规则。启动 MockServer 时可添加 ')}{' '}
+          <code>-Dmockserver.wasmEnabled=true</code>{uiText(' (or the ', '（也可设置 ')}<code>MOCKSERVER_WASM_ENABLED=true</code>{' '}
+          {uiText('environment variable), or at runtime with ', '环境变量）。也可以在运行期间向 ')}<code>PUT /mockserver/configuration</code>{uiText(' and the body', '发送以下请求体')}{' '}
+          <code>{'{"wasmEnabled": true}'}</code>{uiText(', then press Refresh.', '，再点击刷新。')}
         </Alert>
       )}
 
       {/* Modules table */}
       {wasmDisabled ? null : loading ? (
-        <Typography variant="body2" color="text.secondary">Loading…</Typography>
+        <Typography variant="body2" color="text.secondary">{uiText('Loading…', '正在加载…')}</Typography>
       ) : modules.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">No WASM modules loaded.</Typography>
+        <Typography variant="body2" color="text.secondary">{uiText('No WASM modules loaded.', '尚未加载 WASM 模块。')}</Typography>
       ) : (
         <TableContainer>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Module Name</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>{uiText('Module Name', '模块名称')}</TableCell>
+                <TableCell align="right">{uiText('Actions', '操作')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -803,11 +800,11 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
                     <Typography variant="caption" sx={{ fontFamily: monospaceFontFamily }}>{name}</Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Test module against a sample request">
+                    <Tooltip title={uiText('Test module against a sample request', '用示例请求测试模块')}>
                       <span>
                         <IconButton
                           size="small"
-                          aria-label={`Test WASM module ${name}`}
+                          aria-label={uiText(`Test WASM module ${name}`, `测试 WASM 模块 ${name}`)}
                           disabled={busy}
                           onClick={() => setTestTarget(name)}
                         >
@@ -815,11 +812,11 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Delete module">
+                    <Tooltip title={uiText('Delete module', '删除模块')}>
                       <span>
                         <IconButton
                           size="small"
-                          aria-label={`Delete WASM module ${name}`}
+                          aria-label={uiText(`Delete WASM module ${name}`, `删除 WASM 模块 ${name}`)}
                           disabled={busy}
                           onClick={() => setDeleteTarget(name)}
                         >
@@ -837,9 +834,9 @@ function WasmModulesTab({ connectionParams }: { connectionParams: ConnectionPara
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title={`Delete WASM module "${deleteTarget}"?`}
-        message="This permanently removes the module from the server. Any expectations referencing it will fail. This cannot be undone."
-        confirmLabel="Delete module"
+        title={uiText(`Delete WASM module "${deleteTarget}"?`, `删除 WASM 模块「${deleteTarget}」？`)}
+        message={uiText('This permanently removes the module from the server. Any expectations referencing it will fail. This cannot be undone.', '这会永久移除服务上的此模块，引用它的规则将无法运行。此操作无法撤销。')}
+        confirmLabel={uiText('Delete module', '删除模块')}
         onConfirm={() => { if (deleteTarget) void handleDelete(deleteTarget); }}
         onClose={() => setDeleteTarget(null)}
       />
@@ -888,7 +885,7 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
   const handleUpload = useCallback(async () => {
     const input = fileInputRef.current;
     if (!input?.files?.length) {
-      setActionError({ message: 'Select a compiled descriptor set (.desc / .pb / .bin) to upload' });
+      setActionError({ message: uiText('Select a compiled descriptor set (.desc / .pb / .bin) to upload', '请选择要上传的编译后描述符集合（.desc、.pb 或 .bin）') });
       return;
     }
     setBusy(true);
@@ -921,23 +918,22 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 820 }}>
       <Typography variant="body2" color="text.secondary">
-        Upload a compiled protobuf <code>FileDescriptorSet</code> (e.g. <code>protoc --descriptor_set_out</code>)
-        so MockServer can transcode and mock the declared gRPC services.
+        {uiText('Upload a compiled protobuf ', '上传编译后的 Protobuf ')}<code>FileDescriptorSet</code>{uiText(' (e.g. ', '（例如由 ')}<code>protoc --descriptor_set_out</code>{uiText(') so MockServer can transcode and mock the declared gRPC services.', '生成的文件），以便 MockServer 对其中声明的 gRPC 服务进行转码和模拟。')}
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
         <Button size="small" variant="outlined" component="label" startIcon={<UploadFileIcon sx={{ fontSize: '0.875rem' }} />} sx={{ height: 40 }}>
-          Select descriptor set
+          {uiText('Select descriptor set', '选择描述符集合')}
           <input ref={fileInputRef} type="file" accept=".desc,.pb,.bin,.protoset,application/octet-stream" hidden />
         </Button>
         <Button variant="contained" size="small" disabled={busy} onClick={() => void handleUpload()} sx={{ height: 40 }}>
-          Upload
+          {uiText('Upload', '上传')}
         </Button>
         <Button size="small" color="error" disabled={busy || services.length === 0} onClick={() => setConfirmClearOpen(true)} sx={{ height: 40 }}>
-          Clear all
+          {uiText('Clear all', '全部清除')}
         </Button>
-        <Tooltip title="Refresh service list">
-          <IconButton size="small" onClick={() => setRefreshTick((t) => t + 1)} aria-label="Refresh gRPC services">
+        <Tooltip title={uiText('Refresh service list', '刷新服务列表')}>
+          <IconButton size="small" onClick={() => setRefreshTick((t) => t + 1)} aria-label={uiText('Refresh gRPC services', '刷新 gRPC 服务')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -947,7 +943,7 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
       {loadError && <HumanErrorAlert error={loadError} variant="outlined" />}
 
       {services.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">No gRPC descriptors loaded.</Typography>
+        <Typography variant="body2" color="text.secondary">{uiText('No gRPC descriptors loaded.', '尚未加载 gRPC 描述符。')}</Typography>
       ) : (
         services.map((svc) => (
           <Box key={svc.name}>
@@ -956,9 +952,9 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Method</TableCell>
-                    <TableCell>Input → Output</TableCell>
-                    <TableCell>Streaming</TableCell>
+                    <TableCell>{uiText('Method', '方法')}</TableCell>
+                    <TableCell>{uiText('Input → Output', '输入 → 输出')}</TableCell>
+                    <TableCell>{uiText('Streaming', '流式类型')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -968,7 +964,7 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
                       <TableCell><Typography variant="caption" sx={{ fontFamily: monospaceFontFamily }}>{m.inputType} → {m.outputType}</Typography></TableCell>
                       <TableCell>
                         <Typography variant="caption">
-                          {m.clientStreaming && m.serverStreaming ? 'bidi' : m.clientStreaming ? 'client' : m.serverStreaming ? 'server' : 'unary'}
+                          {m.clientStreaming && m.serverStreaming ? uiText('bidi', '双向流') : m.clientStreaming ? uiText('client', '客户端流') : m.serverStreaming ? uiText('server', '服务端流') : uiText('unary', '一元调用')}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -982,9 +978,9 @@ function GrpcDescriptorsTab({ connectionParams }: { connectionParams: Connection
 
       <ConfirmDialog
         open={confirmClearOpen}
-        title="Clear all gRPC descriptors?"
-        message={`This removes all ${services.length} loaded gRPC service descriptor${services.length === 1 ? '' : 's'}. MockServer will no longer be able to transcode or mock those services. This cannot be undone.`}
-        confirmLabel="Clear descriptors"
+        title={uiText('Clear all gRPC descriptors?', '清除所有 gRPC 描述符？')}
+        message={uiText(`This removes all ${services.length} loaded gRPC service descriptor${services.length === 1 ? '' : 's'}. MockServer will no longer be able to transcode or mock those services. This cannot be undone.`, `这会移除已加载的全部 ${services.length} 个 gRPC 服务描述符。此后 MockServer 无法对这些服务进行转码和模拟。此操作无法撤销。`)}
+        confirmLabel={uiText('Clear descriptors', '清除描述符')}
         onConfirm={() => void handleClear()}
         onClose={() => setConfirmClearOpen(false)}
       />
@@ -1000,7 +996,13 @@ export interface LibraryViewProps {
   connectionParams: ConnectionParams;
 }
 
-const TABS = ['Import', 'Export', 'Cassettes', 'WASM Modules', 'gRPC Descriptors'];
+const TABS = [
+  ['Import', '导入'],
+  ['Export', '导出'],
+  ['Cassettes', '录制归档'],
+  ['WASM Modules', 'WASM 模块'],
+  ['gRPC Descriptors', 'gRPC 描述符'],
+] as const;
 
 export default function LibraryView({ connectionParams }: LibraryViewProps) {
   const [tab, setTab] = useState(0);
@@ -1013,8 +1015,8 @@ export default function LibraryView({ connectionParams }: LibraryViewProps) {
           onChange={(_, v: number) => setTab(v)}
           sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, typography: 'body2' } }}
         >
-          {TABS.map((label) => (
-            <Tab key={label} label={label} />
+          {TABS.map(([id, chineseLabel]) => (
+            <Tab key={id} label={uiText(id, chineseLabel)} />
           ))}
         </Tabs>
         <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>

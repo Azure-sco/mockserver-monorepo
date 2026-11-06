@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -100,14 +101,14 @@ export default function LlmConversationForm({
   if (loadError) {
     return (
       <Alert severity="error" variant="outlined" data-testid="llm-conversation-load-error">
-        Could not load the whole conversation, so it cannot be edited: {loadError}
+        {uiText("Could not load the whole conversation, so it cannot be edited: ", "无法加载完整对话，因此不能编辑： ")}{loadError}
       </Alert>
     );
   }
   if (anyShortened && !wholeTurns) {
     return (
       <Typography variant="body2" color="text.secondary" data-testid="llm-conversation-loading">
-        Loading the whole conversation…
+        {uiText("Loading the whole conversation…", "正在加载完整对话…")}
       </Typography>
     );
   }
@@ -196,7 +197,7 @@ function LlmConversationEditor({
           // register the new turns on top of the un-cleared old ones, recreating
           // the duplicate-scenario bug this is meant to prevent.
           if (!clearRes.ok) {
-            setError(`Failed to clear existing turn ${oldId} (HTTP ${clearRes.status}); aborted to avoid duplicating the conversation.`);
+            setError(uiText(`Failed to clear existing turn ${oldId} (HTTP ${clearRes.status}); aborted to avoid duplicating the conversation.`, `清除已有的第 ${oldId} 轮失败（HTTP ${clearRes.status}）。操作已中止，以免重复注册对话。`));
             setRegistering(false);
             return;
           }
@@ -229,7 +230,7 @@ function LlmConversationEditor({
       {/* Conversation basics */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ fontSize: '0.78rem', fontWeight: 600, mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          1 · Conversation basics
+          {uiText("1 · Conversation basics", "1 · 对话基本设置")}
         </Typography>
         <ConversationWizardStep1
           provider={draft.provider}
@@ -248,7 +249,7 @@ function LlmConversationEditor({
       {/* Turns */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ fontSize: '0.78rem', fontWeight: 600, mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          2 · Turns
+          {uiText("2 · Turns", "2 · 配置对话轮次")}
         </Typography>
         <ConversationWizardStep2
           turns={draft.turns}
@@ -259,7 +260,7 @@ function LlmConversationEditor({
       {/* Review + Register */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ fontSize: '0.78rem', fontWeight: 600, mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          3 · Review &amp; register
+          {uiText("3 · Review & register", "3 · 确认并注册")}
         </Typography>
         <Divider sx={{ mb: 1 }} />
         <ConversationWizardStep3 draft={draft} />
@@ -271,7 +272,7 @@ function LlmConversationEditor({
             disabled={registering || !canRegister}
           >
             {registering
-              ? 'Registering…'
+              ? uiText('Registering…', "正在注册…")
               : editingScenario
                 ? existingIds.length === draft.turns.length
                   // Count the TURNS being written, not `existingIds.length`. The
@@ -281,23 +282,23 @@ function LlmConversationEditor({
                   // count. In this branch the two are equal by the guard above,
                   // so this is the same number sourced correctly rather than from
                   // the window.
-                  ? `Update ${draft.turns.length} expectation${draft.turns.length === 1 ? '' : 's'}`
-                  : `Replace conversation (${draft.turns.length} turns)`
-                : 'Register on server'}
+                  ? uiText(`Update ${draft.turns.length} expectation${draft.turns.length === 1 ? '' : 's'}`, `更新 ${draft.turns.length} 条规则`)
+                  : uiText(`Replace conversation (${draft.turns.length} turns)`, `替换对话（${draft.turns.length} 轮）`)
+                : uiText('Register on server', "注册到服务器")}
           </Button>
           {editingScenario ? (
             existingIds.length === draft.turns.length ? (
               <Typography variant="caption" color="success.main" sx={{ fontSize: '0.7rem' }}>
-                Editing — the existing expectation IDs will be reused so this updates in place.
+                {uiText("Editing — the existing expectation IDs will be reused so this updates in place.", "编辑时将沿用已有规则 ID，并更新对应规则。")}
               </Typography>
             ) : (
               <Typography variant="caption" color="warning.main" sx={{ fontSize: '0.7rem' }}>
-                Turn count changed — the old expectations will be removed and replaced.
+                {uiText("Turn count changed — the old expectations will be removed and replaced.", "对话轮次已改变。旧规则将被删除并替换。")}
               </Typography>
             )
           ) : (
             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-              Pick an existing conversation above to update it in place, or leave blank to create a new one.
+              {uiText("Pick an existing conversation above to update it in place, or leave blank to create a new one.", "在上方选择已有对话即可更新。未选择时会创建新对话。")}
             </Typography>
           )}
         </Box>
@@ -311,9 +312,9 @@ function LlmConversationEditor({
         {registrationResult && (
           <Alert severity="success" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              Conversation registered.
+              {uiText("Conversation registered.", "对话已注册。")}
               {Boolean(registrationResult['scenarioName']) && (
-                <> Scenario: <code>{String(registrationResult['scenarioName'])}</code></>
+                <>{uiText(" Scenario: ", " 场景： ")}<code>{String(registrationResult['scenarioName'])}</code></>
               )}
             </Typography>
             {Array.isArray(registrationResult['states']) && (
@@ -329,7 +330,7 @@ function LlmConversationEditor({
         open={snackOpen}
         autoHideDuration={4000}
         onClose={() => setSnackOpen(false)}
-        message="Conversation registered"
+        message={uiText("Conversation registered", "对话已注册")}
       />
     </>
   );

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { LineChart } from '@mui/x-charts/LineChart';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -123,7 +124,7 @@ export default function MetricsLineChart({ series, height = 220, valueFormatter,
     return (
       <Box sx={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography variant="caption" color="text.secondary">
-          collecting…
+          {uiText('collecting…', '正在采集…')}
         </Typography>
       </Box>
     );

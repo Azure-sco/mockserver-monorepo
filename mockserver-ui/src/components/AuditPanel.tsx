@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -20,7 +21,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
-import { humanizeError, type HumanError } from '../lib/errorMessage';
+import { humanizeError, unavailableFeatureMessage, type HumanError } from '../lib/errorMessage';
 import { monospaceFontFamily } from '../theme';
 import type { ConnectionParams } from '../hooks/useConnectionParams';
 import { fetchAuditEntries, type AuditEntry } from '../lib/audit';
@@ -41,7 +42,8 @@ function isUnavailable(message: string): boolean {
   return (
     message.includes('404') ||
     message.includes('Not Found') ||
-    message.includes('isn’t available')
+    message.includes('isn’t available') ||
+    message === unavailableFeatureMessage
   );
 }
 
@@ -165,12 +167,12 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
     <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Audit Trail
+          {uiText('Audit Trail', '审计记录')}
         </Typography>
         {configLoaded && (
           <Chip
             size="small"
-            label={auditEnabled ? 'Audit Trail: On' : 'Audit Trail: Off'}
+            label={auditEnabled ? uiText('Audit Trail: On', '审计记录已启用') : uiText('Audit Trail: Off', '审计记录已关闭')}
             color={auditEnabled ? 'success' : 'default'}
             variant={auditEnabled ? 'filled' : 'outlined'}
           />
@@ -178,18 +180,18 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
         {entries && (
           <Chip
             size="small"
-            label={`${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`}
+            label={`${entries.length} ${entries.length === 1 ? uiText('entry', '条记录') : uiText('entries', '条记录')}`}
             variant="outlined"
           />
         )}
         <Box sx={{ flex: 1 }} />
         <TextField
           size="small"
-          placeholder="Search audit entries"
+          placeholder={uiText('Search audit entries', '搜索审计记录')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{
-            htmlInput: { 'aria-label': 'Search audit entries' },
+            htmlInput: { 'aria-label': uiText('Search audit entries', '搜索审计记录') },
             input: {
               startAdornment: (
                 <InputAdornment position="start">
@@ -207,15 +209,12 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
           startIcon={<RefreshIcon fontSize="small" />}
           sx={{ textTransform: 'none' }}
         >
-          Refresh
+          {uiText('Refresh', '刷新')}
         </Button>
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        The most recent control-plane changes to this server — mutations to expectations,
-        configuration, and server state (who changed what, and whether it was allowed). This is a
-        separate trail from the data-plane event log of received requests and responses. Newest
-        first. Request headers and bodies are never recorded.
+        {uiText('The most recent control-plane changes to this server — mutations to expectations, configuration, and server state (who changed what, and whether it was allowed). This is a separate trail from the data-plane event log of received requests and responses. Newest first. Request headers and bodies are never recorded.', '按时间从新到旧显示近期的控制面变更，包括谁操作了规则、配置或服务状态，以及操作是否获准。审计记录与请求和响应的事件日志分开保存，且不会记录请求头和请求体。')}
       </Typography>
 
       {configLoaded && (
@@ -230,12 +229,11 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
         >
           {!auditEnabled && (
             <Typography variant="body2" color="text.secondary">
-              The audit trail is off. It can only be switched on when MockServer starts, so a
-              control-plane request cannot switch it off to hide the changes that follow.
+              {uiText('The audit trail is off. It can only be switched on when MockServer starts, so a control-plane request cannot switch it off to hide the changes that follow.', '审计记录当前已关闭。只能在启动 MockServer 时启用，避免通过控制面请求关闭记录并隐藏后续变更。')}
             </Typography>
           )}
           <Tooltip
-            title="Also record read operations (e.g. GET /mockserver/expectation), not just mutations."
+            title={uiText('Also record read operations (e.g. GET /mockserver/expectation), not just mutations.', '除变更外，也记录读取操作（例如 GET /mockserver/expectation）。')}
             arrow
           >
             <FormControlLabel
@@ -245,10 +243,10 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
                   checked={auditReads}
                   disabled={busy || !auditEnabled}
                   onChange={(e) => void applyConfig({ controlPlaneAuditReads: e.target.checked })}
-                  slotProps={{ input: { 'aria-label': 'Also record reads' } }}
+                  slotProps={{ input: { 'aria-label': uiText('Also record reads', '同时记录读取操作') } }}
                 />
               }
-              label={<Typography variant="body2">Also record reads</Typography>}
+              label={<Typography variant="body2">{uiText('Also record reads', '同时记录读取操作')}</Typography>}
             />
           </Tooltip>
         </Box>
@@ -258,8 +256,7 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
 
       {auditEnabled && (
         <Alert severity="info" sx={{ mb: 1.5 }}>
-          Recording is on. The most recent control-plane changes since the server started appear
-          here; a reset clears them.
+          {uiText('Recording is on. The most recent control-plane changes since the server started appear here; a reset clears them.', '审计记录已启用。此处显示服务启动后的近期控制面变更，重置服务会清空这些记录。')}
         </Alert>
       )}
 
@@ -268,16 +265,16 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
           severity={isUnavailable(loadError) ? 'info' : 'error'}
           sx={{ mb: 1.5 }}
           action={
-            <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry">
+            <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText('Retry', '重试')}>
               <RefreshIcon fontSize="small" />
             </IconButton>
           }
         >
           <AlertTitle>
-            {isUnavailable(loadError) ? 'Audit trail not available' : 'Could not load audit trail'}
+            {isUnavailable(loadError) ? uiText('Audit trail not available', '审计记录不可用') : uiText('Could not load audit trail', '无法加载审计记录')}
           </AlertTitle>
           {isUnavailable(loadError)
-            ? 'The connected server does not expose an audit trail. This feature requires a newer version of MockServer.'
+            ? uiText('The connected server does not expose an audit trail. This feature requires a newer version of MockServer.', '当前连接的服务未提供审计记录。此功能需要较新版本的 MockServer。')
             : loadError}
         </Alert>
       )}
@@ -292,40 +289,37 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
             // server with it; when it is on it explains what will appear.
             <Box sx={{ p: 2 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                No audit entries recorded.
+                {uiText('No audit entries recorded.', '暂无审计记录。')}
               </Typography>
               {auditEnabled ? (
                 <Typography variant="body2" color="text.secondary">
-                  Recording is on — make a control-plane change (register or clear an expectation,
-                  reset, or change configuration) and it will appear here.
+                  {uiText('Recording is on — make a control-plane change (register or clear an expectation, reset, or change configuration) and it will appear here.', '审计记录已启用。注册或清除规则、重置服务、修改配置等控制面操作会显示在这里。')}
                 </Typography>
               ) : (
                 <Typography variant="body2" color="text.secondary">
-                  The control-plane audit trail is off by default. To record control-plane
-                  mutations — changes to expectations, configuration, and server state — here, start
-                  MockServer with{' '}
+                  {uiText('The control-plane audit trail is off by default. To record control-plane mutations — changes to expectations, configuration, and server state — here, start MockServer with', '控制面审计默认关闭。要记录规则、配置和服务状态等控制面变更，请在启动 MockServer 时配置 ')}{' '}
                   <Box component="code" sx={{ fontFamily: monospaceFontFamily }}>
                     controlPlaneAuditEnabled=true
                   </Box>{' '}
-                  (system property{' '}
+                  {uiText('(system property', '（系统属性 ')}{' '}
                   <Box component="code" sx={{ fontFamily: monospaceFontFamily }}>
                     -Dmockserver.controlPlaneAuditEnabled=true
                   </Box>{' '}
-                  or environment variable{' '}
+                  {uiText('or environment variable', '或环境变量 ')}{' '}
                   <Box component="code" sx={{ fontFamily: monospaceFontFamily }}>
                     MOCKSERVER_CONTROL_PLANE_AUDIT_ENABLED=true
                   </Box>
-                  , plus{' '}
+                  {uiText(', plus', '）。如果还要记录读取操作，请同时配置 ')}{' '}
                   <Box component="code" sx={{ fontFamily: monospaceFontFamily }}>
                     controlPlaneAuditReads=true
                   </Box>{' '}
-                  to include reads).
+                  {uiText('to include reads).', '。')}
                 </Typography>
               )}
             </Box>
           ) : (
             <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-              {entries == null ? 'Loading audit trail…' : 'No entries match your search.'}
+              {entries == null ? uiText('Loading audit trail…', '正在加载审计记录…') : uiText('No entries match your search.', '没有符合搜索条件的记录。')}
             </Typography>
           )
         ) : (
@@ -333,14 +327,14 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Time</TableCell>
-                  <TableCell>Operation</TableCell>
-                  <TableCell>Method</TableCell>
-                  <TableCell>Path</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell>Principal</TableCell>
-                  <TableCell>Outcome</TableCell>
-                  <TableCell>Summary</TableCell>
+                  <TableCell>{uiText('Time', '时间')}</TableCell>
+                  <TableCell>{uiText('Operation', '操作')}</TableCell>
+                  <TableCell>{uiText('Method', '方法')}</TableCell>
+                  <TableCell>{uiText('Path', '路径')}</TableCell>
+                  <TableCell>{uiText('Source', '来源')}</TableCell>
+                  <TableCell>{uiText('Principal', '操作主体')}</TableCell>
+                  <TableCell>{uiText('Outcome', '结果')}</TableCell>
+                  <TableCell>{uiText('Summary', '摘要')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -373,7 +367,7 @@ export default function AuditPanel({ connectionParams }: AuditPanelProps) {
                     </TableCell>
                     <TableCell>
                       {entry.principal ? (
-                        <Tooltip title={entry.principalSource ? `via ${entry.principalSource}` : ''}>
+                        <Tooltip title={entry.principalSource ? uiText(`via ${entry.principalSource}`, `身份来源：${entry.principalSource}`) : ''}>
                           <Typography variant="caption" sx={{ fontFamily: monospaceFontFamily }}>
                             {entry.principal}
                           </Typography>

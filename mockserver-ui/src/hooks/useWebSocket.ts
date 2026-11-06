@@ -3,6 +3,7 @@ import type { ConnectionParams } from './useConnectionParams';
 import type { ClearType, RequestFilter, WebSocketMessage } from '../types';
 import { useDashboardStore } from '../store';
 import { buildBaseUrl } from '../lib/mcpClient';
+import { uiText } from '../lib/dashboardLocale';
 import { CLEAR_LOGS_DONE_MESSAGE } from '../lib/clearServerText';
 import { isCrossOrigin, isMixedContent } from '../lib/connectionTarget';
 
@@ -12,15 +13,18 @@ const currentEpoch = (): number => useDashboardStore.getState().connectionEpoch;
 export function connectionLostMessage(params: ConnectionParams, workspaceTarget: boolean): string {
   const where = `${params.host}:${params.port}`;
   const check = workspaceTarget
-    ? "Check the server is running and this workspace's target is correct."
-    : 'Check the server is running and the host/port (?host=&port= in the URL) are correct.';
-  let message = `Connection lost to ${where} — retrying automatically. ${check}`;
+    ? uiText("Check the server is running and this workspace's target is correct.", '请检查服务器是否运行，以及当前工作区的目标地址是否正确。')
+    : uiText('Check the server is running and the host/port (?host=&port= in the URL) are correct.', '请检查服务器是否运行，以及 URL 中 ?host=&port= 指定的主机和端口是否正确。');
+  let message = uiText(`Connection lost to ${where} — retrying automatically. ${check}`, `与 ${where} 的连接已断开，正在自动重试。${check}`);
   if (isMixedContent(params)) {
-    message += ' This dashboard is served over https, so the browser blocks calls to an http target: use https for it.';
+    message += uiText(' This dashboard is served over https, so the browser blocks calls to an http target: use https for it.', '此控制台通过 HTTPS 提供服务，浏览器会阻止对 HTTP 目标的请求。请使用 HTTPS 地址。');
   } else if (isCrossOrigin(params)) {
-    message += ` ${where} is a different origin from this dashboard, so its control-plane calls are cross-origin:` +
-      ' it must answer CORS for this origin (by default MockServer does for a dashboard on localhost; otherwise' +
-      ' list this origin in its controlPlaneCorsAllowOrigin, and check no proxy in front of it strips the CORS headers).';
+    message += uiText(
+      ` ${where} is a different origin from this dashboard, so its control-plane calls are cross-origin:` +
+        ' it must answer CORS for this origin (by default MockServer does for a dashboard on localhost; otherwise' +
+        ' list this origin in its controlPlaneCorsAllowOrigin, and check no proxy in front of it strips the CORS headers).',
+      `目标 ${where} 与控制台不同源，必须允许来自控制台的跨域管理请求。MockServer 默认允许 localhost 控制台。其他来源可添加到 controlPlaneCorsAllowOrigin，并确认代理保留 CORS 响应头。`,
+    );
   }
   return message;
 }
@@ -77,7 +81,7 @@ export function useWebSocket(params: ConnectionParams) {
         const data = JSON.parse(raw) as WebSocketMessage;
         applyMessage(data);
       } catch {
-        setError('Failed to parse WebSocket message');
+        setError(uiText('Failed to parse WebSocket message', '无法解析 WebSocket 消息'));
       }
     },
     [applyMessage, setError],
@@ -97,9 +101,13 @@ export function useWebSocket(params: ConnectionParams) {
       if (response.status === 401 || response.status === 403) {
         authRequiredRef.current = true;
         setError(
-          `Dashboard requires authentication (HTTP ${response.status}) on ${params.host}:${params.port}. ` +
-            `Control-plane authentication is enabled. Browsers cannot attach a bearer token to a WebSocket, so serve ` +
-            `the dashboard through an authenticating proxy that adds the Authorization header (or use mutual TLS).`,
+          uiText(
+            `Dashboard requires authentication (HTTP ${response.status}) on ${params.host}:${params.port}. ` +
+              `Control-plane authentication is enabled. Browsers cannot attach a bearer token to a WebSocket, so serve ` +
+              `the dashboard through an authenticating proxy that adds the Authorization header (or use mutual TLS).`,
+            `${params.host}:${params.port} 的控制台需要身份验证（HTTP ${response.status}）。` +
+              '浏览器无法为 WebSocket 附加 Bearer 令牌。请通过可添加 Authorization 请求头的认证代理访问控制台，或使用双向 TLS。',
+          ),
         );
         return;
       }
@@ -271,7 +279,7 @@ export function useWebSocket(params: ConnectionParams) {
         const response = await fetch(url, { method: 'PUT' });
         if (currentEpoch() !== epoch) return;
         if (!response.ok) {
-          setError(`Clear failed: ${response.status} ${response.statusText}`);
+          setError(uiText(`Clear failed: ${response.status} ${response.statusText}`, `清空失败：${response.status} ${response.statusText}`));
           return;
         }
         if (type === 'all') {
@@ -284,10 +292,12 @@ export function useWebSocket(params: ConnectionParams) {
         } else if (type === 'expectations') {
           useDashboardStore.setState({ activeExpectations: [] });
         }
-        const what = type === 'all' ? 'Server reset — all expectations, logs and recorded traffic cleared' : type === 'log' ? CLEAR_LOGS_DONE_MESSAGE : 'Expectations cleared';
+        const what = type === 'all'
+          ? uiText('Server reset — all expectations, logs and recorded traffic cleared', '服务器已重置，所有规则、日志和请求记录已清空')
+          : type === 'log' ? CLEAR_LOGS_DONE_MESSAGE : uiText('Expectations cleared', 'Mock 规则已清空');
         useDashboardStore.getState().setNotification({ message: what, severity: 'success' });
       } catch {
-        setError('Failed to clear server');
+        setError(uiText('Failed to clear server', '无法清空服务器数据'));
       }
     },
     [params, setError, connect],

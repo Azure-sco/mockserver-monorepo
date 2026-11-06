@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
@@ -196,7 +197,7 @@ function deriveLines(raw: unknown, separator: string, field: string, notes: Note
   for (const { key, values } of entriesOf(raw)) {
     const name = key === null ? null : literalKey(key);
     if (name === null) {
-      dropped.push(key === null ? '(non-string key)' : key);
+      dropped.push(key === null ? uiText('(non-string key)', "（键不是字符串）") : key);
       continue;
     }
     const literals = values.map((v) => literalValue(v, true));
@@ -205,13 +206,13 @@ function deriveLines(raw: unknown, separator: string, field: string, notes: Note
       dropped.push(key ?? name);
       continue;
     }
-    if (usable.length < literals.length) dropped.push(`${name} (some values)`);
+    if (usable.length < literals.length) dropped.push(uiText(`${name} (some values)`, `${name}（部分值）`));
     for (const value of usable) lines.push(`${name}${separator}${value}`);
   }
   if (dropped.length > 0) {
     notes.push({
       field,
-      reason: `not literal — ${dropped.join(', ')} (add real values before sending)`,
+      reason: uiText(`not literal — ${dropped.join(', ')} (add real values before sending)`, `非字面值匹配条件。${dropped.join(', ')}。请在发送前填写实际值。`),
     });
   }
   return lines.join('\n');
@@ -224,7 +225,7 @@ function deriveBody(raw: unknown, notes: Note[]): string {
     // A plain string body is parsed by NottableString.string(), so a leading `!`
     // makes it a NEGATED matcher — there is no literal body to send.
     if (raw.startsWith('!')) {
-      notes.push({ field: 'body', reason: 'negated body matcher — no literal body to send' });
+      notes.push({ field: 'body', reason: uiText('negated body matcher — no literal body to send', "请求体匹配条件取反，无法从中提取可发送的请求体。") });
       return '';
     }
     // Otherwise it is an exact-value match: the literal body. The pattern
@@ -235,7 +236,7 @@ function deriveBody(raw: unknown, notes: Note[]): string {
   if (typeof raw !== 'object') return '';
   const obj = raw as Record<string, unknown>;
   if (obj['not'] === true) {
-    notes.push({ field: 'body', reason: 'negated body matcher — no literal body to send' });
+    notes.push({ field: 'body', reason: uiText('negated body matcher — no literal body to send', "请求体匹配条件取反，无法从中提取可发送的请求体。") });
     return '';
   }
   const type = typeof obj['type'] === 'string' ? (obj['type'] as string) : '';
@@ -255,7 +256,7 @@ function deriveBody(raw: unknown, notes: Note[]): string {
     default:
       notes.push({
         field: 'body',
-        reason: `${type || 'this'} body matcher describes a shape, not a value — type the body to send`,
+        reason: uiText(`${type || 'this'} body matcher describes a shape, not a value — type the body to send`, `${type || 'this'} 请求体匹配条件只描述数据结构，无法提取实际值。请填写要发送的请求体。`),
       });
       return '';
   }
@@ -274,7 +275,7 @@ function partitionForbiddenHeaders(headerLines: string, notes: Note[]): string {
   if (blocked.length > 0) {
     notes.push({
       field: 'headers (browser-blocked)',
-      reason: `the browser will not let a page set ${blocked.join(', ')} — fetch strips them silently, so this matcher field cannot be exercised from the dashboard`,
+      reason: uiText(`the browser will not let a page set ${blocked.join(', ')} — fetch strips them silently, so this matcher field cannot be exercised from the dashboard`, `浏览器会自动移除 ${blocked.join(', ')}，因此无法从控制台测试这些匹配字段。`),
     });
   }
   return allowed.join('\n');
@@ -298,15 +299,15 @@ function derive(expectationJson: string): Derivation {
   try {
     parsed = JSON.parse(expectationJson);
   } catch {
-    return { request: EMPTY_REQUEST, notes, unsupported: 'The expectation draft is not valid JSON yet.' };
+    return { request: EMPTY_REQUEST, notes, unsupported: uiText('The expectation draft is not valid JSON yet.', "当前规则草稿不是有效的 JSON。") };
   }
   if (parsed === null || typeof parsed !== 'object') {
-    return { request: EMPTY_REQUEST, notes, unsupported: 'The expectation draft is not valid JSON yet.' };
+    return { request: EMPTY_REQUEST, notes, unsupported: uiText('The expectation draft is not valid JSON yet.', "当前规则草稿不是有效的 JSON。") };
   }
   const root = parsed as Record<string, unknown>;
   const reqRaw = 'httpRequest' in root ? root['httpRequest'] : root;
   if (reqRaw === null || typeof reqRaw !== 'object') {
-    return { request: EMPTY_REQUEST, notes, unsupported: 'This draft has no request matcher to derive from.' };
+    return { request: EMPTY_REQUEST, notes, unsupported: uiText('This draft has no request matcher to derive from.', "草稿中没有可用于填充字段的请求匹配条件。") };
   }
   const req = reqRaw as Record<string, unknown>;
 
@@ -314,7 +315,7 @@ function derive(expectationJson: string): Derivation {
     return {
       request: EMPTY_REQUEST,
       notes,
-      unsupported: 'This is a DNS expectation — Try It sends HTTP requests only.',
+      unsupported: uiText('This is a DNS expectation — Try It sends HTTP requests only.', "这是 DNS 规则。试发面板仅支持 HTTP 请求。"),
     };
   }
 
@@ -323,7 +324,7 @@ function derive(expectationJson: string): Derivation {
   if (req['method'] != null && req['method'] !== '') {
     const literal = literalValue(req['method']);
     if (literal === null) {
-      notes.push({ field: 'method', reason: 'not a literal method — defaulted to GET' });
+      notes.push({ field: 'method', reason: uiText('not a literal method — defaulted to GET', "不是字面请求方法，已使用默认值 GET。") });
     } else {
       method = literal.toUpperCase();
     }
@@ -346,13 +347,13 @@ function derive(expectationJson: string): Derivation {
     if (literal === null || literal.trim() === '') {
       notes.push({
         field: 'path',
-        reason: `matcher path ${JSON.stringify(rawPath)} is a pattern, not a literal path — enter the path to send`,
+        reason: uiText(`matcher path ${JSON.stringify(rawPath)} is a pattern, not a literal path — enter the path to send`, `${JSON.stringify(rawPath)} 是路径匹配模式，请填写实际要发送的路径。`),
       });
     } else {
       path = literal;
     }
   } else if (req['path'] != null) {
-    notes.push({ field: 'path', reason: 'path matcher is not a plain string — enter the path to send' });
+    notes.push({ field: 'path', reason: uiText('path matcher is not a plain string — enter the path to send', "路径匹配条件不是普通字符串，请填写要发送的路径。") });
   }
 
   const query = deriveLines(req['queryStringParameters'], '=', 'queryStringParameters', notes);
@@ -366,23 +367,23 @@ function derive(expectationJson: string): Derivation {
   // creates a differently-keyed cookie that outlives any cleanup). Naming the
   // matcher fields that cannot be exercised is honest; planting them is not.
   const cookieNames = entriesOf(req['cookies']).map(({ key }) =>
-    key === null ? '(non-string key)' : key,
+    key === null ? uiText('(non-string key)', "（键不是字符串）") : key,
   );
   if (cookieNames.length > 0) {
     notes.push({
       field: 'cookies (browser-blocked)',
       reason:
-        `a page cannot set the Cookie header — fetch strips it silently — so ${cookieNames.join(', ')} ` +
-        'cannot be exercised from the dashboard; send this request from curl or a client library to test a cookie matcher',
+        uiText(`a page cannot set the Cookie header — fetch strips it silently — so ${cookieNames.join(', ')} `, `浏览器会自动移除 Cookie 请求头，因此无法从控制台测试 `) +
+        uiText('cannot be exercised from the dashboard; send this request from curl or a client library to test a cookie matcher', "。可通过 curl 或客户端库发送请求来测试 Cookie 匹配。"),
     });
   }
   const body = deriveBody(req['body'], notes);
 
   if (req['jwt'] != null) {
-    notes.push({ field: 'jwt', reason: 'JWT matchers need a real signed token — add an Authorization header' });
+    notes.push({ field: 'jwt', reason: uiText('JWT matchers need a real signed token — add an Authorization header', "匹配 JWT 需要实际签发的令牌，请添加 Authorization 请求头。") });
   }
   if (req['secure'] === true) {
-    notes.push({ field: 'secure', reason: 'matcher requires TLS — the request uses the target URL scheme below' });
+    notes.push({ field: 'secure', reason: uiText('matcher requires TLS — the request uses the target URL scheme below', "匹配条件要求 TLS，实际请求将使用下方目标 URL 的协议。") });
   }
 
   return { request: { method, path, query, headers, body }, notes, unsupported: null };
@@ -549,9 +550,9 @@ export default function LiveResponseWidget({
     if (blocked.length > 0) {
       setResult(null);
       setFailure(
-        `The browser will not let a page set ${blocked.join(', ')} — fetch removes those headers ` +
-          'silently, so the request would not be what you see here. Remove them, and use curl or a ' +
-          'client library if you need to exercise a matcher on one of them.',
+        uiText(`The browser will not let a page set ${blocked.join(', ')} — fetch removes those headers `, `浏览器会自动移除 ${blocked.join(', ')}， `) +
+          uiText('silently, so the request would not be what you see here. Remove them, and use curl or a ', "因此实际发送的请求会与这里显示的不同。请移除这些请求头。 ") +
+          uiText('client library if you need to exercise a matcher on one of them.', "若要测试其中的匹配条件，可使用 curl 或客户端库。"),
       );
       return;
     }
@@ -563,7 +564,7 @@ export default function LiveResponseWidget({
       headerInit = new Headers(headerMap);
     } catch (err) {
       setResult(null);
-      setFailure(`Invalid request header: ${err instanceof Error ? err.message : String(err)}`);
+      setFailure(uiText(`Invalid request header: ${err instanceof Error ? err.message : String(err)}`, `无效的请求头：${err instanceof Error ? err.message : String(err)}`));
       return;
     }
 
@@ -610,22 +611,22 @@ export default function LiveResponseWidget({
       const aborted = err instanceof Error && err.name === 'AbortError';
       const detail = err instanceof Error ? err.message : String(err);
       if (aborted) {
-        setFailure(`No response within ${REQUEST_TIMEOUT_MS / 1000}s — the request was aborted (${url}).`);
+        setFailure(uiText(`No response within ${REQUEST_TIMEOUT_MS / 1000}s — the request was aborted (${url}).`, `${REQUEST_TIMEOUT_MS / 1000} 秒内未收到响应，请求已中止（${url}）。`));
       } else if (crossOrigin) {
         // fetch reports a CORS block and a connection failure identically (an
         // opaque TypeError), so name the far more likely cause explicitly rather
         // than surfacing a bare "Failed to fetch".
         setFailure(
-          `The browser blocked the response from ${targetOrigin}. The dashboard is served from ` +
-            `${window.location.origin}, so this is a cross-origin request: MockServer must have CORS ` +
-            `enabled on that port (start it with -Dmockserver.enableCORSForAllResponses=true, or set ` +
-            `"enableCORSForAllResponses": true via the Configuration dialog). If CORS is already on, ` +
-            `check that ${targetOrigin} is reachable and listening. Raw error: ${detail}`,
+          uiText(`The browser blocked the response from ${targetOrigin}. The dashboard is served from `, `浏览器阻止了来自 ${targetOrigin} 的响应。控制台来自 `) +
+            uiText(`${window.location.origin}, so this is a cross-origin request: MockServer must have CORS `, `${window.location.origin}，这是跨域请求。请为目标 MockServer 端口 `) +
+            uiText(`enabled on that port (start it with -Dmockserver.enableCORSForAllResponses=true, or set `, "启用 CORS。可在启动时设置 -Dmockserver.enableCORSForAllResponses=true， ") +
+            uiText(`"enableCORSForAllResponses": true via the Configuration dialog). If CORS is already on, `, "或在配置对话框中设置 \"enableCORSForAllResponses\": true。如果已启用 CORS， ") +
+            uiText(`check that ${targetOrigin} is reachable and listening. Raw error: ${detail}`, `请检查 ${targetOrigin} 是否可访问且正在监听。原始错误：${detail}`),
         );
       } else {
         setFailure(
-          `Could not reach ${url} — MockServer may not be listening, or the request was refused. ` +
-            `Raw error: ${detail}`,
+          uiText(`Could not reach ${url} — MockServer may not be listening, or the request was refused. `, `无法访问 ${url}。MockServer 可能未监听此地址，或连接被拒绝。 `) +
+            uiText(`Raw error: ${detail}`, `原始错误：${detail}`),
         );
       }
     } finally {
@@ -641,9 +642,9 @@ export default function LiveResponseWidget({
     <Paper variant="outlined" sx={{ p: 2, mt: 1 }} data-testid="live-response-widget">
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          Try It — send a live request
+          {uiText("Try It — send a live request", "试发 HTTP 请求 · 发送实际请求")}
         </Typography>
-        <IconButton size="small" onClick={onClose} aria-label="Close Try It">
+        <IconButton size="small" onClick={onClose} aria-label={uiText("Close Try It", "关闭试发面板")}>
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>
@@ -656,12 +657,11 @@ export default function LiveResponseWidget({
           data-testid="try-it-stale"
           action={
             <Button size="small" startIcon={<RefreshIcon fontSize="small" />} onClick={reDerive}>
-              Re-derive
+              {uiText("Re-derive", "根据条件重新填充")}
             </Button>
           }
         >
-          The matcher above changed since this request was derived. Re-derive to pick up the change —
-          it replaces the fields below, including your edits.
+          {uiText("The matcher above changed since this request was derived. Re-derive to pick up the change — it replaces the fields below, including your edits.", "请求匹配条件已更改。重新填充会根据最新条件替换下方字段，包括手动修改的内容。")}
         </Alert>
       )}
 
@@ -670,13 +670,12 @@ export default function LiveResponseWidget({
       ) : (
         <>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            Pre-filled from the matcher above using literal values only — pattern, negated and
-            schema matchers are never sent verbatim. Edit anything below before sending.
+            {uiText("Pre-filled from the matcher above using literal values only — pattern, negated and schema matchers are never sent verbatim. Edit anything below before sending.", "下方仅从上面的匹配条件提取字面值。模式、取反和 Schema 匹配条件不会原样发送。发送前可自行编辑。")}
           </Typography>
 
           {derivation.notes.length > 0 && (
             <Alert severity="warning" variant="outlined" sx={{ mb: 1 }} data-testid="try-it-derivation-notes">
-              <AlertTitle sx={{ mb: 0.5 }}>Could not be derived as literal values</AlertTitle>
+              <AlertTitle sx={{ mb: 0.5 }}>{uiText("Could not be derived as literal values", "无法提取字面值的字段")}</AlertTitle>
               <Box component="ul" sx={{ m: 0, pl: 2 }}>
                 {derivation.notes.map((n) => (
                   <li key={n.field}>
@@ -693,20 +692,20 @@ export default function LiveResponseWidget({
           <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap', alignItems: 'flex-start' }}>
             <TextField
               size="small"
-              label="Target base URL"
+              label={uiText("Target base URL", "目标基础 URL")}
               value={targetBaseUrl}
               onChange={(e) => setTargetBaseUrl(e.target.value)}
               sx={{ flex: '1 1 280px' }}
               helperText={
                 portsUnknown
-                  ? 'Could not read the server’s bound ports — using the port serving this dashboard.'
-                  : 'MockServer serves mocks and the control plane on the same port as this dashboard.'
+                  ? uiText('Could not read the server’s bound ports — using the port serving this dashboard.', "无法读取服务器监听端口，将使用当前控制台端口。")
+                  : uiText('MockServer serves mocks and the control plane on the same port as this dashboard.', "Mock 接口和控制 API 使用与此控制台相同的端口。")
               }
-              slotProps={{ htmlInput: { 'aria-label': 'Target base URL', sx: { fontFamily: monospaceFontFamily } } }}
+              slotProps={{ htmlInput: { 'aria-label': uiText('Target base URL', "目标基础 URL"), sx: { fontFamily: monospaceFontFamily } } }}
             />
             {otherPorts.length > 0 && (
               <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexWrap: 'wrap', pt: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">Also bound:</Typography>
+                <Typography variant="caption" color="text.secondary">{uiText("Also bound:", "其他监听端口：")}</Typography>
                 {otherPorts.map((p) => (
                   <Chip
                     key={p}
@@ -725,57 +724,57 @@ export default function LiveResponseWidget({
 
           {crossOrigin && (
             <Alert severity="warning" variant="outlined" sx={{ mb: 1 }} data-testid="try-it-cors-warning">
-              {`${targetOrigin} is a different origin from this dashboard (${typeof window !== 'undefined' ? window.location.origin : ''}). ` +
-                'The browser will block the response unless MockServer has CORS enabled on that port ' +
-                '(mockserver.enableCORSForAllResponses=true).'}
+              {uiText(`${targetOrigin} is a different origin from this dashboard (${typeof window !== 'undefined' ? window.location.origin : ''}). `, `${targetOrigin} 与此控制台（${typeof window !== 'undefined' ? window.location.origin : ''}）不同源。 `) +
+                uiText('The browser will block the response unless MockServer has CORS enabled on that port ', "请在目标 MockServer 端口启用 CORS，浏览器才能读取响应 ") +
+                uiText('(mockserver.enableCORSForAllResponses=true).', "（mockserver.enableCORSForAllResponses=true）。")}
             </Alert>
           )}
 
           <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
             <TextField
               size="small"
-              label="Method"
+              label={uiText("Method", "请求方法")}
               value={request.method}
               onChange={setField('method')}
               sx={{ width: 120 }}
-              slotProps={{ htmlInput: { 'aria-label': 'Live request method' } }}
+              slotProps={{ htmlInput: { 'aria-label': uiText('Live request method', "试发请求方法") } }}
             />
             <TextField
               size="small"
-              label="Path"
+              label={uiText("Path", "路径")}
               value={request.path}
               onChange={setField('path')}
               sx={{ flex: '1 1 240px' }}
               error={request.path.trim().length === 0}
-              helperText={request.path.trim().length === 0 ? 'Enter the path to send' : ' '}
-              slotProps={{ htmlInput: { 'aria-label': 'Live request path', sx: { fontFamily: monospaceFontFamily } } }}
+              helperText={request.path.trim().length === 0 ? uiText('Enter the path to send', "请输入请求路径") : ' '}
+              slotProps={{ htmlInput: { 'aria-label': uiText('Live request path', "试发请求路径"), sx: { fontFamily: monospaceFontFamily } } }}
             />
           </Box>
           <Box sx={{ display: 'flex', gap: 1, mb: 1, flexDirection: { xs: 'column', md: 'row' } }}>
             <TextField
               size="small"
-              label="Query (name=value per line)"
+              label={uiText("Query (name=value per line)", "查询参数（每行一项 name=value）")}
               value={request.query}
               onChange={setField('query')}
               multiline
               minRows={2}
               sx={{ flex: 1 }}
-              slotProps={{ htmlInput: { 'aria-label': 'Live request query', sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
+              slotProps={{ htmlInput: { 'aria-label': uiText('Live request query', "试发查询参数"), sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
             />
             <TextField
               size="small"
-              label="Headers (Name: value per line)"
+              label={uiText("Headers (Name: value per line)", "请求头（每行一项 Name: value）")}
               value={request.headers}
               onChange={setField('headers')}
               multiline
               minRows={2}
               sx={{ flex: 1 }}
-              slotProps={{ htmlInput: { 'aria-label': 'Live request headers', sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
+              slotProps={{ htmlInput: { 'aria-label': uiText('Live request headers', "试发请求头"), sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
             />
           </Box>
           <TextField
             size="small"
-            label="Body"
+            label={uiText("Body", "请求体")}
             value={request.body}
             onChange={setField('body')}
             multiline
@@ -784,10 +783,10 @@ export default function LiveResponseWidget({
             sx={{ mb: 1 }}
             helperText={
               request.body.length > 0 && ['GET', 'HEAD'].includes(request.method.trim().toUpperCase())
-                ? 'A GET/HEAD request cannot carry a body — it will not be sent.'
+                ? uiText('A GET/HEAD request cannot carry a body — it will not be sent.', "GET 和 HEAD 不发送请求体。")
                 : ' '
             }
-            slotProps={{ htmlInput: { 'aria-label': 'Live request body', sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
+            slotProps={{ htmlInput: { 'aria-label': uiText('Live request body', "试发请求体"), sx: { typography: 'body2', fontFamily: monospaceFontFamily } } }}
           />
 
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -798,16 +797,16 @@ export default function LiveResponseWidget({
               onClick={() => void send()}
               disabled={sending || request.path.trim().length === 0}
             >
-              {sending ? 'Sending…' : 'Send request'}
+              {sending ? uiText('Sending…', "正在发送…") : uiText('Send request', "发送请求")}
             </Button>
             <Typography variant="caption" color="text.secondary">
-              Sent live from the browser — it hits real expectations and is recorded in the log.
+              {uiText("Sent live from the browser — it hits real expectations and is recorded in the log.", "请求由浏览器直接发送，会匹配已生效的规则并记录在日志中。")}
             </Typography>
           </Box>
 
           {failure !== null && (
             <Alert severity="error" variant="outlined" sx={{ mt: 1 }} data-testid="try-it-failure">
-              <AlertTitle sx={{ mb: 0.5 }}>Request failed</AlertTitle>
+              <AlertTitle sx={{ mb: 0.5 }}>{uiText("Request failed", "请求失败")}</AlertTitle>
               <Typography variant="caption">{failure}</Typography>
             </Alert>
           )}
@@ -821,7 +820,7 @@ export default function LiveResponseWidget({
                   color={statusColour(result.status)}
                   label={`${result.status}${result.statusText ? ` ${result.statusText}` : ''}`}
                 />
-                <Typography variant="caption" color="text.secondary">{`${result.elapsedMs} ms`}</Typography>
+                <Typography variant="caption" color="text.secondary">{uiText(`${result.elapsedMs} ms`, `${result.elapsedMs} 毫秒`)}</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ fontFamily: monospaceFontFamily, wordBreak: 'break-all' }}>
                   {result.url}
                 </Typography>
@@ -829,8 +828,7 @@ export default function LiveResponseWidget({
               </Box>
               {result.headers.length === 0 ? (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                  No response headers were readable (a cross-origin response only exposes headers the
-                  server allow-lists via Access-Control-Expose-Headers).
+                  {uiText("No response headers were readable (a cross-origin response only exposes headers the server allow-lists via Access-Control-Expose-Headers).", "无法读取响应头。跨域响应只会公开 Access-Control-Expose-Headers 中允许的响应头。")}
                 </Typography>
               ) : (
                 <Box sx={{ mb: 1 }}>
@@ -847,7 +845,7 @@ export default function LiveResponseWidget({
               )}
               {result.oversizeBytes !== null ? (
                 <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
-                  {`Response body is ${result.oversizeBytes} bytes — too large to display, so it was not read into the page.`}
+                  {uiText(`Response body is ${result.oversizeBytes} bytes — too large to display, so it was not read into the page.`, `响应体有 ${result.oversizeBytes} 字节，超出展示大小限制，未加载到页面中。`)}
                 </Typography>
               ) : (
                 <Box
@@ -865,12 +863,12 @@ export default function LiveResponseWidget({
                     wordBreak: 'break-all',
                   }}
                 >
-                  {result.body.length > 0 ? result.body : '(empty response body)'}
+                  {result.body.length > 0 ? result.body : uiText('(empty response body)', "（响应体为空）")}
                 </Box>
               )}
               {result.truncated && (
                 <Typography variant="caption" color="text.secondary">
-                  Body truncated for display.
+                  {uiText("Body truncated for display.", "仅显示响应体的前一部分。")}
                 </Typography>
               )}
             </Box>

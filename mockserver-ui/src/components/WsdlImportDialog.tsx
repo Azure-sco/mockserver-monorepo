@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -55,12 +56,10 @@ export default function WsdlImportDialog({ open, onClose, connectionParams }: Ws
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="wsdl-dialog-title">
-      <DialogTitle id="wsdl-dialog-title">Import WSDL</DialogTitle>
+      <DialogTitle id="wsdl-dialog-title">{uiText("Import WSDL", "导入 WSDL")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Paste a WSDL 1.1 document (SOAP 1.1 or 1.2). MockServer generates one expectation per
-          SOAP operation, matching on the SOAPAction (or content-type action) and responding with a
-          skeleton SOAP envelope.
+          {uiText("Paste a WSDL 1.1 document (SOAP 1.1 or 1.2). MockServer generates one expectation per SOAP operation, matching on the SOAPAction (or content-type action) and responding with a skeleton SOAP envelope.", "粘贴 WSDL 1.1 文档（SOAP 1.1 或 1.2）。MockServer 会为每项 SOAP 操作生成一条规则，根据 SOAPAction 或 Content-Type 中的 action 匹配请求，并返回基础 SOAP Envelope。")}
         </Typography>
         <TextField
           value={wsdl}
@@ -76,18 +75,18 @@ export default function WsdlImportDialog({ open, onClose, connectionParams }: Ws
         )}
         {createdCount !== null && (
           <Alert severity="success" sx={{ mt: 1 }}>
-            Imported {createdCount} expectation{createdCount === 1 ? '' : 's'}.
+            {uiText("Imported ", "已导入 ")}{createdCount}{uiText(" expectation", " 条规则")}{createdCount === 1 ? '' : uiText('s', "")}.
           </Alert>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{uiText("Close", "关闭")}</Button>
         <Button
           variant="contained"
           onClick={() => void handleImport()}
           disabled={busy || wsdl.trim().length === 0}
         >
-          {busy ? 'Importing…' : 'Import'}
+          {busy ? uiText('Importing…', "正在导入…") : uiText('Import', "导入")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type SyntheticEvent } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -130,9 +131,9 @@ const CHAOS_GRID_WIDE = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit
 // Canned Quick Chaos fault modes, in display order. Each maps to real server fault
 // fields via buildQuickChaosProfile: 500s + errorProbability, connection drop, +3s latency.
 const QUICK_CHAOS_MODE_OPTIONS: { mode: QuickChaosMode; label: string }[] = [
-  { mode: 'errors', label: '500 Errors' },
-  { mode: 'reset', label: 'Connection Reset' },
-  { mode: 'latency', label: 'Latency +3s' },
+  { mode: 'errors', label: uiText('500 Errors', '返回 500 错误') },
+  { mode: 'reset', label: uiText('Connection Reset', '重置连接') },
+  { mode: 'latency', label: uiText('Latency +3s', '延迟增加 3 秒') },
 ];
 
 // --- SLO verdict display helpers (A1/A2: terminal experiment verdict) ---
@@ -184,7 +185,7 @@ function ExperimentVerdict({ verdict }: { verdict: SloVerdictDTO }) {
     <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          SLO Verdict
+          {uiText('SLO Verdict', 'SLO 判定')}
         </Typography>
         <Chip size="small" color={sloResultColor(verdict.result)} label={verdict.result} />
         {verdict.name && (
@@ -301,18 +302,18 @@ const EMPTY_FORM: FormState = {
 function hostTargetError(rawHost: string): string | null {
   const host = rawHost.trim();
   if (host.includes('*')) {
-    return 'Chaos targets one exact host (matched case-insensitively, port ignored) - wildcards such as *.example.com are not supported here.';
+    return uiText('Chaos targets one exact host (matched case-insensitively, port ignored) - wildcards such as *.example.com are not supported here.', '故障配置只匹配一个明确的主机名，忽略大小写和端口。此处不支持 *.example.com 等通配符。');
   }
   if (/^host:/i.test(host)) {
-    return 'Enter the host on its own - the host: search operator is not used here.';
+    return uiText('Enter the host on its own - the host: search operator is not used here.', '请仅填写主机名，此处无需使用 host: 搜索操作符。');
   }
   if (host.includes('://')) {
-    return 'Enter the host on its own - a URL scheme such as https:// is not part of the host key.';
+    return uiText('Enter the host on its own - a URL scheme such as https:// is not part of the host key.', '请仅填写主机名，无需 https:// 等 URL 协议。');
   }
   // normalizeHost splits host from port; it never strips a path, so a key
   // carrying one can never be produced from a real Host header.
   if (host.includes('/')) {
-    return 'Enter the host on its own - a path is not part of the host key.';
+    return uiText('Enter the host on its own - a path is not part of the host key.', '请仅填写主机名，无需路径。');
   }
   return null;
 }
@@ -389,81 +390,81 @@ function buildChaosProfile(form: FormState): HttpChaosProfileDTO {
 
 /** Returns a validation message for the form, or null when it is valid to submit. */
 function validateForm(form: FormState): string | null {
-  if (form.host.trim() === '') return 'Host is required';
+  if (form.host.trim() === '') return uiText('Host is required', '请输入主机名');
   const hostError = hostTargetError(form.host);
   if (hostError) return hostError;
   const errorStatus = num(form.errorStatus);
   if (form.errorStatus.trim() !== '' && (errorStatus == null || !Number.isInteger(errorStatus) || errorStatus < 100 || errorStatus > 599)) {
-    return 'Error status must be a whole number between 100 and 599';
+    return uiText('Error status must be a whole number between 100 and 599', '错误状态码必须为 100 至 599 之间的整数');
   }
   if (num(form.errorProbability) != null && errorStatus == null) {
-    return 'Error probability needs an error status (e.g. 503)';
+    return uiText('Error probability needs an error status (e.g. 503)', '设置错误概率时，请同时填写错误状态码（如 503）');
   }
   if (form.retryAfter.trim() && errorStatus == null) {
-    return 'Retry-After needs an error status (e.g. 429 or 503)';
+    return uiText('Retry-After needs an error status (e.g. 429 or 503)', '设置 Retry-After 时，请同时填写错误状态码（如 429 或 503）');
   }
   for (const [field, label] of [['errorProbability', 'Error probability'], ['dropProbability', 'Drop probability']] as const) {
     const value = num(form[field]);
     if (value != null && (value < 0 || value > 1)) return `${label} must be between 0 and 1`;
   }
   const latencyMs = num(form.latencyMs);
-  if (latencyMs != null && latencyMs < 0) return 'Latency must be 0 or greater';
+  if (latencyMs != null && latencyMs < 0) return uiText('Latency must be 0 or greater', '延迟必须大于或等于 0');
   const ttl = num(form.ttlMs);
-  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return 'TTL must be a whole number of milliseconds >= 1';
+  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return uiText('TTL must be a whole number of milliseconds >= 1', '有效期必须为大于或等于 1 的整数毫秒');
   const succeedFirst = num(form.succeedFirst);
-  if (succeedFirst != null && (!Number.isInteger(succeedFirst) || succeedFirst < 0)) return 'Succeed first must be a whole number >= 0';
+  if (succeedFirst != null && (!Number.isInteger(succeedFirst) || succeedFirst < 0)) return uiText('Succeed first must be a whole number >= 0', '先成功的请求数必须为非负整数');
   const failRequestCount = num(form.failRequestCount);
-  if (failRequestCount != null && (!Number.isInteger(failRequestCount) || failRequestCount < 1)) return 'Fail request count must be a whole number >= 1';
+  if (failRequestCount != null && (!Number.isInteger(failRequestCount) || failRequestCount < 1)) return uiText('Fail request count must be a whole number >= 1', '失败请求数必须为大于或等于 1 的整数');
   // Body corruption
   const truncateBodyAtFraction = num(form.truncateBodyAtFraction);
   if (truncateBodyAtFraction != null && (truncateBodyAtFraction < 0 || truncateBodyAtFraction > 1)) {
-    return 'Truncate body fraction must be between 0 and 1';
+    return uiText('Truncate body fraction must be between 0 and 1', '响应体截断比例必须介于 0 和 1 之间');
   }
   // Slow response
   const slowResponseChunkSize = num(form.slowResponseChunkSize);
   if (slowResponseChunkSize != null && (!Number.isInteger(slowResponseChunkSize) || slowResponseChunkSize < 1)) {
-    return 'Slow response chunk size must be a whole number >= 1';
+    return uiText('Slow response chunk size must be a whole number >= 1', '分块大小必须为大于或等于 1 的整数');
   }
   const slowResponseChunkDelayMs = num(form.slowResponseChunkDelayMs);
   if (slowResponseChunkDelayMs != null && slowResponseChunkDelayMs < 0) {
-    return 'Slow response chunk delay must be 0 or greater';
+    return uiText('Slow response chunk delay must be 0 or greater', '块间延迟必须大于或等于 0');
   }
   // Quota
   const quotaLimit = num(form.quotaLimit);
   if (quotaLimit != null && (!Number.isInteger(quotaLimit) || quotaLimit < 1)) {
-    return 'Quota limit must be a whole number >= 1';
+    return uiText('Quota limit must be a whole number >= 1', '配额上限必须为大于或等于 1 的整数');
   }
   const quotaWindowMillis = num(form.quotaWindowMillis);
   if (quotaWindowMillis != null && (!Number.isInteger(quotaWindowMillis) || quotaWindowMillis < 1)) {
-    return 'Quota window must be a whole number of milliseconds >= 1';
+    return uiText('Quota window must be a whole number of milliseconds >= 1', '配额统计窗口必须为大于或等于 1 的整数毫秒');
   }
   const quotaErrorStatus = num(form.quotaErrorStatus);
   if (quotaErrorStatus != null && (!Number.isInteger(quotaErrorStatus) || quotaErrorStatus < 100 || quotaErrorStatus > 599)) {
-    return 'Quota error status must be a whole number between 100 and 599';
+    return uiText('Quota error status must be a whole number between 100 and 599', '超出配额时的状态码必须为 100 至 599 之间的整数');
   }
   // Degradation ramp
   const degradationRampMillis = num(form.degradationRampMillis);
   if (degradationRampMillis != null && (!Number.isInteger(degradationRampMillis) || degradationRampMillis < 1)) {
-    return 'Degradation ramp must be a whole number of milliseconds >= 1';
+    return uiText('Degradation ramp must be a whole number of milliseconds >= 1', '逐步降级时长必须为大于或等于 1 的整数毫秒');
   }
   // Outage window
   const outageAfterMillis = num(form.outageAfterMillis);
   if (outageAfterMillis != null && (!Number.isInteger(outageAfterMillis) || outageAfterMillis < 0)) {
-    return 'Outage after must be a whole number of milliseconds >= 0';
+    return uiText('Outage after must be a whole number of milliseconds >= 0', '开始中断前的等待时间必须为非负整数毫秒');
   }
   const outageDurationMillis = num(form.outageDurationMillis);
   if (outageDurationMillis != null && (!Number.isInteger(outageDurationMillis) || outageDurationMillis < 1)) {
-    return 'Outage duration must be a whole number of milliseconds >= 1';
+    return uiText('Outage duration must be a whole number of milliseconds >= 1', '中断时长必须为大于或等于 1 的整数毫秒');
   }
   // GraphQL-semantic validation: if sub-fields are set, graphqlErrors must be on
   if ((form.graphqlErrorMessage.trim() || form.graphqlErrorCode.trim() || form.graphqlNullifyData) && !form.graphqlErrors) {
     // Only flag if the user actively set message/code — nullifyData defaults to true
     if (form.graphqlErrorMessage.trim() || form.graphqlErrorCode.trim()) {
-      return 'GraphQL error message/code requires GraphQL errors to be enabled';
+      return uiText('GraphQL error message/code requires GraphQL errors to be enabled', '填写 GraphQL 错误消息或错误码前，请先启用 GraphQL 错误');
     }
   }
   if (summarizeChaosProfile(buildChaosProfile(form)).length === 0) {
-    return 'Set at least one fault (error status, drop, latency, body corruption, slow response, quota, or GraphQL error)';
+    return uiText('Set at least one fault (error status, drop, latency, body corruption, slow response, quota, or GraphQL error)', '至少配置一种故障，如错误状态码、断开连接、延迟、损坏响应体、慢响应、配额或 GraphQL 错误');
   }
   return null;
 }
@@ -540,15 +541,15 @@ function buildTcpChaosProfile(form: TcpFormState): TcpChaosProfileDTO {
 }
 
 function validateTcpForm(form: TcpFormState): string | null {
-  if (form.host.trim() === '') return 'Host is required';
+  if (form.host.trim() === '') return uiText('Host is required', '请输入主机名');
   const hostError = hostTargetError(form.host);
   if (hostError) return hostError;
   const profile = buildTcpChaosProfile(form);
   if (summarizeTcpChaosProfile(profile).length === 0) {
-    return 'Set at least one fault (latency, bandwidth, down, reset, etc.)';
+    return uiText('Set at least one fault (latency, bandwidth, down, reset, etc.)', '至少配置一种故障，如延迟、带宽限制、停用或重置连接');
   }
   const ttl = num(form.ttlMs);
-  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return 'TTL must be a whole number of milliseconds >= 1';
+  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return uiText('TTL must be a whole number of milliseconds >= 1', '有效期必须为大于或等于 1 的整数毫秒');
   return null;
 }
 
@@ -568,23 +569,23 @@ const GRPC_STATUS_CODES = [
 // (satisfies react-refresh/only-export-components).
 
 function validateGrpcChaosForm(form: GrpcChaosFormState): string | null {
-  if (form.service.trim() === '') return 'Service is required';
+  if (form.service.trim() === '') return uiText('Service is required', '请输入服务名称');
   const profile = buildGrpcChaosProfile(form);
   if (summarizeGrpcChaosProfile(profile).length === 0) {
-    return 'Set at least one fault (error code, latency, quota, or streaming fault)';
+    return uiText('Set at least one fault (error code, latency, quota, or streaming fault)', '至少配置一种故障，如错误码、延迟、配额或流故障');
   }
   const ep = num(form.errorProbability);
-  if (ep != null && (ep < 0 || ep > 1)) return 'Error probability must be between 0 and 1';
+  if (ep != null && (ep < 0 || ep > 1)) return uiText('Error probability must be between 0 and 1', '错误概率必须介于 0 和 1 之间');
   const latencyMs = num(form.latencyMs);
-  if (latencyMs != null && latencyMs < 0) return 'Latency must be 0 or greater';
+  if (latencyMs != null && latencyMs < 0) return uiText('Latency must be 0 or greater', '延迟必须大于或等于 0');
   const ttl = num(form.ttlMs);
-  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return 'TTL must be a whole number of milliseconds >= 1';
+  if (ttl != null && (!Number.isInteger(ttl) || ttl < 1)) return uiText('TTL must be a whole number of milliseconds >= 1', '有效期必须为大于或等于 1 的整数毫秒');
   const succeedFirst = num(form.succeedFirst);
-  if (succeedFirst != null && (!Number.isInteger(succeedFirst) || succeedFirst < 0)) return 'Succeed first must be a whole number >= 0';
+  if (succeedFirst != null && (!Number.isInteger(succeedFirst) || succeedFirst < 0)) return uiText('Succeed first must be a whole number >= 0', '先成功的请求数必须为非负整数');
   const failRequestCount = num(form.failRequestCount);
-  if (failRequestCount != null && (!Number.isInteger(failRequestCount) || failRequestCount < 1)) return 'Fail request count must be a whole number >= 1';
+  if (failRequestCount != null && (!Number.isInteger(failRequestCount) || failRequestCount < 1)) return uiText('Fail request count must be a whole number >= 1', '失败请求数必须为大于或等于 1 的整数');
   const abortAfterMessages = num(form.abortAfterMessages);
-  if (abortAfterMessages != null && (!Number.isInteger(abortAfterMessages) || abortAfterMessages < 1)) return 'Abort after messages must be a whole number >= 1';
+  if (abortAfterMessages != null && (!Number.isInteger(abortAfterMessages) || abortAfterMessages < 1)) return uiText('Abort after messages must be a whole number >= 1', '中止前的消息数必须为大于或等于 1 的整数');
   return null;
 }
 
@@ -1100,7 +1101,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
       if (checked) {
         const host = quickHostInput.trim();
         if (host === '') {
-          setActionError({ message: 'Enter a target host to enable Quick Chaos' });
+          setActionError({ message: uiText('Enter a target host to enable Quick Chaos', '输入目标主机后才能启用快速故障注入') });
           return;
         }
         // Quick Chaos registers straight into the same host-keyed registry, so it
@@ -1111,7 +1112,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           return;
         }
         if (quickModes.length === 0) {
-          setActionError({ message: 'Select at least one fault mode' });
+          setActionError({ message: uiText('Select at least one fault mode', '至少选择一种故障模式') });
           return;
         }
         void applyQuickChaos(host, quickModes, quickPercent);
@@ -1206,7 +1207,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
     const asForm: FormState = { ...editForm, host, ttlMs: '' };
     const profile = buildChaosProfile(asForm);
     if (summarizeChaosProfile(profile).length === 0) {
-      setActionError({ message: 'Set at least one fault, or use Remove to delete the chaos for this host' });
+      setActionError({ message: uiText('Set at least one fault, or use Remove to delete the chaos for this host', '请至少配置一种故障，或移除此主机的故障配置') });
       return;
     }
     const validationError = validateForm(asForm);
@@ -1333,12 +1334,12 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
   const handleStartPreemption = useCallback(() => {
     const drainMs = num(preemptionForm.drainMs);
     if (drainMs != null && (!Number.isInteger(drainMs) || drainMs < 1)) {
-      setActionError({ message: 'Drain must be a whole number of milliseconds >= 1' });
+      setActionError({ message: uiText('Drain must be a whole number of milliseconds >= 1', '排空等待时间必须为大于或等于 1 的整数毫秒') });
       return;
     }
     const ttlMs = num(preemptionForm.ttlMs);
     if (ttlMs != null && (!Number.isInteger(ttlMs) || ttlMs < 1)) {
-      setActionError({ message: 'TTL must be a whole number of milliseconds >= 1' });
+      setActionError({ message: uiText('TTL must be a whole number of milliseconds >= 1', '有效期必须为大于或等于 1 的整数毫秒') });
       return;
     }
     const request: { mode: PreemptionMode; drainMillis?: number; ttlMillis?: number } = {
@@ -1381,11 +1382,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
   // action error and return null. Shared by Start Experiment and Save Profile.
   const buildDefinitionFromEditor = useCallback((): ExperimentDefinitionDTO | null => {
     if (!expName.trim()) {
-      setActionError({ message: 'Experiment name is required' });
+      setActionError({ message: uiText('Experiment name is required', '请输入实验名称') });
       return null;
     }
     if (expStages.length === 0) {
-      setActionError({ message: 'At least one stage is required' });
+      setActionError({ message: uiText('At least one stage is required', '至少需要一个阶段') });
       return null;
     }
     const stages: ExperimentStageDTO[] = [];
@@ -1393,11 +1394,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
       const s = expStages[i]!;
       const durationMillis = num(s.durationMs);
       if (durationMillis == null || durationMillis <= 0) {
-        setActionError({ message: `Stage ${i + 1}: duration must be > 0` });
+        setActionError({ message: uiText(`Stage ${i + 1}: duration must be > 0`, `第 ${i + 1} 阶段的持续时间必须大于 0`) });
         return null;
       }
       if (!s.host.trim()) {
-        setActionError({ message: `Stage ${i + 1}: host is required` });
+        setActionError({ message: uiText(`Stage ${i + 1}: host is required`, `请输入第 ${i + 1} 阶段的主机`) });
         return null;
       }
       // A stage host becomes a registry key verbatim (ChaosExperimentOrchestrator
@@ -1408,7 +1409,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
       // affirmative resilience verdict from a run that faulted nothing.
       const stageHostError = hostTargetError(s.host);
       if (stageHostError) {
-        setActionError({ message: `Stage ${i + 1}: ${stageHostError}` });
+        setActionError({ message: uiText(`Stage ${i + 1}: ${stageHostError}`, `第 ${i + 1} 阶段：${stageHostError}`) });
         return null;
       }
       const profile: HttpChaosProfileDTO = {};
@@ -1423,7 +1424,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
       const dp = num(s.dropProbability);
       if (dp != null) profile.dropConnectionProbability = dp;
       if (summarizeChaosProfile(profile).length === 0) {
-        setActionError({ message: `Stage ${i + 1}: set at least one fault (error, latency, or drop)` });
+        setActionError({ message: uiText(`Stage ${i + 1}: set at least one fault (error, latency, or drop)`, `第 ${i + 1} 阶段至少配置一种故障：错误、延迟或断开连接`) });
         return null;
       }
       stages.push({ durationMillis, profiles: { [s.host.trim()]: profile } });
@@ -1528,11 +1529,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Service Chaos
+          {uiText('Service Chaos', '服务故障注入')}
         </Typography>
         <Box sx={{ flex: 1 }} />
-        <Tooltip title="Refresh now">
-          <IconButton size="small" onClick={refresh} aria-label="Refresh service chaos">
+        <Tooltip title={uiText('Refresh now', '立即刷新')}>
+          <IconButton size="small" onClick={refresh} aria-label={uiText('Refresh service chaos', '刷新服务故障配置')}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -1543,16 +1544,16 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           severity={loadError.includes('404') || loadError.includes('Not Found') ? 'info' : 'error'}
           sx={{ mb: 1.5 }}
           action={
-            <IconButton color="inherit" size="small" onClick={refresh} aria-label="Retry"><RefreshIcon fontSize="small" /></IconButton>
+            <IconButton color="inherit" size="small" onClick={refresh} aria-label={uiText('Retry', '重试')}><RefreshIcon fontSize="small" /></IconButton>
           }
         >
           <AlertTitle>
             {loadError.includes('404') || loadError.includes('Not Found')
-              ? 'Service chaos not available'
-              : 'Could not load service chaos'}
+              ? uiText('Service chaos not available', '服务故障注入不可用')
+              : uiText('Could not load service chaos', '无法加载服务故障配置')}
           </AlertTitle>
           {loadError.includes('404') || loadError.includes('Not Found')
-            ? 'The connected server does not support service chaos. This feature requires a newer version of MockServer.'
+            ? uiText('The connected server does not support service chaos. This feature requires a newer version of MockServer.', '当前连接的服务器不支持服务故障注入。此功能需要更新版本的 MockServer。')
             : loadError}
         </Alert>
       )}
@@ -1572,7 +1573,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-            Quick Chaos
+            {uiText('Quick Chaos', '快速故障注入')}
           </Typography>
           <FormControlLabel
             control={
@@ -1583,12 +1584,12 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 disabled={busy}
               />
             }
-            label={<Typography variant="caption">Enable Chaos</Typography>}
+            label={<Typography variant="caption">{uiText('Enable Chaos', '启用故障注入')}</Typography>}
           />
           <TextField
             size="small"
-            label="Target Host"
-            placeholder="e.g. api.example.com"
+            label={uiText('Target Host', '目标主机')}
+            placeholder={uiText('e.g. api.example.com', '例如 api.example.com')}
             value={quickHost}
             disabled={quickEnabled || busy}
             onChange={(e) => setQuickHostInput(e.target.value)}
@@ -1623,7 +1624,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
               onChange={handleQuickPercentChange}
               onChangeCommitted={handleQuickPercentCommit}
               disabled={busy || !quickPercentAppliesToModes}
-              aria-label="Percentage of requests affected"
+              aria-label={uiText('Percentage of requests affected', '受影响的请求比例')}
               valueLabelDisplay="auto"
             />
             <Typography variant="caption" sx={{ minWidth: 34, textAlign: 'right' }}>
@@ -1632,9 +1633,9 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           </Box>
           <Typography variant="caption" color="text.secondary">
             {quickPercentAppliesToModes
-              ? `Affects ~${quickPercentValue}% of requests forwarded to ${quickHost || 'the target host'}.`
-              : `Latency applies to all requests forwarded to ${quickHost || 'the target host'}.`}
-            {quickModesValue.includes('latency') && ` Latency mode adds +${QUICK_CHAOS_LATENCY_MS}ms to every request.`}
+              ? uiText(`Affects ~${quickPercentValue}% of requests forwarded to ${quickHost || 'the target host'}.`, `约影响转发到 ${quickHost || '目标主机'} 的 ${quickPercentValue}% 请求。`)
+              : uiText(`Latency applies to all requests forwarded to ${quickHost || 'the target host'}.`, `延迟适用于所有转发到 ${quickHost || '目标主机'} 的请求。`)}
+            {quickModesValue.includes('latency') && uiText(` Latency mode adds +${QUICK_CHAOS_LATENCY_MS}ms to every request.`, ` 延迟模式为每条请求增加 ${QUICK_CHAOS_LATENCY_MS} 毫秒。`)}
           </Typography>
         </Box>
       </Paper>
@@ -1644,7 +1645,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
         <Paper variant="outlined" sx={{ p: 1.25, mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-              Auto-halt
+              {uiText('Auto-halt', '自动停止')}
             </Typography>
             <FormControlLabel
               control={
@@ -1657,11 +1658,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   }}
                 />
               }
-              label={<Typography variant="caption">{autoHaltEnabled ? 'Armed' : 'Off'}</Typography>}
+              label={<Typography variant="caption">{autoHaltEnabled ? uiText('Armed', '已启用') : uiText('Off', '已关闭')}</Typography>}
             />
             <TextField
               size="small"
-              label="Error threshold"
+              label={uiText('Error threshold', '错误阈值')}
               type="number"
               value={autoHaltThreshold}
               disabled={!autoHaltEnabled}
@@ -1676,7 +1677,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
             />
             <TextField
               size="small"
-              label="Window (ms)"
+              label={uiText('Window (ms)', '统计窗口（毫秒）')}
               type="number"
               value={autoHaltWindow}
               disabled={!autoHaltEnabled}
@@ -1690,7 +1691,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
               sx={responsiveWidth(130)}
             />
             <Typography variant="caption" color="text.secondary">
-              Automatically halt chaos when errors exceed the threshold within the window.
+              {uiText('Automatically halt chaos when errors exceed the threshold within the window.', '当统计窗口内的错误超过阈值时，自动停止故障注入。')}
             </Typography>
           </Box>
         </Paper>
@@ -1703,11 +1704,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           onClick={() => setHttpExpanded((v) => !v)}
         >
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            HTTP Service Chaos
+            {uiText('HTTP Service Chaos', 'HTTP 服务故障注入')}
           </Typography>
-          <Chip size="small" label={`${hosts.length} active`} color={hosts.length > 0 ? 'warning' : 'default'} variant="outlined" />
+          <Chip size="small" label={uiText(`${hosts.length} active`, `${hosts.length} 项生效中`)} color={hosts.length > 0 ? 'warning' : 'default'} variant="outlined" />
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Clear all HTTP service-scoped chaos">
+          <Tooltip title={uiText('Clear all HTTP service-scoped chaos', '清空所有 HTTP 服务故障配置')}>
             <span>
               <Button
                 size="small"
@@ -1717,89 +1718,88 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={(e) => {
                   e.stopPropagation();
                   setConfirm({
-                    title: 'Clear all HTTP chaos?',
-                    message: `This removes chaos profiles for all ${hosts.length} registered host${hosts.length === 1 ? '' : 's'}. Live traffic will no longer be faulted. This cannot be undone.`,
-                    confirmLabel: 'Clear HTTP chaos',
+                    title: uiText('Clear all HTTP chaos?', '清空所有 HTTP 故障配置？'),
+                    message: uiText(`This removes chaos profiles for all ${hosts.length} registered host${hosts.length === 1 ? '' : 's'}. Live traffic will no longer be faulted. This cannot be undone.`, `此操作会移除全部 ${hosts.length} 个主机的故障配置，实时流量将恢复正常，且操作无法撤销。`),
+                    confirmLabel: uiText('Clear HTTP chaos', '清空 HTTP 故障配置'),
                     onConfirm: () => void runAction(() => clearServiceChaos(connectionParams)),
                   });
                 }}
               >
-                Clear HTTP
+                {uiText('Clear HTTP', '清空 HTTP 故障配置')}
               </Button>
             </span>
           </Tooltip>
-          <IconButton size="small" aria-label={httpExpanded ? 'Collapse HTTP chaos' : 'Expand HTTP chaos'}>
+          <IconButton size="small" aria-label={httpExpanded ? uiText('Collapse HTTP chaos', '收起 HTTP 故障配置') : uiText('Expand HTTP chaos', '展开 HTTP 故障配置')}>
             {httpExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </Box>
         <Collapse in={httpExpanded}>
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Register one HTTP chaos profile per upstream host; it is applied to every matched forward to that host.
-              Add a TTL to auto-revert the fault after a bounded window (a dead-man&apos;s switch).
+              {uiText('Register one HTTP chaos profile per upstream host; it is applied to every matched forward to that host. Add a TTL to auto-revert the fault after a bounded window (a dead-man\'s switch).', '每个上游主机可配置一条 HTTP 故障规则，适用于所有转发到该主机的匹配请求。设置有效期可在到期后自动撤销故障。')}
             </Typography>
 
             {/* Register form */}
             <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
-              <Typography variant="caption" color="text.secondary">Register chaos for a host</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Register chaos for a host', '为主机配置故障')}</Typography>
               {/* Row 1: host + core fault fields */}
               <Box sx={{ ...CHAOS_GRID, mt: 0.75 }}>
-                <TextField size="small" label="Host" placeholder="upstream.svc" value={form.host} onChange={setField('host')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegister(); }} fullWidth />
-                <TextField size="small" label="Error status" placeholder="503" value={form.errorStatus} onChange={setField('errorStatus')} fullWidth />
-                <TextField size="small" label="Error prob (0–1)" placeholder="0.5" value={form.errorProbability} onChange={setField('errorProbability')} fullWidth />
+                <TextField size="small" label={uiText('Host', '主机')} placeholder="upstream.svc" value={form.host} onChange={setField('host')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegister(); }} fullWidth />
+                <TextField size="small" label={uiText('Error status', '错误状态码')} placeholder="503" value={form.errorStatus} onChange={setField('errorStatus')} fullWidth />
+                <TextField size="small" label={uiText('Error prob (0–1)', '错误概率（0–1）')} placeholder="0.5" value={form.errorProbability} onChange={setField('errorProbability')} fullWidth />
                 <TextField size="small" label="Retry-After" placeholder="120" value={form.retryAfter} onChange={setField('retryAfter')} fullWidth />
-                <TextField size="small" label="Drop prob (0–1)" placeholder="0.2" value={form.dropProbability} onChange={setField('dropProbability')} fullWidth />
-                <TextField size="small" label="Latency ms" placeholder="250" value={form.latencyMs} onChange={setField('latencyMs')} fullWidth />
-                <TextField size="small" label="TTL ms" placeholder="60000" value={form.ttlMs} onChange={setField('ttlMs')} fullWidth />
+                <TextField size="small" label={uiText('Drop prob (0–1)', '断开连接概率（0–1）')} placeholder="0.2" value={form.dropProbability} onChange={setField('dropProbability')} fullWidth />
+                <TextField size="small" label={uiText('Latency ms', '延迟（毫秒）')} placeholder="250" value={form.latencyMs} onChange={setField('latencyMs')} fullWidth />
+                <TextField size="small" label={uiText('TTL ms', '有效期（毫秒）')} placeholder="60000" value={form.ttlMs} onChange={setField('ttlMs')} fullWidth />
               </Box>
               {/* Row 2: body corruption + slow response */}
               <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                <TextField size="small" label="Truncate body (0–1)" placeholder="0.5" value={form.truncateBodyAtFraction} onChange={setField('truncateBodyAtFraction')} fullWidth />
+                <TextField size="small" label={uiText('Truncate body (0–1)', '响应体截断比例（0–1）')} placeholder="0.5" value={form.truncateBodyAtFraction} onChange={setField('truncateBodyAtFraction')} fullWidth />
                 <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', pl: 1 }}>
                   <FormControlLabel
                     control={<Switch size="small" checked={form.malformedBody} onChange={setFormToggle('malformedBody')} />}
-                    label="Malformed body"
+                    label={uiText('Malformed body', '损坏响应体')}
                   />
                 </Box>
-                <TextField size="small" label="Slow chunk bytes" placeholder="64" value={form.slowResponseChunkSize} onChange={setField('slowResponseChunkSize')} fullWidth />
-                <TextField size="small" label="Slow chunk delay ms" placeholder="500" value={form.slowResponseChunkDelayMs} onChange={setField('slowResponseChunkDelayMs')} fullWidth />
+                <TextField size="small" label={uiText('Slow chunk bytes', '分块大小（字节）')} placeholder="64" value={form.slowResponseChunkSize} onChange={setField('slowResponseChunkSize')} fullWidth />
+                <TextField size="small" label={uiText('Slow chunk delay ms', '块间延迟（毫秒）')} placeholder="500" value={form.slowResponseChunkDelayMs} onChange={setField('slowResponseChunkDelayMs')} fullWidth />
               </Box>
               {/* Row 3: quota (rate limit) */}
               <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                <TextField size="small" label="Quota name" placeholder="api-quota" value={form.quotaName} onChange={setField('quotaName')} fullWidth />
-                <TextField size="small" label="Quota limit" placeholder="100" value={form.quotaLimit} onChange={setField('quotaLimit')} fullWidth />
-                <TextField size="small" label="Quota window ms" placeholder="60000" value={form.quotaWindowMillis} onChange={setField('quotaWindowMillis')} fullWidth />
-                <TextField size="small" label="Quota error status" placeholder="429" value={form.quotaErrorStatus} onChange={setField('quotaErrorStatus')} fullWidth />
+                <TextField size="small" label={uiText('Quota name', '配额名称')} placeholder="api-quota" value={form.quotaName} onChange={setField('quotaName')} fullWidth />
+                <TextField size="small" label={uiText('Quota limit', '配额上限')} placeholder="100" value={form.quotaLimit} onChange={setField('quotaLimit')} fullWidth />
+                <TextField size="small" label={uiText('Quota window ms', '配额统计窗口（毫秒）')} placeholder="60000" value={form.quotaWindowMillis} onChange={setField('quotaWindowMillis')} fullWidth />
+                <TextField size="small" label={uiText('Quota error status', '超出配额时的状态码')} placeholder="429" value={form.quotaErrorStatus} onChange={setField('quotaErrorStatus')} fullWidth />
               </Box>
               {/* Row 4: count/time windows + degradation + seed */}
               <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                <TextField size="small" label="Seed" placeholder="42" value={form.seed} onChange={setField('seed')} fullWidth />
-                <TextField size="small" label="Succeed first" placeholder="5" value={form.succeedFirst} onChange={setField('succeedFirst')} fullWidth />
-                <TextField size="small" label="Fail count" placeholder="10" value={form.failRequestCount} onChange={setField('failRequestCount')} fullWidth />
-                <TextField size="small" label="Outage after ms" placeholder="5000" value={form.outageAfterMillis} onChange={setField('outageAfterMillis')} fullWidth />
-                <TextField size="small" label="Outage duration ms" placeholder="30000" value={form.outageDurationMillis} onChange={setField('outageDurationMillis')} fullWidth />
-                <TextField size="small" label="Degradation ramp ms" placeholder="60000" value={form.degradationRampMillis} onChange={setField('degradationRampMillis')} fullWidth />
+                <TextField size="small" label={uiText('Seed', '随机种子')} placeholder="42" value={form.seed} onChange={setField('seed')} fullWidth />
+                <TextField size="small" label={uiText('Succeed first', '先成功的请求数')} placeholder="5" value={form.succeedFirst} onChange={setField('succeedFirst')} fullWidth />
+                <TextField size="small" label={uiText('Fail count', '失败次数')} placeholder="10" value={form.failRequestCount} onChange={setField('failRequestCount')} fullWidth />
+                <TextField size="small" label={uiText('Outage after ms', '多久后开始中断（毫秒）')} placeholder="5000" value={form.outageAfterMillis} onChange={setField('outageAfterMillis')} fullWidth />
+                <TextField size="small" label={uiText('Outage duration ms', '中断时长（毫秒）')} placeholder="30000" value={form.outageDurationMillis} onChange={setField('outageDurationMillis')} fullWidth />
+                <TextField size="small" label={uiText('Degradation ramp ms', '逐步降级时长（毫秒）')} placeholder="60000" value={form.degradationRampMillis} onChange={setField('degradationRampMillis')} fullWidth />
               </Box>
               {/* Row 5: GraphQL */}
               <Box sx={{ ...CHAOS_GRID, mt: 0.5 }}>
                 <FormControlLabel
                   control={<Switch size="small" checked={form.graphqlErrors} onChange={setFormToggle('graphqlErrors')} />}
-                  label="GraphQL errors"
+                  label={uiText('GraphQL errors', 'GraphQL 错误')}
                 />
                 {form.graphqlErrors && (
                   <>
-                    <TextField size="small" label="Error message" placeholder="Internal error" value={form.graphqlErrorMessage} onChange={setField('graphqlErrorMessage')} fullWidth />
-                    <TextField size="small" label="Error code" placeholder="INTERNAL_ERROR" value={form.graphqlErrorCode} onChange={setField('graphqlErrorCode')} fullWidth />
+                    <TextField size="small" label={uiText('Error message', '错误消息')} placeholder="Internal error" value={form.graphqlErrorMessage} onChange={setField('graphqlErrorMessage')} fullWidth />
+                    <TextField size="small" label={uiText('Error code', '错误码')} placeholder="INTERNAL_ERROR" value={form.graphqlErrorCode} onChange={setField('graphqlErrorCode')} fullWidth />
                     <FormControlLabel
                       control={<Switch size="small" checked={form.graphqlNullifyData} onChange={setFormToggle('graphqlNullifyData')} />}
-                      label="Nullify data"
+                      label={uiText('Nullify data', '将 data 设为 null')}
                     />
                   </>
                 )}
               </Box>
               <Box sx={{ display: 'flex', mt: 0.5 }}>
                 <Button variant="contained" size="small" disabled={busy} onClick={handleRegister} sx={{ ml: 'auto' }}>
-                  Register
+                  {uiText('Register', '添加')}
                 </Button>
               </Box>
             </Paper>
@@ -1807,7 +1807,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
             {/* Active registrations */}
             {hosts.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                No service-scoped chaos registered.
+                {uiText('No service-scoped chaos registered.', '尚未配置服务故障。')}
               </Typography>
             ) : (
               <Box>
@@ -1826,13 +1826,13 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                           ))}
                         </Box>
                         {ttl != null && (
-                          <Chip size="small" color="warning" label={`auto-revert in ${formatTtl(ttl)}`} />
+                          <Chip size="small" color="warning" label={uiText(`auto-revert in ${formatTtl(ttl)}`, `${formatTtl(ttl)}后自动撤销`)} />
                         )}
-                        <Tooltip title="Edit chaos profile for this host">
+                        <Tooltip title={uiText('Edit chaos profile for this host', '编辑此主机的故障配置')}>
                           <span>
                             <IconButton
                               size="small"
-                              aria-label={`Edit chaos for ${host}`}
+                              aria-label={uiText(`Edit chaos for ${host}`, `编辑 ${host} 的故障配置`)}
                               disabled={busy}
                               onClick={() => isEditing ? handleCancelEdit() : handleStartEdit(host)}
                             >
@@ -1840,11 +1840,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                             </IconButton>
                           </span>
                         </Tooltip>
-                        <Tooltip title="Remove chaos for this host">
+                        <Tooltip title={uiText('Remove chaos for this host', '移除此主机的故障配置')}>
                           <span>
                             <IconButton
                               size="small"
-                              aria-label={`Remove chaos for ${host}`}
+                              aria-label={uiText(`Remove chaos for ${host}`, `移除 ${host} 的故障配置`)}
                               disabled={busy}
                               onClick={() => void runAction(() => removeServiceChaos(connectionParams, host))}
                             >
@@ -1854,63 +1854,63 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                         </Tooltip>
                       </Box>
                       {isEditing && (
-                        <Box role="group" aria-label={`Edit chaos profile for ${host}`} sx={{ py: 0.75, pl: 2, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
+                        <Box role="group" aria-label={uiText(`Edit chaos profile for ${host}`, `编辑 ${host} 的故障配置`)} sx={{ py: 0.75, pl: 2, bgcolor: 'action.hover', borderBottom: '1px solid', borderColor: 'divider' }}>
                           {/* Edit row 1: core fault fields */}
                           <Box sx={CHAOS_GRID}>
-                            <TextField size="small" label="Error status" value={editForm.errorStatus} onChange={setEditField('errorStatus')} fullWidth />
-                            <TextField size="small" label="Error prob (0–1)" value={editForm.errorProbability} onChange={setEditField('errorProbability')} fullWidth />
+                            <TextField size="small" label={uiText('Error status', '错误状态码')} value={editForm.errorStatus} onChange={setEditField('errorStatus')} fullWidth />
+                            <TextField size="small" label={uiText('Error prob (0–1)', '错误概率（0–1）')} value={editForm.errorProbability} onChange={setEditField('errorProbability')} fullWidth />
                             <TextField size="small" label="Retry-After" value={editForm.retryAfter} onChange={setEditField('retryAfter')} fullWidth />
-                            <TextField size="small" label="Drop prob (0–1)" value={editForm.dropProbability} onChange={setEditField('dropProbability')} fullWidth />
-                            <TextField size="small" label="Latency ms" value={editForm.latencyMs} onChange={setEditField('latencyMs')} fullWidth />
+                            <TextField size="small" label={uiText('Drop prob (0–1)', '断开连接概率（0–1）')} value={editForm.dropProbability} onChange={setEditField('dropProbability')} fullWidth />
+                            <TextField size="small" label={uiText('Latency ms', '延迟（毫秒）')} value={editForm.latencyMs} onChange={setEditField('latencyMs')} fullWidth />
                           </Box>
                           {/* Edit row 2: body corruption + slow response */}
                           <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                            <TextField size="small" label="Truncate body (0–1)" value={editForm.truncateBodyAtFraction} onChange={setEditField('truncateBodyAtFraction')} fullWidth />
+                            <TextField size="small" label={uiText('Truncate body (0–1)', '响应体截断比例（0–1）')} value={editForm.truncateBodyAtFraction} onChange={setEditField('truncateBodyAtFraction')} fullWidth />
                             <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', pl: 1 }}>
                               <FormControlLabel
                                 control={<Switch size="small" checked={editForm.malformedBody} onChange={setEditToggle('malformedBody')} />}
-                                label="Malformed body"
+                                label={uiText('Malformed body', '损坏响应体')}
                               />
                             </Box>
-                            <TextField size="small" label="Slow chunk bytes" value={editForm.slowResponseChunkSize} onChange={setEditField('slowResponseChunkSize')} fullWidth />
-                            <TextField size="small" label="Slow chunk delay ms" value={editForm.slowResponseChunkDelayMs} onChange={setEditField('slowResponseChunkDelayMs')} fullWidth />
+                            <TextField size="small" label={uiText('Slow chunk bytes', '分块大小（字节）')} value={editForm.slowResponseChunkSize} onChange={setEditField('slowResponseChunkSize')} fullWidth />
+                            <TextField size="small" label={uiText('Slow chunk delay ms', '块间延迟（毫秒）')} value={editForm.slowResponseChunkDelayMs} onChange={setEditField('slowResponseChunkDelayMs')} fullWidth />
                           </Box>
                           {/* Edit row 3: quota */}
                           <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                            <TextField size="small" label="Quota name" value={editForm.quotaName} onChange={setEditField('quotaName')} fullWidth />
-                            <TextField size="small" label="Quota limit" value={editForm.quotaLimit} onChange={setEditField('quotaLimit')} fullWidth />
-                            <TextField size="small" label="Quota window ms" value={editForm.quotaWindowMillis} onChange={setEditField('quotaWindowMillis')} fullWidth />
-                            <TextField size="small" label="Quota error status" value={editForm.quotaErrorStatus} onChange={setEditField('quotaErrorStatus')} fullWidth />
+                            <TextField size="small" label={uiText('Quota name', '配额名称')} value={editForm.quotaName} onChange={setEditField('quotaName')} fullWidth />
+                            <TextField size="small" label={uiText('Quota limit', '配额上限')} value={editForm.quotaLimit} onChange={setEditField('quotaLimit')} fullWidth />
+                            <TextField size="small" label={uiText('Quota window ms', '配额统计窗口（毫秒）')} value={editForm.quotaWindowMillis} onChange={setEditField('quotaWindowMillis')} fullWidth />
+                            <TextField size="small" label={uiText('Quota error status', '超出配额时的状态码')} value={editForm.quotaErrorStatus} onChange={setEditField('quotaErrorStatus')} fullWidth />
                           </Box>
                           {/* Edit row 4: count/time windows + degradation + seed */}
                           <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                            <TextField size="small" label="Seed" value={editForm.seed} onChange={setEditField('seed')} fullWidth />
-                            <TextField size="small" label="Succeed first" value={editForm.succeedFirst} onChange={setEditField('succeedFirst')} fullWidth />
-                            <TextField size="small" label="Fail count" value={editForm.failRequestCount} onChange={setEditField('failRequestCount')} fullWidth />
-                            <TextField size="small" label="Outage after ms" value={editForm.outageAfterMillis} onChange={setEditField('outageAfterMillis')} fullWidth />
-                            <TextField size="small" label="Outage duration ms" value={editForm.outageDurationMillis} onChange={setEditField('outageDurationMillis')} fullWidth />
-                            <TextField size="small" label="Degradation ramp ms" value={editForm.degradationRampMillis} onChange={setEditField('degradationRampMillis')} fullWidth />
+                            <TextField size="small" label={uiText('Seed', '随机种子')} value={editForm.seed} onChange={setEditField('seed')} fullWidth />
+                            <TextField size="small" label={uiText('Succeed first', '先成功的请求数')} value={editForm.succeedFirst} onChange={setEditField('succeedFirst')} fullWidth />
+                            <TextField size="small" label={uiText('Fail count', '失败次数')} value={editForm.failRequestCount} onChange={setEditField('failRequestCount')} fullWidth />
+                            <TextField size="small" label={uiText('Outage after ms', '多久后开始中断（毫秒）')} value={editForm.outageAfterMillis} onChange={setEditField('outageAfterMillis')} fullWidth />
+                            <TextField size="small" label={uiText('Outage duration ms', '中断时长（毫秒）')} value={editForm.outageDurationMillis} onChange={setEditField('outageDurationMillis')} fullWidth />
+                            <TextField size="small" label={uiText('Degradation ramp ms', '逐步降级时长（毫秒）')} value={editForm.degradationRampMillis} onChange={setEditField('degradationRampMillis')} fullWidth />
                           </Box>
                           {/* Edit row 5: GraphQL */}
                           <Box sx={{ ...CHAOS_GRID, mt: 0.5 }}>
                             <FormControlLabel
                               control={<Switch size="small" checked={editForm.graphqlErrors} onChange={setEditToggle('graphqlErrors')} />}
-                              label="GraphQL errors"
+                              label={uiText('GraphQL errors', 'GraphQL 错误')}
                             />
                             {editForm.graphqlErrors && (
                               <>
-                                <TextField size="small" label="Error message" value={editForm.graphqlErrorMessage} onChange={setEditField('graphqlErrorMessage')} fullWidth />
-                                <TextField size="small" label="Error code" value={editForm.graphqlErrorCode} onChange={setEditField('graphqlErrorCode')} fullWidth />
+                                <TextField size="small" label={uiText('Error message', '错误消息')} value={editForm.graphqlErrorMessage} onChange={setEditField('graphqlErrorMessage')} fullWidth />
+                                <TextField size="small" label={uiText('Error code', '错误码')} value={editForm.graphqlErrorCode} onChange={setEditField('graphqlErrorCode')} fullWidth />
                                 <FormControlLabel
                                   control={<Switch size="small" checked={editForm.graphqlNullifyData} onChange={setEditToggle('graphqlNullifyData')} />}
-                                  label="Nullify data"
+                                  label={uiText('Nullify data', '将 data 设为 null')}
                                 />
                               </>
                             )}
                           </Box>
                           <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                            <Button size="small" variant="contained" disabled={busy} onClick={handleApplyEdit}>Apply</Button>
-                            <Button size="small" onClick={handleCancelEdit}>Cancel</Button>
+                            <Button size="small" variant="contained" disabled={busy} onClick={handleApplyEdit}>{uiText('Apply', '应用')}</Button>
+                            <Button size="small" onClick={handleCancelEdit}>{uiText('Cancel', '取消')}</Button>
                           </Box>
                         </Box>
                       )}
@@ -1930,11 +1930,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           onClick={() => setGrpcPanelExpanded((v) => !v)}
         >
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            gRPC Chaos
+            {uiText('gRPC Chaos', 'gRPC 故障注入')}
           </Typography>
-          <Chip size="small" label={`${grpcCombinedActiveCount} active`} color={grpcCombinedActiveCount > 0 ? 'warning' : 'default'} variant="outlined" />
+          <Chip size="small" label={uiText(`${grpcCombinedActiveCount} active`, `${grpcCombinedActiveCount} 项生效中`)} color={grpcCombinedActiveCount > 0 ? 'warning' : 'default'} variant="outlined" />
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Clear all gRPC chaos: fault injection and health-status overrides">
+          <Tooltip title={uiText('Clear all gRPC chaos: fault injection and health-status overrides', '清空所有 gRPC 故障配置和健康状态覆盖')}>
             <span>
               <Button
                 size="small"
@@ -1944,9 +1944,9 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={(e) => {
                   e.stopPropagation();
                   setConfirm({
-                    title: 'Clear all gRPC chaos?',
-                    message: `This removes all gRPC fault injection profiles and health-status overrides (${grpcCombinedActiveCount} active). This cannot be undone.`,
-                    confirmLabel: 'Clear gRPC chaos',
+                    title: uiText('Clear all gRPC chaos?', '清空所有 gRPC 故障配置？'),
+                    message: uiText(`This removes all gRPC fault injection profiles and health-status overrides (${grpcCombinedActiveCount} active). This cannot be undone.`, `此操作会移除全部 gRPC 故障配置和健康状态覆盖（${grpcCombinedActiveCount} 项生效中），且无法撤销。`),
+                    confirmLabel: uiText('Clear gRPC chaos', '清空 gRPC 故障配置'),
                     onConfirm: () => {
                       // Clear both fault injection and health overrides so the section fully empties
                       // (parity with the HTTP/TCP panels); otherwise the "active" badge stays non-zero.
@@ -1960,11 +1960,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   });
                 }}
               >
-                Clear gRPC
+                {uiText('Clear gRPC', '清空 gRPC 故障配置')}
               </Button>
             </span>
           </Tooltip>
-          <IconButton size="small" aria-label={grpcPanelExpanded ? 'Collapse gRPC chaos' : 'Expand gRPC chaos'}>
+          <IconButton size="small" aria-label={grpcPanelExpanded ? uiText('Collapse gRPC chaos', '收起 gRPC 故障配置') : uiText('Expand gRPC chaos', '展开 gRPC 故障配置')}>
             {grpcPanelExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </Box>
@@ -1978,26 +1978,24 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={() => setGrpcHealthExpanded((v) => !v)}
               >
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Health Status
+                  {uiText('Health Status', '健康状态')}
                 </Typography>
-                <Chip size="small" label={`${grpcServices.length} services`} variant="outlined" />
+                <Chip size="small" label={uiText(`${grpcServices.length} services`, `${grpcServices.length} 个服务`)} variant="outlined" />
                 <Box sx={{ flex: 1 }} />
-                <IconButton size="small" aria-label={grpcHealthExpanded ? 'Collapse gRPC health' : 'Expand gRPC health'}>
+                <IconButton size="small" aria-label={grpcHealthExpanded ? uiText('Collapse gRPC health', '收起 gRPC 健康状态') : uiText('Expand gRPC health', '展开 gRPC 健康状态')}>
                   {grpcHealthExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                 </IconButton>
               </Box>
               <Collapse in={grpcHealthExpanded}>
                 <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Force a service&apos;s gRPC health-check response (e.g. NOT_SERVING) to simulate an
-                    unhealthy or degraded service — exercising how clients and orchestrators
-                    (Kubernetes readiness/liveness probes) react to a failing dependency.
+                    {uiText('Force a service\'s gRPC health-check response (e.g. NOT_SERVING) to simulate an unhealthy or degraded service — exercising how clients and orchestrators (Kubernetes readiness/liveness probes) react to a failing dependency.', '强制服务的 gRPC 健康检查返回指定状态（如 NOT_SERVING），模拟服务异常或降级，观察客户端和 Kubernetes 就绪或存活探针如何响应。')}
                   </Typography>
                   {/* Set status form */}
                   <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                     <TextField
                       size="small"
-                      label="Service name"
+                      label={uiText('Service name', '服务名称')}
                       placeholder="my.grpc.Service"
                       value={grpcNewService}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => setGrpcNewService(e.target.value)}
@@ -2014,22 +2012,22 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                       ))}
                     </Select>
                     <Button size="small" variant="contained" disabled={busy || !grpcNewService.trim()} onClick={handleSetGrpcHealth}>
-                      Set Status
+                      {uiText('Set Status', '设置状态')}
                     </Button>
                   </Box>
                   {/* Service list */}
                   {grpcServices.length === 0 ? (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      No gRPC health overrides set.
+                      {uiText('No gRPC health overrides set.', '尚未覆盖任何 gRPC 健康状态。')}
                     </Typography>
                   ) : (
                     <TableContainer>
                       <Table size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Service</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell align="right">Actions</TableCell>
+                            <TableCell>{uiText('Service', '服务')}</TableCell>
+                            <TableCell>{uiText('Status', '状态')}</TableCell>
+                            <TableCell align="right">{uiText('Actions', '操作')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -2047,11 +2045,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                                 />
                               </TableCell>
                               <TableCell align="right">
-                                <Tooltip title="Reset health override">
+                                <Tooltip title={uiText('Reset health override', '恢复健康检查状态')}>
                                   <span>
                                     <IconButton
                                       size="small"
-                                      aria-label={`Reset health for ${svc}`}
+                                      aria-label={uiText(`Reset health for ${svc}`, `恢复 ${svc} 的健康检查状态`)}
                                       disabled={busy}
                                       onClick={() => handleResetGrpcHealth(svc)}
                                     >
@@ -2077,27 +2075,26 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={() => setGrpcFaultExpanded((v) => !v)}
               >
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Fault Injection
+                  {uiText('Fault Injection', '故障注入')}
                 </Typography>
-                <Chip size="small" label={`${grpcChaosServices.length} services`} color={grpcChaosServices.length > 0 ? 'warning' : 'default'} variant="outlined" />
+                <Chip size="small" label={uiText(`${grpcChaosServices.length} services`, `${grpcChaosServices.length} 个服务`)} color={grpcChaosServices.length > 0 ? 'warning' : 'default'} variant="outlined" />
                 <Box sx={{ flex: 1 }} />
-                <IconButton size="small" aria-label={grpcFaultExpanded ? 'Collapse gRPC fault injection' : 'Expand gRPC fault injection'}>
+                <IconButton size="small" aria-label={grpcFaultExpanded ? uiText('Collapse gRPC fault injection', '收起 gRPC 故障注入') : uiText('Expand gRPC fault injection', '展开 gRPC 故障注入')}>
                   {grpcFaultExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                 </IconButton>
               </Box>
               <Collapse in={grpcFaultExpanded} unmountOnExit>
                 <Box sx={{ mt: 1 }}>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Inject gRPC status errors (UNAVAILABLE, DEADLINE_EXCEEDED, RESOURCE_EXHAUSTED, &hellip;) and
-                    latency on matched RPC calls &mdash; distinct from the health-check status above.
+                    {uiText('Inject gRPC status errors (UNAVAILABLE, DEADLINE_EXCEEDED, RESOURCE_EXHAUSTED, …) and latency on matched RPC calls — distinct from the health-check status above.', '对匹配的 RPC 调用注入延迟或 gRPC 状态错误，例如 UNAVAILABLE、DEADLINE_EXCEEDED 和 RESOURCE_EXHAUSTED。此配置单独作用于 RPC 调用。')}
                   </Typography>
 
                   {/* gRPC Chaos Register form */}
                   <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
-                    <Typography variant="caption" color="text.secondary">Register gRPC chaos for a service</Typography>
+                    <Typography variant="caption" color="text.secondary">{uiText('Register gRPC chaos for a service', '为服务配置 gRPC 故障')}</Typography>
                     {/* Row 1: core fields */}
                     <Box sx={{ ...CHAOS_GRID, mt: 0.75 }}>
-                      <TextField size="small" label="Service" placeholder="my.grpc.Service" value={grpcChaosForm.service} onChange={setGrpcChaosField('service')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegisterGrpcChaos(); }} fullWidth />
+                      <TextField size="small" label={uiText('Service', '服务')} placeholder="my.grpc.Service" value={grpcChaosForm.service} onChange={setGrpcChaosField('service')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegisterGrpcChaos(); }} fullWidth />
                       <Select
                         size="small"
                         value={grpcChaosForm.errorStatusCode}
@@ -2108,31 +2105,31 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                           <MenuItem key={code} value={code}>{code}</MenuItem>
                         ))}
                       </Select>
-                      <TextField size="small" label="Error prob (0–1)" placeholder="0.5" value={grpcChaosForm.errorProbability} onChange={setGrpcChaosField('errorProbability')} fullWidth />
-                      <TextField size="small" label="Error message" placeholder="service unavailable" value={grpcChaosForm.errorMessage} onChange={setGrpcChaosField('errorMessage')} fullWidth />
-                      <TextField size="small" label="Latency ms" placeholder="200" value={grpcChaosForm.latencyMs} onChange={setGrpcChaosField('latencyMs')} fullWidth />
-                      <TextField size="small" label="TTL ms" placeholder="60000" value={grpcChaosForm.ttlMs} onChange={setGrpcChaosField('ttlMs')} fullWidth />
+                      <TextField size="small" label={uiText('Error prob (0–1)', '错误概率（0–1）')} placeholder="0.5" value={grpcChaosForm.errorProbability} onChange={setGrpcChaosField('errorProbability')} fullWidth />
+                      <TextField size="small" label={uiText('Error message', '错误消息')} placeholder="service unavailable" value={grpcChaosForm.errorMessage} onChange={setGrpcChaosField('errorMessage')} fullWidth />
+                      <TextField size="small" label={uiText('Latency ms', '延迟（毫秒）')} placeholder="200" value={grpcChaosForm.latencyMs} onChange={setGrpcChaosField('latencyMs')} fullWidth />
+                      <TextField size="small" label={uiText('TTL ms', '有效期（毫秒）')} placeholder="60000" value={grpcChaosForm.ttlMs} onChange={setGrpcChaosField('ttlMs')} fullWidth />
                     </Box>
                     {/* Row 2: quota + count-window + seed */}
                     <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                      <TextField size="small" label="Quota name" placeholder="rpc-quota" value={grpcChaosForm.quotaName} onChange={setGrpcChaosField('quotaName')} fullWidth />
-                      <TextField size="small" label="Quota limit" placeholder="100" value={grpcChaosForm.quotaLimit} onChange={setGrpcChaosField('quotaLimit')} fullWidth />
-                      <TextField size="small" label="Quota window ms" placeholder="60000" value={grpcChaosForm.quotaWindowMillis} onChange={setGrpcChaosField('quotaWindowMillis')} fullWidth />
-                      <TextField size="small" label="Seed" placeholder="42" value={grpcChaosForm.seed} onChange={setGrpcChaosField('seed')} fullWidth />
-                      <TextField size="small" label="Succeed first" placeholder="5" value={grpcChaosForm.succeedFirst} onChange={setGrpcChaosField('succeedFirst')} fullWidth />
-                      <TextField size="small" label="Fail count" placeholder="10" value={grpcChaosForm.failRequestCount} onChange={setGrpcChaosField('failRequestCount')} fullWidth />
+                      <TextField size="small" label={uiText('Quota name', '配额名称')} placeholder="rpc-quota" value={grpcChaosForm.quotaName} onChange={setGrpcChaosField('quotaName')} fullWidth />
+                      <TextField size="small" label={uiText('Quota limit', '配额上限')} placeholder="100" value={grpcChaosForm.quotaLimit} onChange={setGrpcChaosField('quotaLimit')} fullWidth />
+                      <TextField size="small" label={uiText('Quota window ms', '配额统计窗口（毫秒）')} placeholder="60000" value={grpcChaosForm.quotaWindowMillis} onChange={setGrpcChaosField('quotaWindowMillis')} fullWidth />
+                      <TextField size="small" label={uiText('Seed', '随机种子')} placeholder="42" value={grpcChaosForm.seed} onChange={setGrpcChaosField('seed')} fullWidth />
+                      <TextField size="small" label={uiText('Succeed first', '先成功的请求数')} placeholder="5" value={grpcChaosForm.succeedFirst} onChange={setGrpcChaosField('succeedFirst')} fullWidth />
+                      <TextField size="small" label={uiText('Fail count', '失败次数')} placeholder="10" value={grpcChaosForm.failRequestCount} onChange={setGrpcChaosField('failRequestCount')} fullWidth />
                     </Box>
                     {/* Row 3: streaming/trailer faults */}
                     <Box sx={{ ...CHAOS_GRID_WIDE, mt: 0.5 }}>
-                      <FormControlLabel control={<Switch size="small" checked={grpcChaosForm.omitGrpcStatus} onChange={setGrpcChaosToggle('omitGrpcStatus')} />} label="Omit grpc-status" />
-                      <FormControlLabel control={<Switch size="small" checked={grpcChaosForm.corruptGrpcStatus} onChange={setGrpcChaosToggle('corruptGrpcStatus')} />} label="Corrupt grpc-status" />
-                      <TextField size="small" label="Abort after N msgs" placeholder="3" value={grpcChaosForm.abortAfterMessages} onChange={setGrpcChaosField('abortAfterMessages')} fullWidth />
+                      <FormControlLabel control={<Switch size="small" checked={grpcChaosForm.omitGrpcStatus} onChange={setGrpcChaosToggle('omitGrpcStatus')} />} label={uiText('Omit grpc-status', '省略 grpc-status')} />
+                      <FormControlLabel control={<Switch size="small" checked={grpcChaosForm.corruptGrpcStatus} onChange={setGrpcChaosToggle('corruptGrpcStatus')} />} label={uiText('Corrupt grpc-status', '破坏 grpc-status')} />
+                      <TextField size="small" label={uiText('Abort after N msgs', '在指定消息数后中止')} placeholder="3" value={grpcChaosForm.abortAfterMessages} onChange={setGrpcChaosField('abortAfterMessages')} fullWidth />
                     </Box>
                     {/* Row 4: custom trailers textarea */}
                     <Box sx={{ mt: 0.5 }}>
                       <TextField
                         size="small"
-                        label="Custom trailers (key=value per line)"
+                        label={uiText('Custom trailers (key=value per line)', '自定义尾部元数据（每行一个 key=value）')}
                         placeholder={'x-debug-id=abc123\nx-retry=true'}
                         value={grpcChaosForm.customTrailers}
                         onChange={setGrpcChaosField('customTrailers')}
@@ -2144,19 +2141,18 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                     </Box>
                     <Box sx={{ display: 'flex', mt: 0.5 }}>
                       <Button variant="contained" size="small" disabled={busy} onClick={handleRegisterGrpcChaos} sx={{ ml: 'auto' }}>
-                        Register
+                        {uiText('Register', '添加')}
                       </Button>
                     </Box>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                      Note: gRPC latency is applied on the fault path — pair it with an injected
-                      fault (error status, omit/corrupt grpc-status, or abort) rather than on its own.
+                      {uiText('Note: gRPC latency is applied on the fault path — pair it with an injected fault (error status, omit/corrupt grpc-status, or abort) rather than on its own.', 'gRPC 延迟只会随故障生效。请同时配置错误状态、缺失或损坏的 grpc-status，或中止操作。')}
                     </Typography>
                   </Paper>
 
                   {/* gRPC Chaos Active registrations */}
                   {grpcChaosServices.length === 0 ? (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      No gRPC fault injection chaos registered.
+                      {uiText('No gRPC fault injection chaos registered.', '尚未配置 gRPC 故障注入。')}
                     </Typography>
                   ) : (
                     <Box>
@@ -2171,13 +2167,13 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                               ))}
                             </Box>
                             {ttl != null && (
-                              <Chip size="small" color="warning" label={`auto-revert in ${formatTtl(ttl)}`} />
+                              <Chip size="small" color="warning" label={uiText(`auto-revert in ${formatTtl(ttl)}`, `${formatTtl(ttl)}后自动撤销`)} />
                             )}
-                            <Tooltip title="Remove gRPC chaos for this service">
+                            <Tooltip title={uiText('Remove gRPC chaos for this service', '移除此服务的 gRPC 故障配置')}>
                               <span>
                                 <IconButton
                                   size="small"
-                                  aria-label={`Remove gRPC chaos for ${service}`}
+                                  aria-label={uiText(`Remove gRPC chaos for ${service}`, `移除 ${service} 的 gRPC 故障配置`)}
                                   disabled={busy}
                                   onClick={() => void runAction(() => removeGrpcChaos(connectionParams, service))}
                                 >
@@ -2205,11 +2201,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           onClick={() => setTcpExpanded((v) => !v)}
         >
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            TCP-Layer Chaos
+            {uiText('TCP-Layer Chaos', 'TCP 层故障注入')}
           </Typography>
-          <Chip size="small" label={`${tcpHosts.length} hosts`} color={tcpHosts.length > 0 ? 'warning' : 'default'} variant="outlined" />
+          <Chip size="small" label={uiText(`${tcpHosts.length} hosts`, `${tcpHosts.length} 个主机`)} color={tcpHosts.length > 0 ? 'warning' : 'default'} variant="outlined" />
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Clear all TCP chaos">
+          <Tooltip title={uiText('Clear all TCP chaos', '清空所有 TCP 故障配置')}>
             <span>
               <Button
                 size="small"
@@ -2219,31 +2215,30 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={(e) => {
                   e.stopPropagation();
                   setConfirm({
-                    title: 'Clear all TCP chaos?',
-                    message: `This removes TCP chaos profiles for all ${tcpHosts.length} registered host${tcpHosts.length === 1 ? '' : 's'}. This cannot be undone.`,
-                    confirmLabel: 'Clear TCP chaos',
+                    title: uiText('Clear all TCP chaos?', '清空所有 TCP 故障配置？'),
+                    message: uiText(`This removes TCP chaos profiles for all ${tcpHosts.length} registered host${tcpHosts.length === 1 ? '' : 's'}. This cannot be undone.`, `此操作会移除全部 ${tcpHosts.length} 个主机的 TCP 故障配置，且无法撤销。`),
+                    confirmLabel: uiText('Clear TCP chaos', '清空 TCP 故障配置'),
                     onConfirm: () => void runAction(() => clearTcpChaos(connectionParams)),
                   });
                 }}
               >
-                Clear TCP
+                {uiText('Clear TCP', '清空 TCP 故障配置')}
               </Button>
             </span>
           </Tooltip>
-          <IconButton size="small" aria-label={tcpExpanded ? 'Collapse TCP chaos' : 'Expand TCP chaos'}>
+          <IconButton size="small" aria-label={tcpExpanded ? uiText('Collapse TCP chaos', '收起 TCP 故障配置') : uiText('Expand TCP chaos', '展开 TCP 故障配置')}>
             {tcpExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </Box>
         <Collapse in={tcpExpanded} unmountOnExit>
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Register one TCP chaos profile per upstream host; faults are applied at the raw
-              byte level before HTTP decoding (latency, bandwidth, reset, timeout, etc.).
+              {uiText('Register one TCP chaos profile per upstream host; faults are applied at the raw byte level before HTTP decoding (latency, bandwidth, reset, timeout, etc.).', '每个上游主机可配置一条 TCP 故障规则，在 HTTP 解码前对原始字节流施加延迟、带宽限制、连接重置或超时。')}
             </Typography>
 
             {/* TCP Register form */}
             <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
-              <Typography variant="caption" color="text.secondary">Register TCP chaos for a host</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Register TCP chaos for a host', '为主机配置 TCP 故障')}</Typography>
               {/* Network-condition presets. Each sets exactly ONE fault: TcpChaosHandler
                   evaluates faults first-match-wins (down > reset_peer > limit_data >
                   slicer > bandwidth > latency) and silently discards the rest, so a
@@ -2259,7 +2254,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   inputProps={{ 'aria-label': 'Network condition preset' }}
                   sx={{ minWidth: 300 }}
                 >
-                  <MenuItem value="">Custom (no preset)</MenuItem>
+                  <MenuItem value="">{uiText('Custom (no preset)', '自定义（无预设）')}</MenuItem>
                   {NETWORK_PRESETS.map((preset) => (
                     <MenuItem key={preset.id} value={preset.id}>
                       {`${preset.label} — ${summarizeNetworkPreset(preset)}`}
@@ -2273,30 +2268,25 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 )}
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                Each preset sets one fault: only the highest-priority fault configured is
-                applied (down &gt; reset peer &gt; limit &gt; slicer &gt; bandwidth &gt; latency)
-                and the rest are discarded. TCP faults shape inbound request bytes only — not
-                the response — and latency is charged per read, not per round trip. There is
-                no packet-loss or jitter fault; for loss use drop-connection probability in
-                HTTP Service Chaos.
+                {uiText('Each preset sets one fault: only the highest-priority fault configured is applied (down > reset peer > limit > slicer > bandwidth > latency) and the rest are discarded. TCP faults shape inbound request bytes only — not the response — and latency is charged per read, not per round trip. There is no packet-loss or jitter fault; for loss use drop-connection probability in HTTP Service Chaos.', '每个预设只配置一种故障。配置多种故障时，仅应用优先级最高的一项：停用、重置对端、限制字节数、切分字节流、限制带宽、延迟。TCP 故障只作用于入站请求，延迟按每次读取计算。要模拟连接丢失，请设置 HTTP 故障注入中的断开连接概率。')}
               </Typography>
               <Box sx={{ ...CHAOS_GRID, mt: 0.75 }}>
-                <TextField size="small" label="Host" placeholder="upstream.svc" value={tcpForm.host} onChange={setTcpField('host')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegisterTcp(); }} fullWidth />
-                <TextField size="small" label="Latency ms" placeholder="200" value={tcpForm.latencyMs} onChange={setTcpField('latencyMs')} fullWidth />
-                <TextField size="small" label="Bandwidth B/s" placeholder="1024" value={tcpForm.bandwidthBytesPerSec} onChange={setTcpField('bandwidthBytesPerSec')} fullWidth />
-                <TextField size="small" label="Slicer bytes" placeholder="64" value={tcpForm.slicerChunkSize} onChange={setTcpField('slicerChunkSize')} fullWidth />
-                <TextField size="small" label="Limit bytes" placeholder="4096" value={tcpForm.limitDataBytes} onChange={setTcpField('limitDataBytes')} fullWidth />
-                <TextField size="small" label="TTL ms" placeholder="60000" value={tcpForm.ttlMs} onChange={setTcpField('ttlMs')} fullWidth />
+                <TextField size="small" label={uiText('Host', '主机')} placeholder="upstream.svc" value={tcpForm.host} onChange={setTcpField('host')} onKeyDown={(e) => { if (e.key === 'Enter') handleRegisterTcp(); }} fullWidth />
+                <TextField size="small" label={uiText('Latency ms', '延迟（毫秒）')} placeholder="200" value={tcpForm.latencyMs} onChange={setTcpField('latencyMs')} fullWidth />
+                <TextField size="small" label={uiText('Bandwidth B/s', '带宽（字节/秒）')} placeholder="1024" value={tcpForm.bandwidthBytesPerSec} onChange={setTcpField('bandwidthBytesPerSec')} fullWidth />
+                <TextField size="small" label={uiText('Slicer bytes', '每片字节数')} placeholder="64" value={tcpForm.slicerChunkSize} onChange={setTcpField('slicerChunkSize')} fullWidth />
+                <TextField size="small" label={uiText('Limit bytes', '字节数上限')} placeholder="4096" value={tcpForm.limitDataBytes} onChange={setTcpField('limitDataBytes')} fullWidth />
+                <TextField size="small" label={uiText('TTL ms', '有效期（毫秒）')} placeholder="60000" value={tcpForm.ttlMs} onChange={setTcpField('ttlMs')} fullWidth />
               </Box>
               <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                <FormControlLabel control={<Switch size="small" checked={tcpForm.down} onChange={setTcpToggle('down')} />} label="Down" />
-                <FormControlLabel control={<Switch size="small" checked={tcpForm.resetPeer} onChange={setTcpToggle('resetPeer')} />} label="Reset peer" />
-                <FormControlLabel control={<Switch size="small" checked={tcpForm.slowClose} onChange={setTcpToggle('slowClose')} />} label="Slow close" />
-                <FormControlLabel control={<Switch size="small" checked={tcpForm.timeout} onChange={setTcpToggle('timeout')} />} label="Timeout" />
+                <FormControlLabel control={<Switch size="small" checked={tcpForm.down} onChange={setTcpToggle('down')} />} label={uiText('Down', '停用连接')} />
+                <FormControlLabel control={<Switch size="small" checked={tcpForm.resetPeer} onChange={setTcpToggle('resetPeer')} />} label={uiText('Reset peer', '重置对端连接')} />
+                <FormControlLabel control={<Switch size="small" checked={tcpForm.slowClose} onChange={setTcpToggle('slowClose')} />} label={uiText('Slow close', '延迟关闭')} />
+                <FormControlLabel control={<Switch size="small" checked={tcpForm.timeout} onChange={setTcpToggle('timeout')} />} label={uiText('Timeout', '超时')} />
               </Box>
               <Box sx={{ display: 'flex', mt: 0.5 }}>
                 <Button variant="contained" size="small" disabled={busy} onClick={handleRegisterTcp} sx={{ ml: 'auto' }}>
-                  Register
+                  {uiText('Register', '添加')}
                 </Button>
               </Box>
             </Paper>
@@ -2304,7 +2294,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
             {/* TCP Active registrations */}
             {tcpHosts.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                No TCP-layer chaos registered.
+                {uiText('No TCP-layer chaos registered.', '尚未配置 TCP 层故障。')}
               </Typography>
             ) : (
               <Box>
@@ -2321,13 +2311,13 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                         ))}
                       </Box>
                       {ttl != null && (
-                        <Chip size="small" color="warning" label={`auto-revert in ${formatTtl(ttl)}`} />
+                        <Chip size="small" color="warning" label={uiText(`auto-revert in ${formatTtl(ttl)}`, `${formatTtl(ttl)}后自动撤销`)} />
                       )}
-                      <Tooltip title="Remove TCP chaos for this host">
+                      <Tooltip title={uiText('Remove TCP chaos for this host', '移除此主机的 TCP 故障配置')}>
                         <span>
                           <IconButton
                             size="small"
-                            aria-label={`Remove TCP chaos for ${host}`}
+                            aria-label={uiText(`Remove TCP chaos for ${host}`, `移除 ${host} 的 TCP 故障配置`)}
                             disabled={busy}
                             onClick={() => void runAction(() => removeTcpChaos(connectionParams, host))}
                           >
@@ -2351,7 +2341,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           onClick={() => setPreemptionExpanded((v) => !v)}
         >
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Preemption Simulation
+            {uiText('Preemption Simulation', '节点抢占模拟')}
           </Typography>
           <Chip
             size="small"
@@ -2360,7 +2350,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
             variant="outlined"
           />
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Uncordon: clear the preemption simulation">
+          <Tooltip title={uiText('Uncordon: clear the preemption simulation', '解除封锁并清除抢占模拟')}>
             <span>
               <Button
                 size="small"
@@ -2372,41 +2362,38 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   handleClearPreemption();
                 }}
               >
-                Clear Preemption
+                {uiText('Clear Preemption', '清除抢占模拟')}
               </Button>
             </span>
           </Tooltip>
-          <IconButton size="small" aria-label={preemptionExpanded ? 'Collapse preemption' : 'Expand preemption'}>
+          <IconButton size="small" aria-label={preemptionExpanded ? uiText('Collapse preemption', '收起抢占模拟') : uiText('Expand preemption', '展开抢占模拟')}>
             {preemptionExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </Box>
         <Collapse in={preemptionExpanded} unmountOnExit>
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Simulate a Kubernetes node drain or Spot reclamation: the server cordons itself,
-              turning away new exchanges with a 503 and/or signalling HTTP/2 clients to drain via
-              GOAWAY, while in-flight requests finish. Add a TTL to auto-uncordon after a bounded
-              window (a dead-man&apos;s switch). This is a simulation only — it never stops the server.
+              {uiText('Simulate a Kubernetes node drain or Spot reclamation: the server cordons itself, turning away new exchanges with a 503 and/or signalling HTTP/2 clients to drain via GOAWAY, while in-flight requests finish. Add a TTL to auto-uncordon after a bounded window (a dead-man\'s switch). This is a simulation only — it never stops the server.', '模拟 Kubernetes 节点排空或 Spot 实例回收。服务器会继续处理在途请求，并以 503 拒绝新交互，或通过 GOAWAY 通知 HTTP/2 客户端排空连接。设置有效期可自动解除封锁。模拟期间服务器会继续运行。')}
             </Typography>
 
             {/* Current preemption state */}
             <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Current State
+                  {uiText('Current State', '当前状态')}
                 </Typography>
                 <Chip size="small" label={preemptionData.state} color={preemptionActive ? 'warning' : 'default'} />
                 {preemptionData.mode && (
                   <Typography variant="body2" color="text.secondary">
-                    mode {preemptionData.mode}
+                    {uiText('mode', '模式')} {preemptionData.mode}
                   </Typography>
                 )}
                 <Typography variant="body2" color="text.secondary">
-                  {preemptionData.inFlight} in-flight
+                  {preemptionData.inFlight} {uiText('in-flight', '在途请求')}
                 </Typography>
                 {preemptionData.state === 'draining' && (
                   <Typography variant="body2" color="text.secondary">
-                    drain remaining {formatDuration(preemptionData.drainRemainingMillis)}
+                    {uiText('drain remaining', '剩余排空时间')} {formatDuration(preemptionData.drainRemainingMillis)}
                   </Typography>
                 )}
               </Box>
@@ -2414,7 +2401,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
 
             {/* Start form */}
             <Paper variant="outlined" sx={{ p: 1 }}>
-              <Typography variant="caption" color="text.secondary">Start a preemption simulation</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Start a preemption simulation', '启动抢占模拟')}</Typography>
               <Box sx={{ ...CHAOS_GRID, mt: 0.75 }}>
                 <Select
                   size="small"
@@ -2427,12 +2414,12 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                     <MenuItem key={m} value={m}>{m}</MenuItem>
                   ))}
                 </Select>
-                <TextField size="small" label="Drain ms" placeholder="30000" value={preemptionForm.drainMs} onChange={setPreemptionField('drainMs')} fullWidth />
-                <TextField size="small" label="TTL ms" placeholder="60000" value={preemptionForm.ttlMs} onChange={setPreemptionField('ttlMs')} fullWidth />
+                <TextField size="small" label={uiText('Drain ms', '排空等待时间（毫秒）')} placeholder="30000" value={preemptionForm.drainMs} onChange={setPreemptionField('drainMs')} fullWidth />
+                <TextField size="small" label={uiText('TTL ms', '有效期（毫秒）')} placeholder="60000" value={preemptionForm.ttlMs} onChange={setPreemptionField('ttlMs')} fullWidth />
               </Box>
               <Box sx={{ display: 'flex', mt: 0.5 }}>
                 <Button variant="contained" size="small" disabled={busy} onClick={handleStartPreemption} sx={{ ml: 'auto' }}>
-                  Start Preemption
+                  {uiText('Start Preemption', '启动抢占模拟')}
                 </Button>
               </Box>
             </Paper>
@@ -2444,7 +2431,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
         open={confirm !== null}
         title={confirm?.title ?? ''}
         message={confirm?.message ?? ''}
-        confirmLabel={confirm?.confirmLabel ?? 'Confirm'}
+        confirmLabel={confirm?.confirmLabel ?? uiText('Confirm', '确认')}
         onConfirm={() => confirm?.onConfirm()}
         onClose={() => setConfirm(null)}
       />
@@ -2456,16 +2443,16 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
           onClick={() => setExperimentsExpanded((v) => !v)}
         >
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-            Experiments
+            {uiText('Experiments', '实验')}
           </Typography>
           <Chip
             size="small"
             label={
               isExperimentActive
-                ? 'running'
+                ? uiText('running', '运行中')
                 : experimentStatus?.status === 'halted_by_auto_halt' || experimentStatus?.status === 'halted_by_slo_breach'
-                  ? 'halted'
-                  : 'idle'
+                  ? uiText('halted', '已停止')
+                  : uiText('idle', '空闲')
             }
             color={
               isExperimentActive
@@ -2488,25 +2475,24 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 handleStopExperiment();
               }}
             >
-              Stop
+              {uiText('Stop', '停止')}
             </Button>
           )}
-          <IconButton size="small" aria-label={experimentsExpanded ? 'Collapse experiments' : 'Expand experiments'}>
+          <IconButton size="small" aria-label={experimentsExpanded ? uiText('Collapse experiments', '收起实验') : uiText('Expand experiments', '展开实验')}>
             {experimentsExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
           </IconButton>
         </Box>
         <Collapse in={experimentsExpanded} unmountOnExit>
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Define a multi-stage chaos experiment: ordered stages that progress automatically,
-              each applying chaos profiles to upstream hosts for a specified duration.
+              {uiText('Define a multi-stage chaos experiment: ordered stages that progress automatically, each applying chaos profiles to upstream hosts for a specified duration.', '配置多阶段混沌实验。阶段按顺序自动运行，每个阶段在指定时间内对上游主机应用故障配置。')}
             </Typography>
 
             {/* Live status when an experiment is active or recently terminated */}
             {experimentStatus && experimentStatus.status !== 'none' && (
               <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Experiment Status
+                  {uiText('Experiment Status', '实验状态')}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, mt: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
                   {experimentStatus.name && (
@@ -2524,11 +2510,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   />
                   {experimentStatus.totalStages > 0 && (
                     <Typography variant="body2" color="text.secondary">
-                      Stage {experimentStatus.currentStageIndex + 1}/{experimentStatus.totalStages}
+                      {uiText('Stage', '阶段')} {experimentStatus.currentStageIndex + 1}/{experimentStatus.totalStages}
                     </Typography>
                   )}
                   {experimentStatus.loopIteration > 0 && (
-                    <Chip size="small" label={`loop ${experimentStatus.loopIteration}`} variant="outlined" />
+                    <Chip size="small" label={uiText(`loop ${experimentStatus.loopIteration}`, `第 ${experimentStatus.loopIteration} 轮`)} variant="outlined" />
                   )}
                   <Box sx={{ flex: 1 }} />
                   {experimentStatus.experiment && (
@@ -2537,7 +2523,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                       startIcon={<EditIcon fontSize="small" />}
                       onClick={() => loadExperimentIntoEditor(experimentStatus.experiment!)}
                     >
-                      Edit &amp; restart
+                      {uiText('Edit & restart', '编辑并重启')}
                     </Button>
                   )}
                 </Box>
@@ -2545,10 +2531,10 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   <Box sx={{ mt: 1 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography variant="caption" color="text.secondary">
-                        Stage elapsed: {formatDuration(experimentStatus.stageElapsedMillis)}
+                        {uiText('Stage elapsed:', '阶段已用时间')} {formatDuration(experimentStatus.stageElapsedMillis)}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Remaining: {formatDuration(experimentStatus.stageRemainingMillis)}
+                        {uiText('Remaining:', '剩余时间')} {formatDuration(experimentStatus.stageRemainingMillis)}
                       </Typography>
                     </Box>
                     <LinearProgress
@@ -2561,7 +2547,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                       sx={{ height: 6, borderRadius: 1 }}
                     />
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                      Total elapsed: {formatDuration(experimentStatus.totalElapsedMillis)}
+                      {uiText('Total elapsed:', '总用时')} {formatDuration(experimentStatus.totalElapsedMillis)}
                     </Typography>
                   </Box>
                 )}
@@ -2585,12 +2571,12 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                             <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                              Stage {idx + 1}
+                              {uiText('Stage', '阶段')} {idx + 1}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
                               {formatDuration(stage.durationMillis)}
                             </Typography>
-                            {active && <Chip size="small" color="warning" label="active" variant="outlined" />}
+                            {active && <Chip size="small" color="warning" label={uiText('active', '当前')} variant="outlined" />}
                           </Box>
                           {Object.entries(stage.profiles).map(([host, profile]) => (
                             <Box key={host} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
@@ -2620,11 +2606,11 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
 
             {/* Stage editor */}
             <Paper variant="outlined" sx={{ p: 1, mb: 1 }}>
-              <Typography variant="caption" color="text.secondary">Define experiment</Typography>
+              <Typography variant="caption" color="text.secondary">{uiText('Define experiment', '配置实验')}</Typography>
               <Box sx={{ display: 'flex', gap: 1, mt: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
                 <TextField
                   size="small"
-                  label="Experiment name"
+                  label={uiText('Experiment name', '实验名称')}
                   placeholder="latency-then-errors"
                   value={expName}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setExpName(e.target.value)}
@@ -2632,7 +2618,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 />
                 <FormControlLabel
                   control={<Switch size="small" checked={expLoop} onChange={(_e, checked) => setExpLoop(checked)} />}
-                  label="Loop"
+                  label={uiText('Loop', '循环')}
                 />
               </Box>
 
@@ -2640,13 +2626,13 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 <Paper key={stage.id} variant="outlined" sx={{ px: 0.75, pt: 1, pb: 0.75, mt: 0.75, bgcolor: 'action.hover' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.25 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      Stage {idx + 1}
+                      {uiText('Stage', '阶段')} {idx + 1}
                     </Typography>
                     <Box sx={{ flex: 1 }} />
                     {expStages.length > 1 && (
                       <IconButton
                         size="small"
-                        aria-label={`Remove stage ${idx + 1}`}
+                        aria-label={uiText(`Remove stage ${idx + 1}`, `移除第 ${idx + 1} 阶段`)}
                         onClick={() => removeExpStage(idx)}
                       >
                         <DeleteIcon fontSize="small" />
@@ -2654,12 +2640,12 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                     )}
                   </Box>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                    <TextField size="small" label="Duration ms" placeholder="10000" value={stage.durationMs} onChange={setExpStageField(idx, 'durationMs')} sx={responsiveWidth(120)} />
-                    <TextField size="small" label="Host" placeholder="upstream.svc" value={stage.host} onChange={setExpStageField(idx, 'host')} sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 160 } }} />
-                    <TextField size="small" label="Error status" placeholder="503" value={stage.errorStatus} onChange={setExpStageField(idx, 'errorStatus')} sx={responsiveWidth(120)} />
-                    <TextField size="small" label="Error prob (0-1)" placeholder="1.0" value={stage.errorProbability} onChange={setExpStageField(idx, 'errorProbability')} sx={responsiveWidth(140)} />
-                    <TextField size="small" label="Latency ms" placeholder="500" value={stage.latencyMs} onChange={setExpStageField(idx, 'latencyMs')} sx={responsiveWidth(120)} />
-                    <TextField size="small" label="Drop prob (0-1)" placeholder="0.2" value={stage.dropProbability} onChange={setExpStageField(idx, 'dropProbability')} sx={responsiveWidth(140)} />
+                    <TextField size="small" label={uiText('Duration ms', '持续时间（毫秒）')} placeholder="10000" value={stage.durationMs} onChange={setExpStageField(idx, 'durationMs')} sx={responsiveWidth(120)} />
+                    <TextField size="small" label={uiText('Host', '主机')} placeholder="upstream.svc" value={stage.host} onChange={setExpStageField(idx, 'host')} sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 160 } }} />
+                    <TextField size="small" label={uiText('Error status', '错误状态码')} placeholder="503" value={stage.errorStatus} onChange={setExpStageField(idx, 'errorStatus')} sx={responsiveWidth(120)} />
+                    <TextField size="small" label={uiText('Error prob (0-1)', '错误概率（0–1）')} placeholder="1.0" value={stage.errorProbability} onChange={setExpStageField(idx, 'errorProbability')} sx={responsiveWidth(140)} />
+                    <TextField size="small" label={uiText('Latency ms', '延迟（毫秒）')} placeholder="500" value={stage.latencyMs} onChange={setExpStageField(idx, 'latencyMs')} sx={responsiveWidth(120)} />
+                    <TextField size="small" label={uiText('Drop prob (0-1)', '断开连接概率（0–1）')} placeholder="0.2" value={stage.dropProbability} onChange={setExpStageField(idx, 'dropProbability')} sx={responsiveWidth(140)} />
                   </Box>
                 </Paper>
               ))}
@@ -2670,7 +2656,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   startIcon={<AddIcon fontSize="small" />}
                   onClick={addExpStage}
                 >
-                  Add Stage
+                  {uiText('Add Stage', '添加阶段')}
                 </Button>
                 <Button
                   size="small"
@@ -2678,7 +2664,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   disabled={busy}
                   onClick={handleSaveProfile}
                 >
-                  Save as Profile
+                  {uiText('Save as Profile', '保存为配置')}
                 </Button>
                 <Button
                   variant="contained"
@@ -2687,19 +2673,18 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                   disabled={busy}
                   onClick={handleStartExperiment}
                 >
-                  Start Experiment
+                  {uiText('Start Experiment', '启动实验')}
                 </Button>
               </Box>
 
               {/* ADV3: saved chaos profile library */}
               <Box sx={{ mt: 1.5 }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Saved Profiles
+                  {uiText('Saved Profiles', '已保存的配置')}
                 </Typography>
                 {savedProfiles.length === 0 ? (
                   <Typography variant="body2" color="text.secondary">
-                    No saved profiles. Use &quot;Save as Profile&quot; to store the current
-                    experiment definition under its name for one-click re-use.
+                    {uiText('No saved profiles. Use "Save as Profile" to store the current experiment definition under its name for one-click re-use.', '暂无已保存的配置。点击「保存为配置」，按当前实验名称保存，之后可直接复用。')}
                   </Typography>
                 ) : (
                   <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
@@ -2711,7 +2696,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                         onClick={() => handleApplyProfile(name)}
                         onDelete={() => handleDeleteProfile(name)}
                         deleteIcon={<DeleteIcon fontSize="small" />}
-                        title={`Apply saved profile "${name}" (click) or delete (x)`}
+                        title={uiText(`Apply saved profile "${name}" (click) or delete (x)`, `点击应用已保存的配置「${name}」，点击 × 删除`)}
                         disabled={busy}
                       />
                     ))}
@@ -2727,17 +2712,17 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 onClick={() => setHistoryExpanded((v) => !v)}
               >
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  History
+                  {uiText('History', '历史记录')}
                 </Typography>
                 {historyData.length > 0 && (
-                  <Chip size="small" label={`${historyData.length} run${historyData.length === 1 ? '' : 's'}`} variant="outlined" />
+                  <Chip size="small" label={uiText(`${historyData.length} run${historyData.length === 1 ? '' : 's'}`, `${historyData.length} 次运行`)} variant="outlined" />
                 )}
                 <Box sx={{ flex: 1 }} />
-                <Tooltip title="Refresh history">
+                <Tooltip title={uiText('Refresh history', '刷新历史记录')}>
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="Refresh history"
+                      aria-label={uiText('Refresh history', '刷新历史记录')}
                       disabled={historyLoading}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -2751,7 +2736,7 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                     </IconButton>
                   </span>
                 </Tooltip>
-                <IconButton size="small" aria-label={historyExpanded ? 'Collapse history' : 'Expand history'}>
+                <IconButton size="small" aria-label={historyExpanded ? uiText('Collapse history', '收起历史记录') : uiText('Expand history', '展开历史记录')}>
                   {historyExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                 </IconButton>
               </Box>
@@ -2759,17 +2744,17 @@ export default function ServiceChaosPanel({ connectionParams }: ServiceChaosPane
                 <Box sx={{ mt: 1 }}>
                   {historyData.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
-                      {historyLoading ? 'Loading history…' : 'No past experiment runs.'}
+                      {historyLoading ? uiText('Loading history…', '正在加载历史记录…') : uiText('No past experiment runs.', '暂无实验运行记录。')}
                     </Typography>
                   ) : (
                     <TableContainer>
                       <Table size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Status</TableCell>
-                            <TableCell>Verdict</TableCell>
-                            <TableCell align="right">Terminated</TableCell>
+                            <TableCell>{uiText('Name', '名称')}</TableCell>
+                            <TableCell>{uiText('Status', '状态')}</TableCell>
+                            <TableCell>{uiText('Verdict', '判定')}</TableCell>
+                            <TableCell align="right">{uiText('Terminated', '结束时间')}</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>

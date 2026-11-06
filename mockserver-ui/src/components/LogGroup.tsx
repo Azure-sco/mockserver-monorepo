@@ -13,6 +13,7 @@ import { entryToText } from '../lib/logEntryText';
 import CopyButton from './CopyButton';
 import { monospaceFontFamily } from '../theme';
 import { isExplainableGroup } from '../lib/explainRequest';
+import { uiText } from '../lib/dashboardLocale';
 
 interface LogGroupProps {
   group: LogGroupType;
@@ -70,7 +71,7 @@ function LogGroup({ group, open: openProp, onToggleOpen, onExplain }: LogGroupPr
         <IconButton
           size="small"
           onClick={handleToggleOpen}
-          aria-label={open ? 'Collapse' : 'Expand'}
+          aria-label={open ? uiText('Collapse', '折叠') : uiText('Expand', '展开')}
           aria-expanded={open}
           sx={{ color: 'rgb(222, 147, 95)', mt: 0.25 }}
         >
@@ -81,7 +82,7 @@ function LogGroup({ group, open: openProp, onToggleOpen, onExplain }: LogGroupPr
             <LogEntry entry={group.group.value} />
           </Box>
           {correlationId && (
-            <Tooltip title={`Correlation ID: ${correlationId} (click to copy)`}>
+            <Tooltip title={uiText(`Correlation ID: ${correlationId} (click to copy)`, `关联 ID ${correlationId}（点击复制）`)}>
               <Chip
                 label={correlationId.substring(0, 8)}
                 size="small"
@@ -95,7 +96,7 @@ function LogGroup({ group, open: openProp, onToggleOpen, onExplain }: LogGroupPr
             </Tooltip>
           )}
           {correlationId && explainable && onExplain && (
-            <Tooltip describeChild title="Explain which expectation would serve this request now, and why others were skipped">
+            <Tooltip describeChild title={uiText('Explain which expectation would serve this request now, and why others were skipped', '查看当前会命中哪条规则，以及其他规则未命中的原因')}>
               <Button
                 size="small"
                 variant="outlined"
@@ -105,7 +106,7 @@ function LogGroup({ group, open: openProp, onToggleOpen, onExplain }: LogGroupPr
                 }}
                 sx={{ typography: 'caption', height: 18, minWidth: 0, px: 0.75, py: 0, flexShrink: 0, textTransform: 'none' }}
               >
-                Explain
+                {uiText('Explain', '查看匹配分析')}
               </Button>
             </Tooltip>
           )}

@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { monospaceFontFamily } from '../theme';
+import { uiText } from '../lib/dashboardLocale';
 
 /**
  * Lists the global keyboard shortcuts. The list is the single source of truth for the
@@ -18,10 +19,10 @@ import { monospaceFontFamily } from '../theme';
  *   - Cmd/Ctrl+Shift+F  -> toggle the request-filter panel
  */
 const SHORTCUTS: { keys: string; action: string }[] = [
-  { keys: '?', action: 'Show this keyboard shortcuts help' },
-  { keys: '⌘K  /  Ctrl+K', action: 'Focus the log search field' },
-  { keys: '⌘⇧L  /  Ctrl+Shift+L', action: 'Clear server logs and recorded requests (asks for confirmation)' },
-  { keys: '⌘⇧F  /  Ctrl+Shift+F', action: 'Show / hide the request filter panel' },
+  { keys: '?', action: uiText('Show this keyboard shortcuts help', '显示键盘快捷键帮助') },
+  { keys: '⌘K  /  Ctrl+K', action: uiText('Focus the log search field', '将焦点移到日志搜索框') },
+  { keys: '⌘⇧L  /  Ctrl+Shift+L', action: uiText('Clear server logs and recorded requests (asks for confirmation)', '清空请求记录及相关日志（需要确认）') },
+  { keys: '⌘⇧F  /  Ctrl+Shift+F', action: uiText('Show / hide the request filter panel', '显示或隐藏请求筛选面板') },
 ];
 
 export default function ShortcutsDialog({
@@ -36,10 +37,10 @@ export default function ShortcutsDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth fullScreen={fullScreen} aria-labelledby="shortcuts-dialog-title">
-      <DialogTitle id="shortcuts-dialog-title">Keyboard Shortcuts</DialogTitle>
+      <DialogTitle id="shortcuts-dialog-title">{uiText('Keyboard Shortcuts', '键盘快捷键')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Shortcuts are ignored while you are typing in a text field.
+          {uiText('Shortcuts are ignored while you are typing in a text field.', '在文本框中输入时，快捷键不会生效。')}
         </Typography>
         <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', columnGap: 2, rowGap: 1, m: 0 }}>
           {SHORTCUTS.map((s) => (
@@ -59,7 +60,7 @@ export default function ShortcutsDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{uiText('Close', '关闭')}</Button>
       </DialogActions>
     </Dialog>
   );

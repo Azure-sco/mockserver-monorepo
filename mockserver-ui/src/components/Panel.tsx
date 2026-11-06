@@ -6,6 +6,7 @@ import Chip from '@mui/material/Chip';
 import { useTailFollow } from '../hooks/useTailFollow';
 import { transitions } from '../theme';
 import OperatorSearchField from './OperatorSearchField';
+import { uiText } from '../lib/dashboardLocale';
 
 // A scroll offset at or below this many pixels counts as "at the top" for
 // tail-following auto-scroll. 8 is not arbitrary: it has to absorb sub-pixel
@@ -15,6 +16,13 @@ import OperatorSearchField from './OperatorSearchField';
 // so live pushes would silently stop following the tail; much looser and someone
 // who deliberately scrolled down a little would still get yanked back.
 const AT_TOP_THRESHOLD_PX = 8;
+
+const PANEL_LABELS = new Map([
+  ['Log Messages', uiText('Log Messages', '日志消息')],
+  ['Active Expectations', uiText('Active Expectations', '生效规则')],
+  ['Received Requests', uiText('Received Requests', '接收的请求')],
+  ['Proxied Requests', uiText('Proxied Requests', '代理请求')],
+]);
 
 interface PanelProps {
   title: string;
@@ -135,7 +143,7 @@ export default function Panel({
           flexShrink: 0,
         }}
       >
-        <Typography variant="subtitle2">{title}</Typography>
+        <Typography variant="subtitle2">{PANEL_LABELS.get(title) ?? title}</Typography>
         {count != null && count > 0 && (
           <Chip
             label={
@@ -150,7 +158,7 @@ export default function Panel({
         )}
         {follow !== undefined && onFollowChange && (
           <Chip
-            label={follow ? 'Following' : 'Follow'}
+            label={follow ? uiText('Following', '自动滚动中') : uiText('Follow', '跳到最新')}
             size="small"
             color={follow ? 'primary' : 'default'}
             variant={follow ? 'filled' : 'outlined'}
@@ -158,8 +166,8 @@ export default function Panel({
             onClick={() => onFollowChange(!follow)}
             title={
               follow
-                ? 'Following the newest entries. Scroll up to stop and read — nothing will move.'
-                : 'Paused while you read. Click to jump to the newest entries and resume following.'
+                ? uiText('Following the newest entries. Scroll up to stop and read — nothing will move.', '向上滚动可暂停自动滚动，查看较早的记录。')
+                : uiText('Paused while you read. Click to jump to the newest entries and resume following.', '自动滚动已暂停。点击可跳到最新记录并恢复自动滚动。')
             }
             sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.75 } }}
           />

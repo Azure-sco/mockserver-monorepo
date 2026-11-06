@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useMemo, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -100,17 +101,15 @@ export default function OpenApiImportDialog({ open, onClose, connectionParams }:
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="openapi-dialog-title">
-      <DialogTitle id="openapi-dialog-title">Import OpenAPI</DialogTitle>
+      <DialogTitle id="openapi-dialog-title">{uiText("Import OpenAPI", "导入 OpenAPI")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Paste an OpenAPI v3 spec (JSON or YAML) or a spec URL. MockServer generates one
-          expectation per operation. Re-importing the same spec updates the expectations in place
-          and prunes operations that have been removed.
+          {uiText("Paste an OpenAPI v3 spec (JSON or YAML) or a spec URL. MockServer generates one expectation per operation. Re-importing the same spec updates the expectations in place and prunes operations that have been removed.", "粘贴 OpenAPI v3 规范（JSON 或 YAML）或规范地址。MockServer 为每项操作生成一条规则。重复导入同一规范会更新原有规则，并移除对应已删除操作的规则。")}
         </Typography>
         <TextField
           value={spec}
           onChange={(e) => handleSpecChange(e.target.value)}
-          label="OpenAPI spec or URL"
+          label={uiText("OpenAPI spec or URL", "OpenAPI 规范或地址")}
           multiline
           minRows={10}
           fullWidth
@@ -119,11 +118,10 @@ export default function OpenApiImportDialog({ open, onClose, connectionParams }:
         {operationExamples.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Named Examples
+              {uiText("Named Examples", "命名示例")}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Some operations declare multiple named response examples. Pick one to use for the
-              generated mock, or leave it as the spec default.
+              {uiText("Some operations declare multiple named response examples. Pick one to use for the generated mock, or leave it as the spec default.", "部分操作定义了多个命名响应示例。请选择生成 Mock 规则时使用的示例，或使用规范中的默认示例。")}
             </Typography>
             {operationExamples.map((op) => (
               <TextField
@@ -138,7 +136,7 @@ export default function OpenApiImportDialog({ open, onClose, connectionParams }:
                   setChosenExamples((prev) => ({ ...prev, [op.operationId]: e.target.value }))
                 }
               >
-                <MenuItem value={DEFAULT_EXAMPLE}>Default</MenuItem>
+                <MenuItem value={DEFAULT_EXAMPLE}>{uiText("Default", "默认")}</MenuItem>
                 {op.exampleNames.map((name) => (
                   <MenuItem key={name} value={name}>
                     {name}
@@ -153,19 +151,19 @@ export default function OpenApiImportDialog({ open, onClose, connectionParams }:
         )}
         {createdCount !== null && !noExpectationsCreated && (
           <Alert severity="success" sx={{ mt: 1 }}>
-            Imported {createdCount} expectation{createdCount === 1 ? '' : 's'}.
+            {uiText("Imported ", "已导入 ")}{createdCount}{uiText(" expectation", " 条规则")}{createdCount === 1 ? '' : uiText('s', "")}.
           </Alert>
         )}
         <OpenApiLoadProblemsAlert problems={loadProblems} noExpectationsCreated={noExpectationsCreated} sx={{ mt: 1 }} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{uiText("Close", "关闭")}</Button>
         <Button
           variant="contained"
           onClick={() => void handleImport()}
           disabled={busy || spec.trim().length === 0}
         >
-          {busy ? 'Importing…' : 'Import'}
+          {busy ? uiText('Importing…', "正在导入…") : uiText('Import', "导入")}
         </Button>
       </DialogActions>
     </Dialog>

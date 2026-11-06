@@ -3,6 +3,7 @@ import { useConnectionParams } from './useConnectionParams';
 import { useDashboardStore } from '../store';
 import { fetchFullMessages, hasTruncatedBodies, withFullMessages } from '../lib/fullBody';
 import { humanizeError } from '../lib/errorMessage';
+import { uiText } from '../lib/dashboardLocale';
 import { cachedParseTraffic } from '../lib/llmTraffic';
 import type { JsonListItem } from '../types';
 
@@ -21,7 +22,7 @@ export function useLoadFullRow(): (item: JsonListItem) => Promise<JsonListItem> 
       const epoch = useDashboardStore.getState().connectionEpoch;
       const full = await fetchFullMessages(params, item);
       if (useDashboardStore.getState().connectionEpoch !== epoch) {
-        throw new Error('The dashboard switched to another MockServer while the body was loading');
+        throw new Error(uiText('The dashboard switched to another MockServer while the body was loading', '加载消息体期间，控制台已切换到另一台 MockServer'));
       }
       applyFullMessages(item.key, full);
       return withFullMessages(item, full);
@@ -31,8 +32,9 @@ export function useLoadFullRow(): (item: JsonListItem) => Promise<JsonListItem> 
 }
 
 export function notifyFullBodyLoadFailed(e: unknown): void {
+  const reason = humanizeError(e).message;
   useDashboardStore.getState().setNotification({
-    message: `Could not load the full body, so nothing was done: ${humanizeError(e).message}`,
+    message: uiText(`Could not load the full body, so nothing was done: ${reason}`, `无法加载完整的消息体，本次操作已取消。原因：${reason}`),
     severity: 'error',
   });
 }

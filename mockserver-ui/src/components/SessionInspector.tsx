@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -117,7 +118,7 @@ function RequestDetail({ request }: { request: SessionRequest }) {
       <Box sx={{ p: 1 }} data-testid="trace-request-shortened">
         <ShortenedBodyNotice item={request.item} />
         <Typography variant="caption" color="text.secondary">
-          The conversation is shown once the full body is loaded.
+          {uiText('The conversation is shown once the full body is loaded.', '加载完整内容后会显示对话。')}
         </Typography>
       </Box>
     );
@@ -140,7 +141,7 @@ function RequestDetail({ request }: { request: SessionRequest }) {
   return (
     <Box sx={{ p: 1 }}>
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
-        {model && <Chip label={`Model: ${model}`} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.6rem' }} />}
+        {model && <Chip label={uiText(`Model: ${model}`, `模型：${model}`)} size="small" variant="outlined" sx={{ height: 18, fontSize: '0.6rem' }} />}
         {tokens && (
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
             {tokens}
@@ -234,10 +235,10 @@ function SessionConversation({ requests }: { requests: SessionRequest[] }) {
   // Button label: a single multi-turn thread says how many turns collapsed; a
   // single one-shot is just "Conversation"; multiple threads says how many.
   const label = multipleThreads
-    ? `Conversations (${groups.length})`
+    ? uiText(`Conversations (${groups.length})`, `对话（${groups.length} 个）`)
     : onlyGroup && onlyGroup.collapsed
-      ? `Conversation (${onlyGroup.turns.length} turns)`
-      : 'Conversation';
+      ? uiText(`Conversation (${onlyGroup.turns.length} turns)`, `对话（${onlyGroup.turns.length} 轮）`)
+      : uiText('Conversation', '对话');
 
   return (
     <Box sx={{ px: 1.5, pb: 0.75 }}>
@@ -255,7 +256,7 @@ function SessionConversation({ requests }: { requests: SessionRequest[] }) {
           {shortenedRequests.map(({ request, turnIndex }) => (
             <Box key={request.item.key} data-testid="trace-conversation-shortened">
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                [{turnIndex}] {request.method ?? '?'} {request.path ?? '/'} is left out of the conversation until its full body is loaded.
+                [{turnIndex}] {request.method ?? '?'} {request.path ?? '/'}{uiText(' is left out of the conversation until its full body is loaded.', '尚未加入对话，加载完整内容后会显示。')}
               </Typography>
               <ShortenedBodyNotice item={request.item} />
             </Box>
@@ -266,8 +267,7 @@ function SessionConversation({ requests }: { requests: SessionRequest[] }) {
               color="text.secondary"
               sx={{ display: 'block', mb: 0.5, fontStyle: 'italic' }}
             >
-              This lane holds {groups.length} separate conversation threads — the request
-              history diverged or mixes unrelated requests. Each is shown below.
+              {uiText('This lane holds ', '此调用链包含 ')}{groups.length}{uiText(' separate conversation threads — the request history diverged or mixes unrelated requests. Each is shown below.', '个独立的对话线程。请求历史发生了分叉，或包含互不相关的请求。各线程如下所示。')}
             </Typography>
           )}
           {groups.map((group, i) => (
@@ -277,7 +277,7 @@ function SessionConversation({ requests }: { requests: SessionRequest[] }) {
                   variant="overline"
                   sx={{ display: 'block', fontSize: '0.6rem', color: 'text.secondary', mt: i > 0 ? 1 : 0 }}
                 >
-                  {providerLabel(group.turns[0]!.parsed)} thread {i + 1}
+                  {providerLabel(group.turns[0]!.parsed)}{uiText(' thread ', '线程 ')}{i + 1}
                 </Typography>
               )}
               <GroupedConversationView group={group} />
@@ -417,8 +417,8 @@ function SessionLane({ session, connectionParams, onOpenChange }: SessionLanePro
       >
         <Tooltip title={isUnscoped
             ? (session.isolationKey !== '<unscoped>'
-              ? `Unscoped requests (${session.isolationKey})`
-              : 'Unscoped requests')
+              ? uiText(`Unscoped requests (${session.isolationKey})`, `未归组的请求（${session.isolationKey}）`)
+              : uiText('Unscoped requests', '未归组的请求'))
             : `${displayName} / ${session.isolationKey}`
           }
         >
@@ -437,22 +437,22 @@ function SessionLane({ session, connectionParams, onOpenChange }: SessionLanePro
           >
             {isUnscoped
               ? (session.isolationKey !== '<unscoped>'
-                ? `Unscoped requests (${session.isolationKey})`
-                : 'Unscoped requests')
+                ? uiText(`Unscoped requests (${session.isolationKey})`, `未归组的请求（${session.isolationKey}）`)
+                : uiText('Unscoped requests', '未归组的请求'))
               : `${displayName} / ${session.isolationKey}`
             }
           </Typography>
         </Tooltip>
         <Chip
-          label={`${session.requests.length} request${session.requests.length !== 1 ? 's' : ''}`}
+          label={uiText(`${session.requests.length} request${session.requests.length !== 1 ? 's' : ''}`, `${session.requests.length} 条请求`)}
           size="small"
           variant="outlined"
           sx={{ height: 18, fontSize: '0.6rem', '& .MuiChip-label': { px: 0.5 } }}
         />
         {usage && (
-          <Tooltip title={`${usage.totalInputTokens.toLocaleString()} in / ${usage.totalOutputTokens.toLocaleString()} out`}>
+          <Tooltip title={uiText(`${usage.totalInputTokens.toLocaleString()} in / ${usage.totalOutputTokens.toLocaleString()} out`, `输入 ${usage.totalInputTokens.toLocaleString()} / 输出 ${usage.totalOutputTokens.toLocaleString()} Token`)}>
             <Chip
-              label={`${usage.totalInputTokens.toLocaleString()} in / ${usage.totalOutputTokens.toLocaleString()} out`}
+              label={uiText(`${usage.totalInputTokens.toLocaleString()} in / ${usage.totalOutputTokens.toLocaleString()} out`, `输入 ${usage.totalInputTokens.toLocaleString()} / 输出 ${usage.totalOutputTokens.toLocaleString()} Token`)}
               size="small"
               variant="outlined"
               sx={{ height: 18, fontSize: '0.6rem', fontFamily: monospaceFontFamily, maxWidth: 180, '& .MuiChip-label': { px: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
@@ -601,8 +601,8 @@ export default function SessionInspector({ connectionParams }: SessionInspectorP
           onChange={(_, v: number) => setTab(v)}
           sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, typography: 'body2' } }}
         >
-          <Tab label="Traces" />
-          <Tab label="Compare" />
+          <Tab label={uiText('Traces', '调用链')} />
+          <Tab label={uiText('Compare', '对比')} />
         </Tabs>
 
         {tab === 0 && (
@@ -620,7 +620,7 @@ export default function SessionInspector({ connectionParams }: SessionInspectorP
             >
               {hasLlmTraffic && (
                 <Chip
-                  label={`Active traces: ${sessions.length}`}
+                  label={uiText(`Active traces: ${sessions.length}`, `当前调用链：${sessions.length}`)}
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -629,7 +629,7 @@ export default function SessionInspector({ connectionParams }: SessionInspectorP
               )}
               <TextField
                 size="small"
-                placeholder="Filter traces..."
+                placeholder={uiText('Filter traces...', '筛选调用链…')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 slotProps={{
@@ -661,15 +661,15 @@ export default function SessionInspector({ connectionParams }: SessionInspectorP
               {!hasLlmTraffic ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <Typography variant="body2" color="text.secondary">
-                    No LLM traffic captured yet
+                    {uiText('No LLM traffic captured yet', '尚未捕获 LLM 流量')}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    Configure your application to proxy through MockServer to see traces grouped here.
+                    {uiText('Configure your application to proxy through MockServer to see traces grouped here.', '将应用的请求配置为通过 MockServer 代理，即可在这里按调用链查看。')}
                   </Typography>
                 </Box>
               ) : filteredSessions.length === 0 ? (
                 <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                  No traces match the current filter
+                  {uiText('No traces match the current filter', '没有符合筛选条件的调用链')}
                 </Typography>
               ) : (
                 filteredSessions.map((session) => (

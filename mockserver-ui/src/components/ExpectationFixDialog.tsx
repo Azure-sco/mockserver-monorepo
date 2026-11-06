@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useEffect, useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -19,7 +20,7 @@ import { humanizeError, type HumanError } from '../lib/errorMessage';
 import HumanErrorAlert from './HumanErrorAlert';
 import LintWarningsBadge from './LintWarningsBadge';
 
-const CHANGED_SINCE = 'This expectation has changed since the explanation was computed, so the fix was not applied. Refresh the explanation and preview the fix again.';
+const CHANGED_SINCE = uiText('This expectation has changed since the explanation was computed, so the fix was not applied. Refresh the explanation and preview the fix again.', "此规则在生成解释后已发生变化，修复未应用。请刷新解释后重新预览修复。");
 
 function RequestMatcherPane({ title, value, testId }: { title: string; value: unknown; testId: string }) {
   return (
@@ -109,22 +110,21 @@ export default function ExpectationFixDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="expectation-fix-dialog-title">
-      <DialogTitle id="expectation-fix-dialog-title">Preview Fix</DialogTitle>
+      <DialogTitle id="expectation-fix-dialog-title">{uiText("Preview Fix", "预览修复")}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          The smallest change to expectation{' '}
+          {uiText("The smallest change to expectation", "对规则")}{' '}
           <Box component="span" sx={{ fontFamily: monospaceFontFamily }}>{expectationId}</Box>{' '}
-          that lets it match <Box component="span" sx={{ fontFamily: monospaceFontFamily }}>{requestLabel}</Box>.
-          Nothing changes until you select Apply Fix.
+          {uiText("that lets it match ", "进行最小改动，使其可以匹配 ")}<Box component="span" sx={{ fontFamily: monospaceFontFamily }}>{requestLabel}</Box>{uiText(". Nothing changes until you select Apply Fix.", "。点击“应用修复”后才会更新。")}
         </Typography>
         {!fix.matchesAfterPatch && (
           <Alert severity="warning" sx={{ mb: 1.5 }}>
-            This fix alone does not make the expectation match the request: the fields listed below still need editing by hand.
+            {uiText("This fix alone does not make the expectation match the request: the fields listed below still need editing by hand.", "只应用此修复还不能匹配该请求，仍需手动编辑下列字段。")}
           </Alert>
         )}
         {fix.unpatchedFields.length > 0 && (
           <Alert severity="info" sx={{ mb: 1.5 }}>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>Not changed by this fix:</Typography>
+            <Typography variant="body2" sx={{ mb: 0.5 }}>{uiText("Not changed by this fix:", "此修复不会修改：")}</Typography>
             {fix.unpatchedFields.map((u) => (
               <Typography key={u.field} variant="body2" component="div">
                 <b>{u.field}</b>: {u.reason}
@@ -132,12 +132,12 @@ export default function ExpectationFixDialog({
             ))}
           </Alert>
         )}
-        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Changes</Typography>
+        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>{uiText("Changes", "变更")}</Typography>
         <Box component="ul" sx={{ mt: 0, mb: 1.5, pl: 2.5 }} data-testid="expectation-fix-changes">
           {changes.map((change) => (
             <Typography key={`${change.kind}:${change.field}`} component="li" variant="body2" sx={{ fontFamily: monospaceFontFamily, fontSize: '0.8rem' }}>
-              {change.kind === 'remove' && <>remove <b>{change.field}</b> {formatValue(change.before)}</>}
-              {change.kind === 'add' && <>add <b>{change.field}</b> {formatValue(change.after)}</>}
+              {change.kind === 'remove' && <>{uiText("remove ", "移除 ")}<b>{change.field}</b> {formatValue(change.before)}</>}
+              {change.kind === 'add' && <>{uiText("add ", "添加 ")}<b>{change.field}</b> {formatValue(change.after)}</>}
               {change.kind === 'replace' && <><b>{change.field}</b>: {formatValue(change.before)} → {formatValue(change.after)}</>}
             </Typography>
           ))}
@@ -146,14 +146,14 @@ export default function ExpectationFixDialog({
         {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}><CircularProgress size={24} /></Box>}
         {preview && (
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1.5 }}>
-            <RequestMatcherPane title="Request matcher now" value={preview.before['httpRequest']} testId="expectation-fix-before" />
-            <RequestMatcherPane title="Request matcher after the fix" value={preview.after['httpRequest']} testId="expectation-fix-after" />
+            <RequestMatcherPane title={uiText("Request matcher now", "当前请求匹配条件")} value={preview.before['httpRequest']} testId="expectation-fix-before" />
+            <RequestMatcherPane title={uiText("Request matcher after the fix", "修复后的请求匹配条件")} value={preview.after['httpRequest']} testId="expectation-fix-after" />
           </Box>
         )}
         {applyError && <Box sx={{ mt: 1.5 }}><ErrorAlert error={applyError} /></Box>}
         {applied && (
           <Alert severity="success" sx={{ mt: 1.5 }}>
-            Expectation updated.
+            {uiText("Expectation updated.", "规则已更新。")}
             {lintWarnings > 0 && (
               <Box sx={{ mt: 1 }}>
                 <LintWarningsBadge count={lintWarnings} connectionParams={connectionParams} />
@@ -163,10 +163,10 @@ export default function ExpectationFixDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{applied ? 'Close' : 'Cancel'}</Button>
+        <Button onClick={onClose}>{applied ? uiText('Close', "关闭") : uiText('Cancel', "取消")}</Button>
         {!applied && (
           <Button variant="contained" onClick={() => { void apply(); }} disabled={preview === null || applying}>
-            {applying ? 'Applying…' : 'Apply Fix'}
+            {applying ? uiText('Applying…', "正在应用…") : uiText('Apply Fix', "应用修复")}
           </Button>
         )}
       </DialogActions>

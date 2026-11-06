@@ -3,6 +3,7 @@ import { useConnectionParams } from './useConnectionParams';
 import { useDashboardStore } from '../store';
 import { loadWholeExpectation } from '../lib/fullExpectation';
 import { humanizeError } from '../lib/errorMessage';
+import { uiText } from '../lib/dashboardLocale';
 import type { JsonListItem } from '../types';
 
 /**
@@ -29,8 +30,9 @@ export function useWithWholeExpectation(): (item: JsonListItem, act: (whole: Jso
 }
 
 export function notifyWholeExpectationLoadFailed(e: unknown): void {
+  const reason = humanizeError(e).message;
   useDashboardStore.getState().setNotification({
-    message: `Could not load the whole expectation, so nothing was done: ${humanizeError(e).message}`,
+    message: uiText(`Could not load the whole expectation, so nothing was done: ${reason}`, `无法加载完整的 Mock 规则，本次操作已取消。原因：${reason}`),
     severity: 'error',
   });
 }

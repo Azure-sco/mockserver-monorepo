@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -70,13 +71,13 @@ export default function DiffRequestsDialog({
     try {
       expectedObj = JSON.parse(expected) as Record<string, unknown>;
     } catch {
-      setError({ message: '“Expected” request is not valid JSON.' });
+      setError({ message: uiText('“Expected” request is not valid JSON.', '「预期请求」不是有效的 JSON。') });
       return;
     }
     try {
       actualObj = JSON.parse(actual) as Record<string, unknown>;
     } catch {
-      setError({ message: '“Actual” request is not valid JSON.' });
+      setError({ message: uiText('“Actual” request is not valid JSON.', '「实际请求」不是有效的 JSON。') });
       return;
     }
     setLoading(true);
@@ -106,7 +107,7 @@ export default function DiffRequestsDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="diff-requests-title">
-      <DialogTitle id="diff-requests-title">Diff Two Requests</DialogTitle>
+      <DialogTitle id="diff-requests-title">{uiText('Diff Two Requests', '对比两条请求')}</DialogTitle>
       <DialogContent>
         {/* Diff result is shown at the top so it is the most visible thing in the
             dialog (the editable request JSON is below for tweaking and re-running). */}
@@ -116,15 +117,14 @@ export default function DiffRequestsDialog({
           </Box>
         )}
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Paste two requests as JSON to compare them field-by-field. Copy a request from the Traffic
-          inspector, or hand-author one.
+          {uiText('Paste two requests as JSON to compare them field-by-field. Copy a request from the Traffic inspector, or hand-author one.', '粘贴两条 JSON 请求以逐字段查看差异。可以从「请求记录」中复制，也可以手动填写。')}
         </Typography>
         <TextField
-          label="Ignored Headers"
+          label={uiText('Ignored Headers', '忽略的请求头')}
           value={ignoredHeadersInput}
           onChange={(e) => setIgnoredHeadersInput(e.target.value)}
           placeholder={DEFAULT_IGNORED_DIFF_HEADERS.join(', ')}
-          helperText="Comma-separated header names hidden from the diff (timestamps, correlation ids, trace context)."
+          helperText={uiText('Comma-separated header names hidden from the diff (timestamps, correlation ids, trace context).', '用逗号分隔不参与对比的请求头名称，例如时间戳、关联 ID、调用链上下文字段。')}
           size="small"
           fullWidth
           sx={{ mb: 1.5 }}
@@ -132,7 +132,7 @@ export default function DiffRequestsDialog({
         />
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
           <TextField
-            label="Expected request (JSON)"
+            label={uiText('Expected request (JSON)', '预期请求（JSON）')}
             multiline minRows={8} maxRows={20}
             value={expected} onChange={(e) => setExpected(e.target.value)}
             placeholder={PLACEHOLDER}
@@ -140,7 +140,7 @@ export default function DiffRequestsDialog({
             slotProps={{ input: { sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
           />
           <TextField
-            label="Actual request (JSON)"
+            label={uiText('Actual request (JSON)', '实际请求（JSON）')}
             multiline minRows={8} maxRows={20}
             value={actual} onChange={(e) => setActual(e.target.value)}
             placeholder={PLACEHOLDER}
@@ -151,9 +151,9 @@ export default function DiffRequestsDialog({
         {error && <HumanErrorAlert error={error} sx={{ mt: 1.5 }} />}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{uiText('Close', '关闭')}</Button>
         <Button variant="contained" disabled={loading || !expected.trim() || !actual.trim()} onClick={() => void submit()}>
-          Compare
+          {uiText('Compare', '对比')}
         </Button>
       </DialogActions>
     </Dialog>

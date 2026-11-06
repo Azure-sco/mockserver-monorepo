@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 /**
  * ImportForm — bulk-import expectations from Expectation JSON, OpenAPI, WSDL,
  * HAR (HTTP Archive), or a Postman collection. Renders as the entire form body
@@ -42,22 +43,22 @@ interface FormatMeta {
 }
 
 const FORMATS: FormatMeta[] = [
-  { value: 'json', label: 'Expectation JSON', description: 'A single expectation object or a JSON array of expectations.', urlSupported: false },
-  { value: 'openapi', label: 'OpenAPI', description: 'An OpenAPI v3 spec (JSON/YAML) or a URL pointing to one.', urlSupported: true },
-  { value: 'wsdl', label: 'WSDL / SOAP', description: 'A WSDL 1.1 document. SOAP operations are converted to expectations.', urlSupported: false },
-  { value: 'har', label: 'HAR (HTTP Archive)', description: 'A HAR JSON file captured from browser DevTools or a proxy.', urlSupported: false },
-  { value: 'postman', label: 'Postman collection', description: 'A Postman collection (v2.x) JSON export; requests are converted to expectations.', urlSupported: false },
-  { value: 'recording', label: 'Recording (NDJSON)', description: 'A persisted NDJSON archive of recorded request/response traffic (disk-offload capture); reloaded into the event log. Leave blank and use "Reload From Server Disk" to read the server\'s configured archive.', urlSupported: false },
+  { value: 'json', label: uiText('Expectation JSON', 'Mock 规则 JSON'), description: uiText('A single expectation object or a JSON array of expectations.', '单条 Mock 规则对象，或由多条规则组成的 JSON 数组。'), urlSupported: false },
+  { value: 'openapi', label: 'OpenAPI', description: uiText('An OpenAPI v3 spec (JSON/YAML) or a URL pointing to one.', 'OpenAPI v3 规范（JSON 或 YAML），也可以提供规范的 URL。'), urlSupported: true },
+  { value: 'wsdl', label: 'WSDL / SOAP', description: uiText('A WSDL 1.1 document. SOAP operations are converted to expectations.', 'WSDL 1.1 文档，其中的 SOAP 操作将转换为 Mock 规则。'), urlSupported: false },
+  { value: 'har', label: uiText('HAR (HTTP Archive)', 'HAR（HTTP 归档）'), description: uiText('A HAR JSON file captured from browser DevTools or a proxy.', '浏览器开发者工具或代理捕获的 HAR JSON 文件。'), urlSupported: false },
+  { value: 'postman', label: uiText('Postman collection', 'Postman 集合'), description: uiText('A Postman collection (v2.x) JSON export; requests are converted to expectations.', 'Postman 集合（v2.x）的 JSON 导出文件，其中的请求将转换为 Mock 规则。'), urlSupported: false },
+  { value: 'recording', label: uiText('Recording (NDJSON)', '录制记录（NDJSON）'), description: uiText('A persisted NDJSON archive of recorded request/response traffic (disk-offload capture); reloaded into the event log. Leave blank and use "Reload From Server Disk" to read the server\'s configured archive.', '将已存盘的请求和响应归档（NDJSON）重新载入事件日志。留空并选择「从服务端磁盘重新载入」可读取服务端已配置的归档。'), urlSupported: false },
 ];
 
 /** Build a user-facing message from a recording reload result. */
 function recordingMessage(result: RecordingImportResult): string {
   const base =
     result.count > 0
-      ? `Reloaded ${result.count} recorded request${result.count === 1 ? '' : 's'}`
-      : 'No recorded requests reloaded';
+      ? uiText(`Reloaded ${result.count} recorded request${result.count === 1 ? '' : 's'}`, `已重新载入 ${result.count} 条录制请求`)
+      : uiText('No recorded requests reloaded', '未重新载入任何录制请求');
   return result.skipped > 0
-    ? `${base} (${result.skipped} malformed line${result.skipped === 1 ? '' : 's'} skipped)`
+    ? uiText(`${base} (${result.skipped} malformed line${result.skipped === 1 ? '' : 's'} skipped)`, `${base}（已跳过 ${result.skipped} 行格式无效的记录）`)
     : base;
 }
 
@@ -120,7 +121,7 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
     try {
       const input = source === 'url' ? urlValue.trim() : payload.trim();
       if (!input) {
-        throw new Error(source === 'url' ? 'Please enter a URL.' : 'Please provide content to import.');
+        throw new Error(source === 'url' ? uiText('Please enter a URL.', '请输入 URL。') : uiText('Please provide content to import.', '请提供要导入的内容。'));
       }
 
       // Recording archives reload into the event log (not into expectations), so
@@ -170,8 +171,8 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
       // one; otherwise confirm success without a misleading "Imported 0".
       setSnackMessage(
         count > 0
-          ? `Imported ${count} expectation${count === 1 ? '' : 's'}`
-          : 'Import succeeded',
+          ? uiText(`Imported ${count} expectation${count === 1 ? '' : 's'}`, `已导入 ${count} 条 Mock 规则`)
+          : uiText('Import succeeded', '导入成功'),
       );
       // Clear the payload after a successful import so the user can import more.
       setPayload('');
@@ -203,7 +204,7 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
       {/* Format picker */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          Format
+          {uiText('Format', '格式')}
         </Typography>
         <RadioGroup
           value={format}
@@ -235,7 +236,7 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
       {/* Source picker + content input */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" sx={{ mb: 1, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-          Source
+          {uiText('Source', '来源')}
         </Typography>
         <RadioGroup
           row
@@ -248,26 +249,26 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
           <FormControlLabel
             value="paste"
             control={<Radio size="small" />}
-            label={<Typography variant="body2">Paste</Typography>}
+            label={<Typography variant="body2">{uiText('Paste', '粘贴')}</Typography>}
           />
           {currentFormatMeta.urlSupported && (
             <FormControlLabel
               value="url"
               control={<Radio size="small" />}
-              label={<Typography variant="body2">URL</Typography>}
+              label={<Typography variant="body2">{uiText('URL', 'URL')}</Typography>}
             />
           )}
           <FormControlLabel
             value="file"
             control={<Radio size="small" />}
-            label={<Typography variant="body2">File</Typography>}
+            label={<Typography variant="body2">{uiText('File', '文件')}</Typography>}
           />
         </RadioGroup>
 
         <Box sx={{ mt: 1.5 }}>
           {source === 'url' && (
             <TextField
-              label="Spec URL"
+              label={uiText('Spec URL', '规范 URL')}
               size="small"
               fullWidth
               value={urlValue}
@@ -285,7 +286,7 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
                     size="small"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    Choose file
+                    {uiText('Choose file', '选择文件')}
                   </Button>
                   <input
                     ref={fileInputRef}
@@ -296,12 +297,12 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
                     data-testid="import-file-input"
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                    The file contents will be loaded into the text area below.
+                    {uiText('The file contents will be loaded into the text area below.', '文件内容会载入下方的文本框。')}
                   </Typography>
                 </Box>
               )}
               <TextField
-                label={`${currentFormatMeta.label} content`}
+                label={uiText(`${currentFormatMeta.label} content`, `${currentFormatMeta.label} 内容`)}
                 multiline
                 minRows={8}
                 maxRows={24}
@@ -338,7 +339,7 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
             disabled={busy || (source === 'url' ? !urlValue.trim() : !payload.trim())}
             startIcon={busy ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
-            {busy ? 'Importing...' : format === 'recording' ? 'Reload' : 'Import'}
+            {busy ? uiText('Importing...', '正在导入…') : format === 'recording' ? uiText('Reload', '重新载入') : uiText('Import', '导入')}
           </Button>
           {format === 'recording' && (
             <Button
@@ -347,13 +348,13 @@ export default function ImportForm({ connectionParams }: ImportFormProps) {
               onClick={() => void handleReloadFromDisk()}
               disabled={busy}
             >
-              Reload From Server Disk
+              {uiText('Reload From Server Disk', '从服务端磁盘重新载入')}
             </Button>
           )}
           <Typography variant="caption" color="text.secondary">
             {format === 'recording'
-              ? 'The recorded request/response traffic will be reloaded into the event log.'
-              : `${currentFormatMeta.label} will be sent to MockServer and converted to expectations.`}
+              ? uiText('The recorded request/response traffic will be reloaded into the event log.', '已录制的请求和响应会重新载入事件日志。')
+              : uiText(`${currentFormatMeta.label} will be sent to MockServer and converted to expectations.`, `${currentFormatMeta.label} 将发送给 MockServer 并转换为 Mock 规则。`)}
           </Typography>
         </Box>
       </Paper>

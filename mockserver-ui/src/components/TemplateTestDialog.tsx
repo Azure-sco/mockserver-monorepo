@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -44,12 +45,12 @@ const ENGINE_LABELS: Record<TemplateTestEngine, string> = {
 };
 
 function truncatedNote(truncated: boolean | undefined) {
-  return truncated ? ' (shortened by the server)' : '';
+  return truncated ? uiText(' (shortened by the server)', " （内容已被服务器截断）") : '';
 }
 
 function position(line?: number, column?: number): string | null {
   if (line === undefined) return null;
-  return column !== undefined ? `line ${line}, column ${column}` : `line ${line}`;
+  return column !== undefined ? uiText(`line ${line}, column ${column}`, `第 ${line} 行，第 ${column} 列`) : uiText(`line ${line}`, `第 ${line} 行`);
 }
 
 function ErrorExcerpt({ template, templateType, line, column }: { template: string; templateType: TemplateTestEngine; line: number; column?: number }) {
@@ -66,7 +67,7 @@ function ErrorExcerpt({ template, templateType, line, column }: { template: stri
         <Box key={l.number} component="span" sx={{ display: 'block', color: l.failing ? 'error.main' : 'text.secondary', fontWeight: l.failing ? 600 : 400 }}>
           {`${l.failing ? '>' : ' '} ${String(l.number).padStart(width)} | ${expandTabs(l.text)}`}
           {l.failing && column !== undefined && column >= 1 && (
-            <Box component="span" role="note" aria-label={`error at column ${column}`} sx={{ display: 'block' }}>
+            <Box component="span" role="note" aria-label={uiText(`error at column ${column}`, `第 ${column} 列出错`)} sx={{ display: 'block' }}>
               {`  ${' '.repeat(width)} | ${' '.repeat(caretOffset(l.text, column, templateType))}^`}
             </Box>
           )}
@@ -84,19 +85,19 @@ function Result({ report, template, templateType, actionType }: { report: Templa
     <Box data-testid="template-test-result" sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
         {report.timedOut
-          ? <Chip color="warning" label="Timed Out" />
+          ? <Chip color="warning" label={uiText("Timed Out", "已超时")} />
           : report.valid
-            ? <Chip color="success" label={actionType === 'FORWARD_TEMPLATE' ? 'Valid Request' : 'Valid Response'} />
-            : <Chip color="error" label="Failed" />}
+            ? <Chip color="success" label={actionType === 'FORWARD_TEMPLATE' ? uiText('Valid Request', "请求有效") : uiText('Valid Response', "响应有效")} />
+            : <Chip color="error" label={uiText("Failed", "失败")} />}
         {report.durationMillis !== undefined && (
-          <Typography variant="caption" color="text.secondary">{report.durationMillis} ms</Typography>
+          <Typography variant="caption" color="text.secondary">{report.durationMillis}{uiText(" ms", " 毫秒")}</Typography>
         )}
       </Box>
 
       {error && (
         <Alert severity={report.timedOut ? 'warning' : 'error'} sx={{ mb: 1, '& .MuiAlert-message': { minWidth: 0, flex: 1 } }}>
           {errorPosition && (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>At template {errorPosition}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{uiText("At template ", "模板位置 ")}{errorPosition}</Typography>
           )}
           {error.message && (
             <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: monospaceFontFamily, fontSize: '0.75rem' }}>
@@ -104,11 +105,11 @@ function Result({ report, template, templateType, actionType }: { report: Templa
             </Typography>
           )}
           {error.hint && (
-            <Typography variant="body2" sx={{ mt: 0.5 }}>Hint: {error.hint}{truncatedNote(error.hintTruncated)}</Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>{uiText("Hint: ", "提示： ")}{error.hint}{truncatedNote(error.hintTruncated)}</Typography>
           )}
           {error.validationErrors && (
             <Typography variant="body2" component="div" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              Not a valid {actionType === 'FORWARD_TEMPLATE' ? 'request' : 'response'}: {error.validationErrors}{truncatedNote(error.validationErrorsTruncated)}
+              {uiText("Not a valid ", "无效的 ")}{actionType === 'FORWARD_TEMPLATE' ? uiText('request', "请求") : uiText('response', "响应")}: {error.validationErrors}{truncatedNote(error.validationErrorsTruncated)}
             </Typography>
           )}
           {error.line !== undefined && <ErrorExcerpt template={template} templateType={templateType} line={error.line} column={error.column} />}
@@ -117,7 +118,7 @@ function Result({ report, template, templateType, actionType }: { report: Templa
 
       {report.warnings.length > 0 && (
         <Alert severity="warning" sx={{ mb: 1 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>Warnings ({report.warnings.length})</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>{uiText("Warnings (", "警告（")}{report.warnings.length})</Typography>
           <Box component="ul" sx={{ m: 0, pl: 2 }}>
             {report.warnings.map((w, i) => {
               const at = position(w.line, w.column);
@@ -136,7 +137,7 @@ function Result({ report, template, templateType, actionType }: { report: Templa
       {rendered && (
         <Box>
           <Typography variant="subtitle2" component="h3" sx={{ mb: 0.5 }}>
-            {report.renderedRequest ? 'Rendered Request' : 'Rendered Response'}
+            {report.renderedRequest ? uiText('Rendered Request', "渲染后的请求") : uiText('Rendered Response', "渲染后的响应")}
           </Typography>
           <JsonViewer data={rendered} collapsed={3} />
         </Box>
@@ -144,7 +145,7 @@ function Result({ report, template, templateType, actionType }: { report: Templa
       {!rendered && report.renderedOutput !== undefined && (
         <Box>
           <Typography variant="subtitle2" component="h3" sx={{ mb: 0.5 }}>
-            Rendered Output{truncatedNote(report.renderedOutputTruncated)}
+            {uiText("Rendered Output", "渲染结果")}{truncatedNote(report.renderedOutputTruncated)}
           </Typography>
           <Box
             component="pre"
@@ -240,12 +241,12 @@ export default function TemplateTestDialog({
       try {
         const parsed = JSON.parse(requestText) as unknown;
         if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          setRequestError('The sample request must be a JSON object');
+          setRequestError(uiText('The sample request must be a JSON object', "示例请求必须为 JSON 对象"));
           return;
         }
         request = parsed as Record<string, unknown>;
       } catch (e) {
-        setRequestError(e instanceof Error ? e.message : 'Invalid JSON');
+        setRequestError(e instanceof Error ? e.message : uiText('Invalid JSON', "无效的 JSON"));
         return;
       }
     }
@@ -277,26 +278,25 @@ export default function TemplateTestDialog({
   return (
     <Dialog open={open} onClose={close} maxWidth="md" fullWidth fullScreen={fullScreen} aria-labelledby="template-test-dialog-title">
       <DialogTitle id="template-test-dialog-title">
-        Test Template
-        <Chip size="small" variant="outlined" sx={{ ml: 1 }} label={`${ENGINE_LABELS[templateType]} ${actionType === 'FORWARD_TEMPLATE' ? 'forward' : 'response'} template`} />
+        {uiText("Test Template", "测试模板")}
+        <Chip size="small" variant="outlined" sx={{ ml: 1 }} label={uiText(`${ENGINE_LABELS[templateType]} ${actionType === 'FORWARD_TEMPLATE' ? uiText('forward', "转发") : uiText('response', "响应")} template`, `${ENGINE_LABELS[templateType]} ${actionType === 'FORWARD_TEMPLATE' ? uiText('forward', "转发") : uiText('response', "响应")} 模板`)} />
       </DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Renders the template in the editor against a sample request, with the server&apos;s template engines and
-          limits. Nothing is registered, logged or changed: a <code>scenario.set</code> call is reported, not applied.
+          {uiText("Renders the template in the editor against a sample request, with the server's template engines and limits. Nothing is registered, logged or changed: a ", "使用服务器的模板引擎和限制，根据示例请求渲染编辑器中的模板。测试不会注册规则、写入请求日志或改变状态。 ")}<code>scenario.set</code>{uiText(" call is reported, not applied.", " 调用仅展示，不会执行。")}
         </Typography>
         <TextField
           select
           size="small"
           fullWidth
-          label="Sample request"
+          label={uiText("Sample request", "示例请求")}
           value={selectedKey}
           onChange={(e) => { void chooseRequest(e.target.value); }}
           disabled={loadingRow}
-          helperText={options.length === 0 ? 'No recorded requests yet: send a request to MockServer to pick it here, or edit the sample below.' : undefined}
+          helperText={options.length === 0 ? uiText('No recorded requests yet: send a request to MockServer to pick it here, or edit the sample below.', "暂无已记录的请求。可向 MockServer 发送请求后在这里选择，也可编辑下方的示例。") : undefined}
           sx={{ mb: 1.5 }}
         >
-          <MenuItem value={DEFAULT_KEY}>Default sample (GET /)</MenuItem>
+          <MenuItem value={DEFAULT_KEY}>{uiText("Default sample (GET /)", "默认示例（GET /）")}</MenuItem>
           {options.map(({ item, request }) => (
             <MenuItem key={item.key} value={item.key} sx={{ fontFamily: monospaceFontFamily, fontSize: '0.8rem' }}>
               {String(request['method'] ?? 'GET')} {String(request['path'] ?? '/')}
@@ -305,7 +305,7 @@ export default function TemplateTestDialog({
           ))}
         </TextField>
         <TextField
-          label="Sample request (JSON)"
+          label={uiText("Sample request (JSON)", "示例请求（JSON）")}
           multiline
           minRows={4}
           maxRows={14}
@@ -313,25 +313,25 @@ export default function TemplateTestDialog({
           value={requestText}
           onChange={(e) => setRequestText(e.target.value)}
           error={requestError !== null}
-          helperText={requestError ?? 'The request the template sees as request. Edit it to try other values.'}
-          slotProps={{ htmlInput: { 'aria-label': 'Sample request JSON', sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
+          helperText={requestError ?? uiText('The request the template sees as request. Edit it to try other values.', "模板会通过 request 读取此请求。可编辑内容来尝试不同的值。")}
+          slotProps={{ htmlInput: { 'aria-label': uiText('Sample request JSON', "示例请求 JSON"), sx: { fontFamily: monospaceFontFamily, fontSize: '0.78rem' } } }}
         />
 
         {running && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
             <CircularProgress size={20} />
-            <Typography variant="body2" color="text.secondary">Rendering the template…</Typography>
+            <Typography variant="body2" color="text.secondary">{uiText("Rendering the template…", "正在渲染模板…")}</Typography>
           </Box>
         )}
         {failure && <HumanErrorAlert error={failure.error} severity={failure.severity} sx={{ mt: 2 }} data-testid="template-test-failure" />}
         {report && <Result report={report} template={template} templateType={templateType} actionType={actionType} />}
       </DialogContent>
       <DialogActions>
-        {running && <Button onClick={cancel}>Cancel</Button>}
+        {running && <Button onClick={cancel}>{uiText("Cancel", "取消")}</Button>}
         <Button variant="contained" onClick={() => { void run(); }} disabled={running || loadingRow || !template.trim()}>
-          Run Test
+          {uiText("Run Test", "开始测试")}
         </Button>
-        <Button onClick={close}>Close</Button>
+        <Button onClick={close}>{uiText("Close", "关闭")}</Button>
       </DialogActions>
     </Dialog>
   );

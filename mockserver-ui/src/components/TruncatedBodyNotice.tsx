@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -49,11 +50,11 @@ export default function TruncatedBodyNotice({ marker, onLoad, sx }: TruncatedBod
             startIcon={loading ? <CircularProgress size={12} /> : undefined}
             data-testid="load-full-body"
           >
-            Load Full Body
+            {uiText('Load Full Body', '加载完整内容')}
           </Button>
         ) : undefined}
       >
-        Body shortened: showing the first {formatCharacters(marker.shownLength)} of {formatCharacters(marker.originalLength)}.
+        {uiText('Body shortened: showing the first', '内容已截断，显示前')} {formatCharacters(marker.shownLength)} {uiText('of', '，共')} {formatCharacters(marker.originalLength)}.
       </Alert>
       {error && <HumanErrorAlert error={error} sx={{ my: 0.5 }} />}
     </>

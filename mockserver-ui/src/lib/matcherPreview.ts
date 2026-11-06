@@ -1,3 +1,4 @@
+import { uiText } from './dashboardLocale';
 /**
  * Client-side matcher preview for the dashboard "matcher test playground" (WS5.5).
  *
@@ -139,9 +140,9 @@ function unsupportedStringField(field: string): FieldResult {
   return {
     field,
     verdict: 'unsupported',
-    expected: '(set)',
-    actual: '(not evaluated)',
-    reason: `${field} matcher uses a JSON schema, which the client preview cannot evaluate`,
+    expected: uiText('(set)', '（已设置）'),
+    actual: uiText('(not evaluated)', '（未评估）'),
+    reason: uiText(`${field} matcher uses a JSON schema, which the client preview cannot evaluate`, `${field} 的匹配条件使用 JSON Schema，浏览器预览无法评估`),
   };
 }
 
@@ -203,7 +204,7 @@ function collectValueMatchers(
   for (const v of values) {
     const m = toNottable(v);
     if (m === UNSUPPORTED_MATCHER) {
-      return { unsupported: 'value uses a JSON schema or date-time matcher, which the client preview cannot evaluate' };
+      return { unsupported: uiText('value uses a JSON schema or date-time matcher, which the client preview cannot evaluate', '此值使用 JSON Schema 或日期时间匹配条件，浏览器无法评估') };
     }
     if (m) matchers.push(m);
   }
@@ -228,7 +229,7 @@ function normaliseKeyValues(raw: unknown): KeyRequirement[] {
         const key = toNottable(e['name']);
         if (!key || key === UNSUPPORTED_MATCHER) continue;
         if (key.not) {
-          out.push({ key: key.value, matchers: [], unsupported: 'negated key matching is not supported by the client preview' });
+          out.push({ key: key.value, matchers: [], unsupported: uiText('negated key matching is not supported by the client preview', '浏览器预览不支持对键名进行取反匹配') });
           continue;
         }
         const values = e['values'];
@@ -252,7 +253,7 @@ function normaliseKeyValues(raw: unknown): KeyRequirement[] {
     // semantics are non-trivial; flag rather than mis-evaluate (the `!` would otherwise
     // be treated as a literal part of the header name).
     if (rawKey.startsWith('!')) {
-      out.push({ key: rawKey.slice(1), matchers: [], unsupported: 'negated key matching is not supported by the client preview' });
+      out.push({ key: rawKey.slice(1), matchers: [], unsupported: uiText('negated key matching is not supported by the client preview', '浏览器预览不支持对键名进行取反匹配') });
       continue;
     }
     const collected = collectValueMatchers(Array.isArray(values) ? values : [values]);
@@ -279,8 +280,8 @@ function evaluateKeyValues(
       results.push({
         field: `${label} "${key}"`,
         verdict: 'unsupported',
-        expected: '(set)',
-        actual: '(not evaluated)',
+        expected: uiText('(set)', '（已设置）'),
+        actual: uiText('(not evaluated)', '（未评估）'),
         reason: unsupported,
       });
       continue;
@@ -289,15 +290,15 @@ function evaluateKeyValues(
       caseInsensitiveKey ? a.toLowerCase() === key.toLowerCase() : a === key;
     const present = actualPairs.filter((p) => keyEq(p.name));
     const expectedDisplay =
-      matchers.length === 0 ? '(present)' : matchers.map(describe).join(', ');
+      matchers.length === 0 ? uiText('(present)', '（存在）') : matchers.map(describe).join(', ');
 
     if (present.length === 0) {
       results.push({
         field: `${label} "${key}"`,
         verdict: 'mismatch',
         expected: expectedDisplay,
-        actual: '(absent)',
-        reason: `request has no ${label} named "${key}"`,
+        actual: uiText('(absent)', '（不存在）'),
+        reason: uiText(`request has no ${label} named "${key}"`, `请求中没有名为 "${key}" 的${label === 'header' ? '请求头' : '查询参数'}`),
       });
       continue;
     }
@@ -306,7 +307,7 @@ function evaluateKeyValues(
       results.push({
         field: `${label} "${key}"`,
         verdict: 'match',
-        expected: '(present)',
+        expected: uiText('(present)', '（存在）'),
         actual: present.map((p) => p.value).join(', '),
       });
       continue;
@@ -329,7 +330,7 @@ function evaluateKeyValues(
         verdict: 'mismatch',
         expected: expectedDisplay,
         actual: present.map((p) => p.value).join(', '),
-        reason: `no supplied value satisfies ${unsatisfied.map(describe).join(', ')}`,
+        reason: `${uiText('no supplied value satisfies', '提供的值均不满足')} ${unsatisfied.map(describe).join(', ')}`,
       });
     }
   }
@@ -370,9 +371,9 @@ function evaluateBody(raw: unknown, actualBody: string): FieldResult | null {
     return {
       field: 'body',
       verdict: matched ? 'match' : 'mismatch',
-      expected: `contains "${raw}"`,
-      actual: actualBody || '(empty)',
-      reason: matched ? undefined : 'request body does not contain the expected string',
+      expected: uiText(`contains "${raw}"`, `包含 "${raw}"`),
+      actual: actualBody || uiText('(empty)', '（空）'),
+      reason: matched ? undefined : uiText('request body does not contain the expected string', '请求正文不包含预期字符串'),
     };
   }
 
@@ -388,9 +389,9 @@ function evaluateBody(raw: unknown, actualBody: string): FieldResult | null {
       return {
         field: 'body',
         verdict: matched ? 'match' : 'mismatch',
-        expected: subString ? `contains "${expected}"` : `equals "${expected}"`,
-        actual: actualBody || '(empty)',
-        reason: matched ? undefined : 'request body does not match the expected string',
+        expected: subString ? uiText(`contains "${expected}"`, `包含 "${expected}"`) : uiText(`equals "${expected}"`, `等于 "${expected}"`),
+        actual: actualBody || uiText('(empty)', '（空）'),
+        reason: matched ? undefined : uiText('request body does not match the expected string', '请求正文与预期字符串不匹配'),
       };
     }
     case 'REGEX': {
@@ -402,17 +403,17 @@ function evaluateBody(raw: unknown, actualBody: string): FieldResult | null {
         return {
           field: 'body',
           verdict: 'unsupported',
-          expected: `regex ${pattern}`,
-          actual: actualBody || '(empty)',
-          reason: 'body regex is not a valid JavaScript regular expression',
+          expected: uiText(`regex ${pattern}`, `正则表达式 ${pattern}`),
+          actual: actualBody || uiText('(empty)', '（空）'),
+          reason: uiText('body regex is not a valid JavaScript regular expression', '正文匹配条件中的 JavaScript 正则表达式无效'),
         };
       }
       return {
         field: 'body',
         verdict: matched ? 'match' : 'mismatch',
-        expected: `regex ${pattern}`,
-        actual: actualBody || '(empty)',
-        reason: matched ? undefined : 'request body does not match the regex',
+        expected: uiText(`regex ${pattern}`, `正则表达式 ${pattern}`),
+        actual: actualBody || uiText('(empty)', '（空）'),
+        reason: matched ? undefined : uiText('request body does not match the regex', '请求正文不符合正则表达式'),
       };
     }
     case 'JSON': {
@@ -428,9 +429,9 @@ function evaluateBody(raw: unknown, actualBody: string): FieldResult | null {
         return {
           field: 'body',
           verdict: 'mismatch',
-          expected: 'valid JSON body',
-          actual: actualBody || '(empty)',
-          reason: 'request body is not valid JSON',
+          expected: uiText('valid JSON body', '有效的 JSON 正文'),
+          actual: actualBody || uiText('(empty)', '（空）'),
+          reason: uiText('request body is not valid JSON', '请求正文不是有效的 JSON'),
         };
       }
       const matched = strict
@@ -439,22 +440,22 @@ function evaluateBody(raw: unknown, actualBody: string): FieldResult | null {
       return {
         field: 'body',
         verdict: matched ? 'match' : 'mismatch',
-        expected: `${strict ? 'strict ' : ''}JSON ${JSON.stringify(expectedJson)}`,
-        actual: actualBody || '(empty)',
+        expected: `${uiText(strict ? 'strict JSON' : 'JSON', strict ? '严格 JSON' : 'JSON')} ${JSON.stringify(expectedJson)}`,
+        actual: actualBody || uiText('(empty)', '（空）'),
         reason: matched
           ? undefined
           : strict
-            ? 'request JSON is not strictly equal to the expected JSON'
-            : 'request JSON does not contain the expected JSON',
+            ? uiText('request JSON is not strictly equal to the expected JSON', '请求的 JSON 与预期 JSON 不完全相同')
+            : uiText('request JSON does not contain the expected JSON', '请求的 JSON 不包含预期 JSON'),
       };
     }
     default:
       return {
         field: 'body',
         verdict: 'unsupported',
-        expected: type ? `body type ${type}` : 'body matcher',
-        actual: actualBody || '(empty)',
-        reason: `body matcher type ${type ?? '(unknown)'} is not supported by the client preview`,
+        expected: type ? uiText(`body type ${type}`, `正文类型 ${type}`) : uiText('body matcher', '正文匹配条件'),
+        actual: actualBody || uiText('(empty)', '（空）'),
+        reason: uiText(`body matcher type ${type ?? '(unknown)'} is not supported by the client preview`, `浏览器预览不支持正文匹配类型 ${type ?? '（未知）'}`),
       };
   }
 }
@@ -481,9 +482,9 @@ function previewAnyOf(httpRequest: Record<string, unknown>, sample: SampleReques
     return {
       field: `anyOf branch ${n}`,
       verdict: branch.matches ? 'match' : branch.hasUnsupported ? 'unsupported' : 'mismatch',
-      expected: 'matches',
-      actual: branch.matches ? 'matches' : failed.map((r) => r.field).join(', ') || 'does not match',
-      reason: branch.matches ? undefined : failed[0]?.reason ?? 'the branch does not match',
+      expected: uiText('matches', '匹配'),
+      actual: branch.matches ? uiText('matches', '匹配') : failed.map((r) => r.field).join(', ') || uiText('does not match', '不匹配'),
+      reason: branch.matches ? undefined : failed[0]?.reason ?? uiText('the branch does not match', '此分支不匹配'),
     };
   });
   const negated = httpRequest['not'] === true;
@@ -516,8 +517,8 @@ export function previewMatch(expectation: unknown, sample: SampleRequest): Previ
       field: 'method',
       verdict: matched ? 'match' : 'mismatch',
       expected: describe(methodMatcher),
-      actual: sample.method.trim() || '(empty)',
-      reason: matched ? undefined : 'request method does not match',
+      actual: sample.method.trim() || uiText('(empty)', '（空）'),
+      reason: matched ? undefined : uiText('request method does not match', '请求方法不匹配'),
     });
   }
 
@@ -531,8 +532,8 @@ export function previewMatch(expectation: unknown, sample: SampleRequest): Previ
       field: 'path',
       verdict: matched ? 'match' : 'mismatch',
       expected: describe(pathMatcher),
-      actual: sample.path.trim() || '(empty)',
-      reason: matched ? undefined : 'request path does not match',
+      actual: sample.path.trim() || uiText('(empty)', '（空）'),
+      reason: matched ? undefined : uiText('request path does not match', '请求路径不匹配'),
     });
   }
 
@@ -582,9 +583,9 @@ export function previewMatch(expectation: unknown, sample: SampleRequest): Previ
       results.push({
         field: label,
         verdict: 'unsupported',
-        expected: '(set)',
-        actual: '(not evaluated)',
-        reason: `${label} matching is not supported by the client preview`,
+        expected: uiText('(set)', '（已设置）'),
+        actual: uiText('(not evaluated)', '（未评估）'),
+        reason: uiText(`${label} matching is not supported by the client preview`, `浏览器预览不支持 ${label} 匹配`),
       });
     }
   }

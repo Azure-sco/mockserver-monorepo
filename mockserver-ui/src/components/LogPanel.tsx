@@ -14,6 +14,7 @@ import { useFollow } from '../hooks/useFollow';
 import { matchesLogSearch, isForwardedLogEntry } from '../lib/searchMatcher';
 import { LOG_FILTER_OPTIONS } from '../lib/filterDSL';
 import { registerLogSearchInput } from '../lib/logSearchFocus';
+import { uiText } from '../lib/dashboardLocale';
 
 // Log rows carry no httpRequest/httpResponse, so `matchesLogSearch` can satisfy
 // no field operator at all. Declaring that to the search box (rather than
@@ -100,7 +101,7 @@ function LogPanel() {
     >
       {shown.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-          {logMessages.length === 0 ? 'No log messages yet — server activity appears here as requests are handled.' : 'No matching log messages'}
+          {logMessages.length === 0 ? uiText('No log messages yet — server activity appears here as requests are handled.', '暂无日志消息。服务器处理请求后，相关活动会显示在这里。') : uiText('No matching log messages', '没有符合条件的日志消息')}
         </Typography>
       ) : (
         <ProgressiveList

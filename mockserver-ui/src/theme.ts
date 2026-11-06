@@ -1,4 +1,6 @@
+import { zhCN } from '@mui/material/locale';
 import { createTheme } from '@mui/material/styles';
+import { dashboardLocale } from './lib/dashboardLocale';
 import type { ThemeMode } from './types';
 
 /**
@@ -397,5 +399,5 @@ export function buildTheme(mode: ThemeMode) {
         },
       },
     },
-  });
+  }, dashboardLocale === 'zh-CN' ? zhCN : {});
 }

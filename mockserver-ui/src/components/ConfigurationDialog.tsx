@@ -43,12 +43,22 @@ import {
   type ServerStatus,
   type ProxyConfiguration,
 } from '../lib/configuration';
+import { uiText } from '../lib/dashboardLocale';
 
 function valueToText(v: unknown): string {
   if (v == null) return '';
   if (typeof v === 'object') return JSON.stringify(v);
   return String(v);
 }
+
+const CONFIG_GROUP_LABELS = new Map([
+  ['Developer / data', uiText('Developer / data', '开发和数据')],
+  ['Validation proxy', uiText('Validation proxy', '代理校验')],
+  ['Chaos auto-halt', uiText('Chaos auto-halt', '自动停止故障注入')],
+  ['Matching & proxying', uiText('Matching & proxying', '匹配和代理')],
+  ['Logging', uiText('Logging', '日志')],
+  ['Analytics', uiText('Analytics', '使用统计')],
+]);
 
 /** Group the descriptor list by `group` field, preserving insertion order. */
 function groupDescriptors(descriptors: readonly EditablePropertyDescriptor[]): Map<string, EditablePropertyDescriptor[]> {
@@ -199,29 +209,28 @@ export default function ConfigurationDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth fullScreen={fullScreen} aria-labelledby="configuration-dialog-title">
-      <DialogTitle id="configuration-dialog-title">Server Configuration</DialogTitle>
+      <DialogTitle id="configuration-dialog-title">{uiText('Server Configuration', '服务器配置')}</DialogTitle>
       <DialogContent>
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v as 'settings' | 'info')}
           sx={{ mb: 1.5, minHeight: 36 }}
         >
-          <Tab value="settings" label="Settings" sx={{ minHeight: 36, textTransform: 'none' }} />
-          <Tab value="info" label="Server Info" sx={{ minHeight: 36, textTransform: 'none' }} />
+          <Tab value="settings" label={uiText('Settings', '设置')} sx={{ minHeight: 36, textTransform: 'none' }} />
+          <Tab value="info" label={uiText('Server Info', '服务器信息')} sx={{ minHeight: 36, textTransform: 'none' }} />
         </Tabs>
 
         {tab === 'settings' && (
           <>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Inspect the running server configuration and change common runtime settings. Changes apply
-          immediately to this server.
+          {uiText('Inspect the running server configuration and change common runtime settings. Changes apply immediately to this server.', '查看正在运行的服务器配置并修改常用设置。更改会立即在当前服务器上生效。')}
         </Typography>
         {error && <HumanErrorAlert error={error} sx={{ mb: 1.5 }} />}
 
         {/* --- Original bespoke controls --- */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2">Log level</Typography>
+            <Typography variant="body2">{uiText('Log level', '日志级别')}</Typography>
             <Select size="small" value={logLevel} disabled={disabled}
               onChange={(e) => void apply({ logLevel: e.target.value })} sx={{ width: 120 }}>
               {LOG_LEVELS.map((l) => <MenuItem key={l} value={l}>{l}</MenuItem>)}
@@ -230,12 +239,12 @@ export default function ConfigurationDialog({
           <FormControlLabel
             control={<Switch size="small" checked={detailed} disabled={disabled}
               onChange={(e) => void apply({ detailedMatchFailures: e.target.checked })} />}
-            label={<Typography variant="body2">Detailed match failures</Typography>}
+            label={<Typography variant="body2">{uiText('Detailed match failures', '记录匹配失败详情')}</Typography>}
           />
           <FormControlLabel
             control={<Switch size="small" checked={metrics} disabled={disabled}
               onChange={(e) => void apply({ metricsEnabled: e.target.checked })} />}
-            label={<Typography variant="body2">Metrics enabled</Typography>}
+            label={<Typography variant="body2">{uiText('Metrics enabled', '启用指标')}</Typography>}
           />
         </Box>
 
@@ -243,7 +252,7 @@ export default function ConfigurationDialog({
         {Array.from(grouped.entries()).map(([group, descriptors]) => (
           <Box key={group} sx={{ mt: 2 }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-              {group}
+              {CONFIG_GROUP_LABELS.get(group) ?? group}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
               {descriptors.map((d) => (
@@ -261,7 +270,7 @@ export default function ConfigurationDialog({
 
         {/* --- Read-only table for everything else --- */}
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, mb: 0.5 }}>
-          All other settings (read-only)
+          {uiText('All other settings (read-only)', '其他设置（只读）')}
         </Typography>
         <Box sx={{ maxHeight: 320, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
           <Table size="small" stickyHeader>
@@ -273,7 +282,7 @@ export default function ConfigurationDialog({
                 </TableRow>
               ))}
               {entries.length === 0 && (
-                <TableRow><TableCell colSpan={2}><Typography variant="body2" color="text.secondary">No configuration loaded.</Typography></TableCell></TableRow>
+                <TableRow><TableCell colSpan={2}><Typography variant="body2" color="text.secondary">{uiText('No configuration loaded.', '尚未加载配置。')}</Typography></TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -294,7 +303,7 @@ export default function ConfigurationDialog({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{uiText('Close', '关闭')}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -361,7 +370,7 @@ function ServerInfoPanel({
   if (effectiveConfig === null) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-        Loading server info…
+        {uiText('Loading server info…', '正在加载服务器信息…')}
       </Typography>
     );
   }
@@ -369,13 +378,12 @@ function ServerInfoPanel({
   return (
     <Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        The effective configuration this server resolved at startup, with the source of each value.
-        Sensitive values are redacted by the server. This view is read-only.
+        {uiText('The effective configuration this server resolved at startup, with the source of each value. Sensitive values are redacted by the server. This view is read-only.', '这里显示服务器启动时采用的配置和各配置项的来源。敏感值由服务器脱敏。此页面为只读。')}
       </Typography>
 
       {/* Bound ports + build info */}
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-        Bound ports
+        {uiText('Bound ports', '已绑定的端口')}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap', mb: 0.5 }}>
         {serverStatus && serverStatus.ports.length > 0 ? (
@@ -383,13 +391,13 @@ function ServerInfoPanel({
             <Chip key={port} size="small" label={String(port)} variant="outlined" sx={{ fontFamily: monospaceFontFamily }} />
           ))
         ) : (
-          <Typography variant="body2" color="text.secondary">No bound ports reported.</Typography>
+          <Typography variant="body2" color="text.secondary">{uiText('No bound ports reported.', '服务器未报告已绑定的端口。')}</Typography>
         )}
       </Box>
       <BindPortControl connectionParams={connectionParams} onPortsBound={onPortsBound} />
       {serverStatus?.version && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 1.5 }}>
-          Version {serverStatus.version}
+          {uiText(`Version ${serverStatus.version}`, `版本 ${serverStatus.version}`)}
           {serverStatus.gitHash ? ` (${serverStatus.gitHash})` : ''}
         </Typography>
       )}
@@ -413,10 +421,10 @@ function ServerInfoPanel({
                     </TableCell>
                     <TableCell sx={{ typography: 'subtitle2', fontWeight: 400, fontFamily: monospaceFontFamily, wordBreak: 'break-all' }}>
                       {p.value}
-                      {p.suggestions && p.suggestions.length > 0 && ` did you mean ${p.suggestions.join(' or ')}?`}
+                      {p.suggestions && p.suggestions.length > 0 && uiText(` did you mean ${p.suggestions.join(' or ')}?`, ` 是否指 ${p.suggestions.join(' 或 ')}？`)}
                       {p.default !== undefined && (
                         <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1, fontFamily: monospaceFontFamily }}>
-                          (default: {p.default})
+                          {uiText(`(default: ${p.default})`, `（默认值 ${p.default}）`)}
                         </Typography>
                       )}
                     </TableCell>
@@ -428,7 +436,7 @@ function ServerInfoPanel({
         </Box>
       ))}
       {grouped.length === 0 && (
-        <Typography variant="body2" color="text.secondary">No configuration reported.</Typography>
+        <Typography variant="body2" color="text.secondary">{uiText('No configuration reported.', '服务器未返回配置信息。')}</Typography>
       )}
     </Box>
   );
@@ -452,7 +460,7 @@ function BindPortControl({
   const bind = useCallback(async () => {
     const parsed = Number(port);
     if (!Number.isInteger(parsed) || parsed < 0 || parsed > 65535) {
-      setError({ message: 'Enter a valid port number (0–65535).' });
+      setError({ message: uiText('Enter a valid port number (0–65535).', '请输入有效的端口号（0–65535）。') });
       return;
     }
     setBusy(true);
@@ -474,7 +482,7 @@ function BindPortControl({
         <TextField
           size="small"
           type="number"
-          label="Bind additional port"
+          label={uiText('Bind additional port', '绑定额外端口')}
           value={port}
           disabled={busy}
           sx={{ width: 200 }}
@@ -483,7 +491,7 @@ function BindPortControl({
           onKeyDown={(e) => { if (e.key === 'Enter') void bind(); }}
         />
         <Button size="small" variant="outlined" disabled={busy || port.trim() === ''} onClick={() => void bind()}>
-          Bind
+          {uiText('Bind', '绑定')}
         </Button>
       </Box>
       {error && <HumanErrorAlert error={error} sx={{ mt: 1 }} />}
@@ -518,11 +526,11 @@ function ProxySetupSection({
   return (
     <Box sx={{ mt: 1.5 }}>
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-        Proxy setup
+        {uiText('Proxy setup', '代理设置')}
       </Typography>
       {proxyError && <HumanErrorAlert error={proxyError} sx={{ mb: 1 }} />}
       {!proxyError && !proxyConfig && (
-        <Typography variant="body2" color="text.secondary">Loading proxy setup…</Typography>
+        <Typography variant="body2" color="text.secondary">{uiText('Loading proxy setup…', '正在加载代理设置…')}</Typography>
       )}
       {proxyConfig && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -531,11 +539,11 @@ function ProxySetupSection({
           {/* HTTPS proxy URL */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              HTTPS proxy URL
+              {uiText('HTTPS proxy URL', 'HTTPS 代理地址')}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Typography variant="body2" sx={{ fontFamily: monospaceFontFamily, wordBreak: 'break-all' }}>
-                {proxyConfig.httpsProxy || '(unavailable)'}
+                {proxyConfig.httpsProxy || uiText('(unavailable)', '（不可用）')}
               </Typography>
               {proxyConfig.httpsProxy && <CopyButton text={proxyConfig.httpsProxy} />}
             </Box>
@@ -543,10 +551,10 @@ function ProxySetupSection({
 
           {/* Environment-variable snippets */}
           {([
-            ['Unix / macOS shell', proxyConfig.environmentVariables.unix],
-            ['PowerShell', proxyConfig.environmentVariables.powershell],
-          ] as const).filter(([, snippet]) => snippet).map(([label, snippet]) => (
-            <Box key={label}>
+            ['unix', uiText('Unix / macOS shell', 'Unix / macOS 命令行'), proxyConfig.environmentVariables.unix],
+            ['powershell', 'PowerShell', proxyConfig.environmentVariables.powershell],
+          ] as const).filter(([, , snippet]) => snippet).map(([id, label, snippet]) => (
+            <Box key={id}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <Typography variant="caption" color="text.secondary">{label}</Typography>
                 <CopyButton text={snippet} />
@@ -567,10 +575,10 @@ function ProxySetupSection({
           {/* CA certificate download */}
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              CA certificate {proxyConfig.usingDefaultCa ? '(built-in default)' : '(custom)'}
+              {uiText(`CA certificate ${proxyConfig.usingDefaultCa ? '(built-in default)' : '(custom)'}`, `CA 证书${proxyConfig.usingDefaultCa ? '（默认内置）' : '（自定义）'}`)}
             </Typography>
             <Button size="small" variant="outlined" disabled={!proxyConfig.caCertificatePem} onClick={downloadCa}>
-              Download CA (mockserver-ca.pem)
+              {uiText('Download CA (mockserver-ca.pem)', '下载 CA 证书（mockserver-ca.pem）')}
             </Button>
           </Box>
         </Box>

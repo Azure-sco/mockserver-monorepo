@@ -1,3 +1,4 @@
+import { uiText } from '../lib/dashboardLocale';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -87,10 +88,10 @@ interface BreakpointsPanelProps {
 const HTTP_METHODS = ['', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'] as const;
 
 const ALL_PHASES: { value: MatcherPhase; label: string }[] = [
-  { value: 'REQUEST', label: 'Request' },
-  { value: 'RESPONSE', label: 'Response' },
-  { value: 'RESPONSE_STREAM', label: 'Response stream frames' },
-  { value: 'INBOUND_STREAM', label: 'Inbound stream frames' },
+  { value: 'REQUEST', label: uiText('Request', '请求') },
+  { value: 'RESPONSE', label: uiText('Response', '响应') },
+  { value: 'RESPONSE_STREAM', label: uiText('Response stream frames', '响应流帧') },
+  { value: 'INBOUND_STREAM', label: uiText('Inbound stream frames', '入站流帧') },
 ];
 
 /** A short description of a paused item for messages, e.g. "Request GET /api". */
@@ -100,14 +101,14 @@ function describePausedItem(item: PausedItem): string {
     return item.phase === 'REQUEST' ? `Request ${target}` : `Response to ${target}`;
   }
   const target = `${item.frame.requestMethod ?? ''} ${item.frame.requestPath ?? ''}`.trim();
-  return `Frame #${item.frame.sequenceNumber}${target ? ` of ${target}` : ''}`;
+  return uiText(`Frame #${item.frame.sequenceNumber}${target ? ` of ${target}` : ''}`, `${target ? `${target} 的` : ''}第 ${item.frame.sequenceNumber} 帧`);
 }
 
 /** What to tell the user about a paused item MockServer resolved itself. */
 function releaseNoticeText(notice: BreakpointReleaseNotice): string {
   return notice.item
-    ? `${describePausedItem(notice.item)} is no longer paused. ${notice.message}`
-    : `Your decision was not applied: ${notice.message}`;
+    ? uiText(`${describePausedItem(notice.item)} is no longer paused. ${notice.message}`, `${describePausedItem(notice.item)}已不再暂停。${notice.message}`)
+    : uiText(`Your decision was not applied: ${notice.message}`, `操作未生效：${notice.message}`);
 }
 
 /** A status-range bound typed in the form: blank is open, otherwise three digits. */
@@ -117,7 +118,7 @@ function parseStatusBound(text: string): number | undefined | 'invalid' {
   return /^\d{1,3}$/.test(trimmed) ? Number(trimmed) : 'invalid';
 }
 
-const GONE_FROM_DIALOG = 'This item is no longer paused, so the change cannot be applied.';
+const GONE_FROM_DIALOG = uiText('This item is no longer paused, so the change cannot be applied.', '此项已不再暂停，无法应用修改。');
 
 function phaseChipColor(phase: string): 'default' | 'primary' | 'secondary' | 'info' | 'warning' {
   switch (phase) {
@@ -342,26 +343,26 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
 
   const handleRegister = useCallback(async (confirmedCatchAll = false) => {
     if (!clientId) {
-      setFormError('Callback WebSocket not connected. Wait for the connection to establish.');
+      setFormError(uiText('Callback WebSocket not connected. Wait for the connection to establish.', '回调 WebSocket 尚未连接，请等待连接建立。'));
       return;
     }
     if (formPhases.size === 0) {
-      setFormError('At least one phase must be selected.');
+      setFormError(uiText('At least one phase must be selected.', '至少选择一个阶段。'));
       return;
     }
     const statusMin = parseStatusBound(formStatusMin);
     const statusMax = parseStatusBound(formStatusMax);
     if (statusMin === 'invalid' || statusMax === 'invalid') {
-      setFormError('A response status must be a whole number from 0 to 999.');
+      setFormError(uiText('A response status must be a whole number from 0 to 999.', '响应状态码必须为 0 至 999 之间的整数。'));
       return;
     }
     const hasStatusRange = statusMin != null || statusMax != null;
     if (statusMin != null && statusMax != null && statusMin > statusMax) {
-      setFormError('The minimum response status must not be greater than the maximum.');
+      setFormError(uiText('The minimum response status must not be greater than the maximum.', '最小响应状态码不能大于最大响应状态码。'));
       return;
     }
     if (hasStatusRange && !formPhases.has('RESPONSE')) {
-      setFormError('A response status range is checked only at the Response phase, so tick Response.');
+      setFormError(uiText('A response status range is checked only at the Response phase, so tick Response.', '状态码范围仅在响应阶段检查，请勾选「响应」。'));
       return;
     }
     const httpRequest: Record<string, unknown> = {};
@@ -394,7 +395,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
     if (formSkipCount.trim() !== '') {
       const parsed = Number(formSkipCount);
       if (!Number.isInteger(parsed) || parsed < 0) {
-        setFormError('Skip count must be a non-negative integer.');
+        setFormError(uiText('Skip count must be a non-negative integer.', '跳过次数必须为非负整数。'));
         return;
       }
       skipCount = parsed;
@@ -516,7 +517,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
     try {
       parsed = JSON.parse(modifyJson) as Record<string, unknown>;
     } catch {
-      setModifyError('Invalid JSON');
+      setModifyError(uiText('Invalid JSON', 'JSON 格式无效'));
       return;
     }
     const client = clientRef.current;
@@ -574,7 +575,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
   const handleFrameModifySubmit = useCallback(() => {
     if (!frameModifyTarget) return;
     if (!frameModifyBody) {
-      setFrameModifyError('Body is required');
+      setFrameModifyError(uiText('Body is required', '请输入内容'));
       return;
     }
     if (frameModifyTarget.phase !== 'RESPONSE_STREAM' && frameModifyTarget.phase !== 'INBOUND_STREAM') return;
@@ -588,7 +589,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
     try {
       encoded = utf8ToBase64(frameModifyBody);
     } catch (e) {
-      setFrameModifyError(e instanceof Error ? e.message : 'Could not encode frame body');
+      setFrameModifyError(e instanceof Error ? e.message : uiText('Could not encode frame body', '无法编码帧内容'));
       return;
     }
     resolveFrame(frameModifyTarget, {
@@ -608,7 +609,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
   const handleFrameInjectSubmit = useCallback(() => {
     if (!frameInjectTarget) return;
     if (!frameInjectBody) {
-      setFrameInjectError('Body is required');
+      setFrameInjectError(uiText('Body is required', '请输入内容'));
       return;
     }
     if (frameInjectTarget.phase !== 'RESPONSE_STREAM' && frameInjectTarget.phase !== 'INBOUND_STREAM') return;
@@ -622,7 +623,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
     try {
       encoded = utf8ToBase64(frameInjectBody);
     } catch (e) {
-      setFrameInjectError(e instanceof Error ? e.message : 'Could not encode frame body');
+      setFrameInjectError(e instanceof Error ? e.message : uiText('Could not encode frame body', '无法编码帧内容'));
       return;
     }
     resolveFrame(frameInjectTarget, {
@@ -666,9 +667,9 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Breakpoints
+          {uiText('Breakpoints', '断点')}
         </Typography>
-        <Tooltip title={`Callback WS: ${wsState}${clientId ? ` (${clientId.substring(0, 8)}...)` : ''}`}>
+        <Tooltip title={uiText(`Callback WS: ${wsState}${clientId ? ` (${clientId.substring(0, 8)}...)` : ''}`, `回调 WebSocket：${wsState}${clientId ? ` (${clientId.substring(0, 8)}...)` : ''}`)}>
           <FiberManualRecordIcon
             fontSize="small"
             color={wsIndicatorColor as 'success' | 'warning' | 'error'}
@@ -678,7 +679,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
         {pausedItems.length > 0 && (
           <Chip
             size="small"
-            label={`${pausedItems.length} paused`}
+            label={uiText(`${pausedItems.length} paused`, `${pausedItems.length} 项已暂停`)}
             color="warning"
             variant="outlined"
           />
@@ -687,11 +688,11 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       </Box>
 
       <Tabs value={tab} onChange={(_, v: number) => setTab(v)} sx={{ mb: 1.5 }}>
-        <Tab label="Matchers" />
+        <Tab label={uiText('Matchers', '匹配条件')} />
         <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              Live Exchanges
+              {uiText('Live Exchanges', '实时交互')}
               {exchangeItems.length > 0 && (
                 <Chip size="small" label={exchangeItems.length} color="warning" sx={{ height: 18, fontSize: '0.65rem' }} />
               )}
@@ -701,7 +702,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
         <Tab
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              Live Streams
+              {uiText('Live Streams', '实时流')}
               {frameItems.length > 0 && (
                 <Chip size="small" label={frameItems.length} color="warning" sx={{ height: 18, fontSize: '0.65rem' }} />
               )}
@@ -731,19 +732,16 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       {tab === 0 && (
         <>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Register breakpoint matchers to pause proxied/forwarded exchanges that match. The dashboard resolves them interactively over the callback WebSocket.
+            {uiText('Register breakpoint matchers to pause proxied/forwarded exchanges that match. The dashboard resolves them interactively over the callback WebSocket.', '添加断点匹配条件，可暂停符合条件的代理或转发交互，并通过回调 WebSocket 在控制台中继续处理。')}
           </Typography>
           <Alert severity="info" variant="outlined" sx={{ mb: 1.5, py: 0.25 }}>
-            How it works: 1) add a matcher here → 2) send a matching request through MockServer →
-            3) it pauses in the <strong>Live Exchanges</strong> tab (or <strong>Live Streams</strong> for stream frames),
-            where you continue, modify, or abort it. Registering a matcher needs the callback
-            WebSocket connected{wsState === 'connected' ? '' : ` (currently ${wsState})`}.
+            {uiText('How it works: 1) add a matcher here → 2) send a matching request through MockServer → 3) it pauses in the', '使用方法：先添加匹配条件，再通过 MockServer 发送符合条件的请求，暂停后在')} <strong>{uiText('Live Exchanges', '实时交互')}</strong> {uiText('tab (or', '（或')} <strong>{uiText('Live Streams', '实时流')}</strong> {uiText('for stream frames), where you continue, modify, or abort it. Registering a matcher needs the callback WebSocket connected', '，用于处理流帧）中继续、修改或中止交互。添加匹配条件前需要连接回调 WebSocket')}{wsState === 'connected' ? '' : uiText(` (currently ${wsState})`, `（当前状态：${wsState}）`)}.
           </Alert>
 
           {/* Registration form */}
           <Paper variant="outlined" sx={{ p: 1.5, mb: 1.5 }}>
             <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-              Register a New Breakpoint Matcher
+              {uiText('Register a New Breakpoint Matcher', '添加断点匹配条件')}
             </Typography>
             {/* Quick scope — the same filter-DSL operator syntax as the Traffic and
                 dashboard search boxes, narrowed to the operators a breakpoint matcher
@@ -753,7 +751,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
             <Box sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <OperatorSearchField
                 id="breakpoint-scope"
-                ariaLabel="Breakpoint scope"
+                ariaLabel={uiText('Breakpoint scope', '断点范围')}
                 value={scopeTerm}
                 onChange={setScopeTerm}
                 fields={BREAKPOINT_SCOPE_FIELDS}
@@ -766,7 +764,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                 disabled={!scopeApplicable || formBusy}
                 onClick={applyScope}
               >
-                Apply scope
+                {uiText('Apply scope', '应用范围')}
               </Button>
             </Box>
             {scopeMessage && (
@@ -777,7 +775,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
             <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
               <TextField
                 select
-                label="Method"
+                label={uiText('Method', '请求方法')}
                 value={formMethod}
                 onChange={(e) => setFormMethod(e.target.value)}
                 size="small"
@@ -786,12 +784,12 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
               >
                 {HTTP_METHODS.map((m) => (
                   <MenuItem key={m || '__any'} value={m}>
-                    {m || '(any)'}
+                    {m || uiText('(any)', '（不限）')}
                   </MenuItem>
                 ))}
               </TextField>
               <TextField
-                label="Path (regex)"
+                label={uiText('Path (regex)', '路径（正则表达式）')}
                 value={formPath}
                 onChange={(e) => setFormPath(e.target.value)}
                 size="small"
@@ -799,41 +797,41 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                 sx={{ flex: 1, minWidth: 200 }}
               />
               <TextField
-                label="Skip count"
+                label={uiText('Skip count', '跳过次数')}
                 value={formSkipCount}
                 onChange={(e) => setFormSkipCount(e.target.value)}
                 size="small"
                 type="number"
                 placeholder="0"
-                title="Pause only after this many matching hits (0 / blank = pause every time)"
+                title={uiText('Pause only after this many matching hits (0 / blank = pause every time)', '跳过指定次数的匹配后才暂停（填 0 或留空表示每次都暂停）')}
                 slotProps={{ htmlInput: { min: 0, step: 1 }, inputLabel: { shrink: true } }}
                 sx={{ width: 120, flexShrink: 0 }}
               />
               <TextField
-                label="Min status"
+                label={uiText('Min status', '最小状态码')}
                 value={formStatusMin}
                 onChange={(e) => setFormStatusMin(e.target.value)}
                 size="small"
                 type="number"
-                placeholder="any"
-                title="Pause a response only when its status code is at least this (checked at the Response phase only)"
+                placeholder={uiText('any', '不限')}
+                title={uiText('Pause a response only when its status code is at least this (checked at the Response phase only)', '仅暂停状态码大于或等于此值的响应（仅在响应阶段检查）')}
                 slotProps={{ htmlInput: { min: 0, max: 999, step: 1 }, inputLabel: { shrink: true } }}
                 sx={{ width: 110, flexShrink: 0 }}
               />
               <TextField
-                label="Max status"
+                label={uiText('Max status', '最大状态码')}
                 value={formStatusMax}
                 onChange={(e) => setFormStatusMax(e.target.value)}
                 size="small"
                 type="number"
-                placeholder="any"
-                title="Pause a response only when its status code is at most this (checked at the Response phase only)"
+                placeholder={uiText('any', '不限')}
+                title={uiText('Pause a response only when its status code is at most this (checked at the Response phase only)', '仅暂停状态码小于或等于此值的响应（仅在响应阶段检查）')}
                 slotProps={{ htmlInput: { min: 0, max: 999, step: 1 }, inputLabel: { shrink: true } }}
                 sx={{ width: 110, flexShrink: 0 }}
               />
             </Box>
-            <MultiValueField label="Headers" items={formHeaders} onChange={setFormHeaders} disabled={formBusy} />
-            <MultiValueField label="Query parameters" items={formQueryParams} onChange={setFormQueryParams} disabled={formBusy} />
+            <MultiValueField label={uiText('Headers', '请求头')} items={formHeaders} onChange={setFormHeaders} disabled={formBusy} />
+            <MultiValueField label={uiText('Query parameters', '查询参数')} items={formQueryParams} onChange={setFormQueryParams} disabled={formBusy} />
             <SingleValueField label="Cookies" items={formCookies} onChange={setFormCookies} disabled={formBusy} />
             <FormGroup row sx={{ mb: 1 }}>
               {ALL_PHASES.map((p) => (
@@ -853,8 +851,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
             {(formStatusMin.trim() !== '' || formStatusMax.trim() !== '') &&
               [...formPhases].some((p) => p !== 'RESPONSE') && (
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                The status range is checked at the Response phase only; the other ticked phases pause
-                regardless of status.
+                {uiText('The status range is checked at the Response phase only; the other ticked phases pause regardless of status.', '状态码范围仅在响应阶段检查，其他勾选的阶段不受此范围限制。')}
               </Typography>
             )}
             {formError && (
@@ -869,7 +866,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
               disabled={formBusy || wsState !== 'connected'}
               onClick={() => void handleRegister()}
             >
-              Register Matcher
+              {uiText('Register Matcher', '添加匹配条件')}
             </Button>
           </Paper>
 
@@ -881,29 +878,29 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
             >
               <AlertTitle>
                 {matchersError.includes('404') || matchersError.includes('Not Found')
-                  ? 'Breakpoint matchers not available'
-                  : 'Could not load matchers'}
+                  ? uiText('Breakpoint matchers not available', '断点匹配条件不可用')
+                  : uiText('Could not load matchers', '无法加载匹配条件')}
               </AlertTitle>
               {matchersError.includes('404') || matchersError.includes('Not Found')
-                ? 'The connected server does not support breakpoint matchers. This feature requires a newer version of MockServer.'
+                ? uiText('The connected server does not support breakpoint matchers. This feature requires a newer version of MockServer.', '当前连接的服务器不支持断点匹配条件。此功能需要更新版本的 MockServer。')
                 : matchersError}
             </Alert>
           )}
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Registered Matchers ({matchers.length})
+              {uiText('Registered Matchers (', '已添加的匹配条件（')}{matchers.length})
             </Typography>
             <Box sx={{ flex: 1 }} />
-            <Tooltip title="Refresh matchers">
-              <IconButton size="small" onClick={refreshMatchers} aria-label="Refresh matchers">
+            <Tooltip title={uiText('Refresh matchers', '刷新匹配条件')}>
+              <IconButton size="small" onClick={refreshMatchers} aria-label={uiText('Refresh matchers', '刷新匹配条件')}>
                 <RefreshIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             {matchers.length > 0 && (
-              <Tooltip title="Clear all matchers">
+              <Tooltip title={uiText('Clear all matchers', '清空匹配条件')}>
                 <span>
-                  <IconButton size="small" onClick={() => setConfirmOpen(true)} disabled={busy} aria-label="Clear all matchers">
+                  <IconButton size="small" onClick={() => setConfirmOpen(true)} disabled={busy} aria-label={uiText('Clear all matchers', '清空匹配条件')}>
                     <ClearAllIcon fontSize="small" />
                   </IconButton>
                 </span>
@@ -914,8 +911,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
           <Paper variant="outlined" sx={{ p: 1.25 }}>
             {matchers.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                No matchers registered yet. Add one above, then send a matching request — it will
-                pause in the Live Exchanges tab for you to inspect and resolve.
+                {uiText('No matchers registered yet. Add one above, then send a matching request — it will pause in the Live Exchanges tab for you to inspect and resolve.', '还没有断点匹配条件。请在上方添加条件，再发送符合条件的请求。请求暂停后，可在「实时交互」中查看和处理。')}
               </Typography>
             ) : (
               <TableContainer>
@@ -923,11 +919,11 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                   <TableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
-                      <TableCell>Matcher</TableCell>
-                      <TableCell>Phases</TableCell>
-                      <TableCell align="right">Skip</TableCell>
-                      <TableCell>Owner</TableCell>
-                      <TableCell align="right">Actions</TableCell>
+                      <TableCell>{uiText('Matcher', '匹配条件')}</TableCell>
+                      <TableCell>{uiText('Phases', '阶段')}</TableCell>
+                      <TableCell align="right">{uiText('Skip', '跳过次数')}</TableCell>
+                      <TableCell>{uiText('Owner', '所有者')}</TableCell>
+                      <TableCell align="right">{uiText('Actions', '操作')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -972,14 +968,14 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                           <TruncatedText text={m.clientId ?? '-'} maxWidth={100} sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }} />
                         </TableCell>
                         <TableCell align="right">
-                          <Tooltip title="Remove matcher">
+                          <Tooltip title={uiText('Remove matcher', '移除匹配条件')}>
                             <span>
                               <IconButton
                                 size="small"
                                 color="error"
                                 disabled={busy}
                                 onClick={() => void handleRemoveMatcher(m.id)}
-                                aria-label={`Remove ${m.id}`}
+                                aria-label={uiText(`Remove ${m.id}`, `移除 ${m.id}`)}
                               >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
@@ -1000,30 +996,30 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       {tab === 1 && (
         <>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Paused request/response exchanges dispatched over the callback WebSocket. Resolve each interactively.
+            {uiText('Paused request/response exchanges dispatched over the callback WebSocket. Resolve each interactively.', '通过回调 WebSocket 收到的已暂停请求与响应。可以逐项处理。')}
           </Typography>
 
           {wsState !== 'connected' && (
             <Alert severity="info" sx={{ mb: 1.5 }}>
-              Callback WebSocket is {wsState}. Paused exchanges will appear here once connected and matchers are registered.
+              {uiText('Callback WebSocket is', '回调 WebSocket 状态：')} {wsState}{uiText('. Paused exchanges will appear here once connected and matchers are registered.', '。连接建立且已添加匹配条件后，暂停的交互会显示在这里。')}
             </Alert>
           )}
 
           <Paper variant="outlined" sx={{ p: 1.25 }}>
             {exchangeItems.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                No paused exchanges. Register a breakpoint matcher (Matchers tab) to pause matching forwarded requests or responses.
+                {uiText('No paused exchanges. Register a breakpoint matcher (Matchers tab) to pause matching forwarded requests or responses.', '没有暂停的交互。请在「匹配条件」页添加断点条件，暂停匹配的转发请求或响应。')}
               </Typography>
             ) : (
               <TableContainer>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Phase</TableCell>
-                      <TableCell>Method / Status</TableCell>
-                      <TableCell>Path / Reason</TableCell>
-                      <TableCell>Breakpoint</TableCell>
-                      <TableCell align="right">Actions</TableCell>
+                      <TableCell>{uiText('Phase', '阶段')}</TableCell>
+                      <TableCell>{uiText('Method / Status', '请求方法 / 状态')}</TableCell>
+                      <TableCell>{uiText('Path / Reason', '路径 / 原因')}</TableCell>
+                      <TableCell>{uiText('Breakpoint', '断点')}</TableCell>
+                      <TableCell align="right">{uiText('Actions', '操作')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1063,27 +1059,27 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                           </TableCell>
                           <TableCell align="right">
                             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                              <Tooltip title="Continue (forward unchanged)">
+                              <Tooltip title={uiText('Continue (forward unchanged)', '继续（原样转发）')}>
                                 <span>
                                   <IconButton
                                     size="small"
                                     color="success"
                                     disabled={busy}
                                     onClick={() => handleContinueExchange(item)}
-                                    aria-label={`Continue ${item.key}`}
+                                    aria-label={uiText(`Continue ${item.key}`, `继续 ${item.key}`)}
                                   >
                                     <PlayArrowIcon fontSize="small" />
                                   </IconButton>
                                 </span>
                               </Tooltip>
-                              <Tooltip title={isResponse ? 'Modify response' : 'Modify request'}>
+                              <Tooltip title={isResponse ? uiText('Modify response', '修改响应') : uiText('Modify request', '修改请求')}>
                                 <span>
                                   <IconButton
                                     size="small"
                                     color="info"
                                     disabled={busy}
                                     onClick={() => openModifyExchangeDialog(item)}
-                                    aria-label={`Modify ${item.key}`}
+                                    aria-label={uiText(`Modify ${item.key}`, `修改 ${item.key}`)}
                                   >
                                     <EditIcon fontSize="small" />
                                   </IconButton>
@@ -1095,27 +1091,27 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                                   clearly-labelled disabled control there instead of a red button
                                   that silently behaves like Continue. */}
                               {isResponse ? (
-                                <Tooltip title="Abort not applicable — the response has already been received and can only be continued or modified">
+                                <Tooltip title={uiText('Abort not applicable — the response has already been received and can only be continued or modified', '响应已收到，只能继续或修改')}>
                                   <span>
                                     <IconButton
                                       size="small"
                                       color="error"
                                       disabled
-                                      aria-label={`Abort ${item.key} (not applicable for responses)`}
+                                      aria-label={uiText(`Abort ${item.key} (not applicable for responses)`, `中止 ${item.key}（不适用于响应）`)}
                                     >
                                       <BlockIcon fontSize="small" />
                                     </IconButton>
                                   </span>
                                 </Tooltip>
                               ) : (
-                                <Tooltip title="Abort (do not forward)">
+                                <Tooltip title={uiText('Abort (do not forward)', '中止（停止转发）')}>
                                   <span>
                                     <IconButton
                                       size="small"
                                       color="error"
                                       disabled={busy}
                                       onClick={() => handleAbortExchange(item)}
-                                      aria-label={`Abort ${item.key}`}
+                                      aria-label={uiText(`Abort ${item.key}`, `中止 ${item.key}`)}
                                     >
                                       <BlockIcon fontSize="small" />
                                     </IconButton>
@@ -1139,33 +1135,33 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       {tab === 2 && (
         <>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Paused stream frames dispatched over the callback WebSocket. Continue, modify, drop, inject, or close each frame.
+            {uiText('Paused stream frames dispatched over the callback WebSocket. Continue, modify, drop, inject, or close each frame.', '通过回调 WebSocket 收到的已暂停流帧。可以继续、修改或丢弃流帧，也可以插入新帧或关闭流。')}
           </Typography>
 
           {wsState !== 'connected' && (
             <Alert severity="info" sx={{ mb: 1.5 }}>
-              Callback WebSocket is {wsState}. Paused stream frames will appear here once connected.
+              {uiText('Callback WebSocket is', '回调 WebSocket 状态：')} {wsState}{uiText('. Paused stream frames will appear here once connected.', '。连接建立后，暂停的流帧会显示在这里。')}
             </Alert>
           )}
 
           <Paper variant="outlined" sx={{ p: 1.25 }}>
             {frameItems.length === 0 ? (
               <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
-                No paused stream frames. Register a breakpoint matcher with stream phases (Matchers tab) to pause matching streaming frames.
+                {uiText('No paused stream frames. Register a breakpoint matcher with stream phases (Matchers tab) to pause matching streaming frames.', '没有暂停的流帧。请在「匹配条件」页添加包含流阶段的断点条件。')}
               </Typography>
             ) : (
               <TableContainer>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Phase</TableCell>
-                      <TableCell>Direction</TableCell>
-                      <TableCell>Stream</TableCell>
-                      <TableCell>Seq</TableCell>
-                      <TableCell>Method</TableCell>
-                      <TableCell>Path</TableCell>
-                      <TableCell>Body (Base64)</TableCell>
-                      <TableCell align="right">Actions</TableCell>
+                      <TableCell>{uiText('Phase', '阶段')}</TableCell>
+                      <TableCell>{uiText('Direction', '方向')}</TableCell>
+                      <TableCell>{uiText('Stream', '流')}</TableCell>
+                      <TableCell>{uiText('Seq', '序号')}</TableCell>
+                      <TableCell>{uiText('Method', '请求方法')}</TableCell>
+                      <TableCell>{uiText('Path', '路径')}</TableCell>
+                      <TableCell>{uiText('Body (Base64)', '内容（Base64）')}</TableCell>
+                      <TableCell align="right">{uiText('Actions', '操作')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1184,7 +1180,7 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                           <Chip
                             size="small"
                             icon={item.frame.direction === 'INBOUND' ? <CallReceivedIcon /> : <CallMadeIcon />}
-                            label={item.frame.direction === 'INBOUND' ? 'Inbound' : 'Outbound'}
+                            label={item.frame.direction === 'INBOUND' ? uiText('Inbound', '入站') : uiText('Outbound', '出站')}
                             color={item.frame.direction === 'INBOUND' ? 'info' : 'default'}
                             variant="outlined"
                             sx={{ height: 20, fontSize: '0.6rem' }}
@@ -1211,37 +1207,37 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
                         </TableCell>
                         <TableCell align="right">
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                            <Tooltip title="Continue (write frame unchanged)">
+                            <Tooltip title={uiText('Continue (write frame unchanged)', '继续（原样发送帧）')}>
                               <span>
-                                <IconButton size="small" color="success" disabled={busy} onClick={() => handleFrameContinue(item)} aria-label={`Continue ${item.key}`}>
+                                <IconButton size="small" color="success" disabled={busy} onClick={() => handleFrameContinue(item)} aria-label={uiText(`Continue ${item.key}`, `继续 ${item.key}`)}>
                                   <PlayArrowIcon fontSize="small" />
                                 </IconButton>
                               </span>
                             </Tooltip>
-                            <Tooltip title="Modify frame body">
+                            <Tooltip title={uiText('Modify frame body', '修改帧内容')}>
                               <span>
-                                <IconButton size="small" color="info" disabled={busy} onClick={() => openFrameModifyDialog(item)} aria-label={`Modify ${item.key}`}>
+                                <IconButton size="small" color="info" disabled={busy} onClick={() => openFrameModifyDialog(item)} aria-label={uiText(`Modify ${item.key}`, `修改 ${item.key}`)}>
                                   <EditIcon fontSize="small" />
                                 </IconButton>
                               </span>
                             </Tooltip>
-                            <Tooltip title="Drop (discard frame)">
+                            <Tooltip title={uiText('Drop (discard frame)', '丢弃帧')}>
                               <span>
-                                <IconButton size="small" color="error" disabled={busy} onClick={() => handleFrameDrop(item)} aria-label={`Drop ${item.key}`}>
+                                <IconButton size="small" color="error" disabled={busy} onClick={() => handleFrameDrop(item)} aria-label={uiText(`Drop ${item.key}`, `丢弃 ${item.key}`)}>
                                   <DeleteIcon fontSize="small" />
                                 </IconButton>
                               </span>
                             </Tooltip>
-                            <Tooltip title="Inject extra frame">
+                            <Tooltip title={uiText('Inject extra frame', '插入额外帧')}>
                               <span>
-                                <IconButton size="small" color="primary" disabled={busy} onClick={() => openFrameInjectDialog(item)} aria-label={`Inject ${item.key}`}>
+                                <IconButton size="small" color="primary" disabled={busy} onClick={() => openFrameInjectDialog(item)} aria-label={uiText(`Inject ${item.key}`, `插入帧 ${item.key}`)}>
                                   <AddIcon fontSize="small" />
                                 </IconButton>
                               </span>
                             </Tooltip>
-                            <Tooltip title="Close stream">
+                            <Tooltip title={uiText('Close stream', '关闭流')}>
                               <span>
-                                <IconButton size="small" color="warning" disabled={busy} onClick={() => handleFrameClose(item)} aria-label={`Close ${item.key}`}>
+                                <IconButton size="small" color="warning" disabled={busy} onClick={() => handleFrameClose(item)} aria-label={uiText(`Close ${item.key}`, `关闭 ${item.key}`)}>
                                   <StopIcon fontSize="small" />
                                 </IconButton>
                               </span>
@@ -1261,13 +1257,13 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
       {/* Modify dialog (request/response exchanges) */}
       <Dialog open={modifyTarget !== null} onClose={() => setModifyTarget(null)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {modifyTarget?.phase === 'RESPONSE' ? 'Modify Response' : 'Modify Request'}
+          {modifyTarget?.phase === 'RESPONSE' ? uiText('Modify Response', '修改响应') : uiText('Modify Request', '修改请求')}
         </DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {modifyTarget?.phase === 'RESPONSE'
-              ? 'Edit the response JSON, then send the modified response.'
-              : 'Edit the request JSON, then send the modified request.'}
+              ? uiText('Edit the response JSON, then send the modified response.', '编辑响应 JSON，然后发送修改后的响应。')
+              : uiText('Edit the request JSON, then send the modified request.', '编辑请求 JSON，然后发送修改后的请求。')}
           </Typography>
           {modifyError && (
             <Alert severity="error" sx={{ mb: 1 }}>
@@ -1289,19 +1285,19 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModifyTarget(null)}>Cancel</Button>
+          <Button onClick={() => setModifyTarget(null)}>{uiText('Cancel', '取消')}</Button>
           <Button variant="contained" disabled={busy} onClick={handleModifySubmit}>
-            Send Modified
+            {uiText('Send Modified', '发送修改后的内容')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Frame modify dialog */}
       <Dialog open={frameModifyTarget !== null} onClose={() => setFrameModifyTarget(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Modify Stream Frame</DialogTitle>
+        <DialogTitle>{uiText('Modify Stream Frame', '修改流帧')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Edit the frame body, then send the modified frame.
+            {uiText('Edit the frame body, then send the modified frame.', '编辑帧内容，然后发送修改后的帧。')}
           </Typography>
           {frameModifyError && (
             <Alert severity="error" sx={{ mb: 1 }}>
@@ -1323,19 +1319,19 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFrameModifyTarget(null)}>Cancel</Button>
+          <Button onClick={() => setFrameModifyTarget(null)}>{uiText('Cancel', '取消')}</Button>
           <Button variant="contained" disabled={busy} onClick={handleFrameModifySubmit}>
-            Send Modified Frame
+            {uiText('Send Modified Frame', '发送修改后的帧')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Frame inject dialog */}
       <Dialog open={frameInjectTarget !== null} onClose={() => setFrameInjectTarget(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Inject Extra Frame</DialogTitle>
+        <DialogTitle>{uiText('Inject Extra Frame', '插入额外帧')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Enter the body for the extra frame to inject after the held frame.
+            {uiText('Enter the body for the extra frame to inject after the held frame.', '输入要插入到当前暂停帧之后的帧内容。')}
           </Typography>
           {frameInjectError && (
             <Alert severity="error" sx={{ mb: 1 }}>
@@ -1357,27 +1353,27 @@ export default function BreakpointsPanel({ connectionParams }: BreakpointsPanelP
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFrameInjectTarget(null)}>Cancel</Button>
+          <Button onClick={() => setFrameInjectTarget(null)}>{uiText('Cancel', '取消')}</Button>
           <Button variant="contained" disabled={busy} onClick={handleFrameInjectSubmit}>
-            Inject Frame
+            {uiText('Inject Frame', '插入帧')}
           </Button>
         </DialogActions>
       </Dialog>
 
       <ConfirmDialog
         open={catchAllConfirmOpen}
-        title="Pause every request?"
-        message="No method, path, header, query parameter or cookie is set, so this matcher matches every request MockServer receives and pauses all of them until each is resolved or times out."
-        confirmLabel="Pause every request"
+        title={uiText('Pause every request?', '暂停所有请求？')}
+        message={uiText('No method, path, header, query parameter or cookie is set, so this matcher matches every request MockServer receives and pauses all of them until each is resolved or times out.', '未设置请求方法、路径、请求头、查询参数或 Cookie。该条件会匹配 MockServer 收到的所有请求，并暂停每条请求，直到处理完成或超时。')}
+        confirmLabel={uiText('Pause every request', '暂停所有请求')}
         onConfirm={() => void handleRegister(true)}
         onClose={() => setCatchAllConfirmOpen(false)}
       />
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Clear all breakpoint matchers?"
-        message="This removes every registered breakpoint matcher. Any paused exchanges will remain held server-side until the breakpoint timeout expires. This cannot be undone."
-        confirmLabel="Clear all matchers"
+        title={uiText('Clear all breakpoint matchers?', '清空所有断点匹配条件？')}
+        message={uiText('This removes every registered breakpoint matcher. Any paused exchanges will remain held server-side until the breakpoint timeout expires. This cannot be undone.', '此操作会移除所有断点匹配条件，且无法撤销。已暂停的交互仍会在服务器上等待，直到断点超时。')}
+        confirmLabel={uiText('Clear all matchers', '清空匹配条件')}
         onConfirm={() => void handleClearMatchers()}
         onClose={() => setConfirmOpen(false)}
       />
